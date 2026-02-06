@@ -139,7 +139,7 @@ namespace llcom.Pages
                                         {
                                             openClosePortTextBlock.Text = (TryFindResource("OpenPort_close") as string ?? "?!");
                                             serialPortsListComboBox.IsEnabled = false;
-                                            SetMainWindowStatus(TryFindResource("OpenPort_open") as string ?? "?!");
+                                            SetMainWindowStatus(Tools.Global.uart.GetName(), true);
                                         });
                                     }
                                     catch { }
@@ -149,6 +149,8 @@ namespace llcom.Pages
                             break;
                         }
                     }
+                    if (!Tools.Global.uart.IsOpen())
+                        SetMainWindowStatus(GetDisplayPortName(), false);
                 });
             });
         }
@@ -179,7 +181,7 @@ namespace llcom.Pages
                 }
                 openClosePortTextBlock.Text = (TryFindResource("OpenPort_open") as string ?? "?!");
                 serialPortsListComboBox.IsEnabled = true;
-                SetMainWindowStatus(TryFindResource("OpenPort_close") as string ?? "?!");
+                SetMainWindowStatus(lastPort, false);
                 RefreshPortList(lastPort);
             }
         }
@@ -225,7 +227,7 @@ namespace llcom.Pages
                             {
                                 openClosePortTextBlock.Text = (TryFindResource("OpenPort_close") as string ?? "?!");
                                 serialPortsListComboBox.IsEnabled = false;
-                                SetMainWindowStatus(TryFindResource("OpenPort_open") as string ?? "?!");
+                                SetMainWindowStatus(Tools.Global.uart.GetName(), true);
                             });
                             if (toSendData != null)
                             {
@@ -336,8 +338,27 @@ namespace llcom.Pages
             }
         }
 
-        private void SetMainWindowStatus(string text)
+        /// <summary>
+        /// 从当前串口或下拉框选中项中解析出 COM 口名
+        /// </summary>
+        private string GetDisplayPortName()
         {
+            if (Tools.Global.uart.IsOpen())
+                return Tools.Global.uart.GetName();
+            var sel = serialPortsListComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(sel))
+            {
+                var m = Regex.Match(sel, @"\(COM\d+\)");
+                if (m.Success)
+                    return m.Value.Trim('(', ')');
+            }
+            return Tools.Global.uart.GetName();
+        }
+
+        private void SetMainWindowStatus(string portName, bool isOpen)
+        {
+            var openClose = (TryFindResource(isOpen ? "OpenPort_open" : "OpenPort_close") as string) ?? "?!";
+            var text = $"{portName}：{openClose}";
             var mw = Application.Current.MainWindow as MainWindow;
             mw?.SetSerialStatus(text);
         }
