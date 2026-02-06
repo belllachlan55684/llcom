@@ -172,6 +172,7 @@
     <system:String x:Key="ShowHexFormat">Hex显示</system:String>
     <system:String x:Key="ShowHexFormatTip">切换为：只显示Hex/只显示文本数据/同时显示Hex与文本数据</system:String>
     <system:String x:Key="HexSendMode">发Hex</system:String>
+    <system:String x:Key="DataInterfaceTab">数据接口</system:String>
     <system:String x:Key="ToolsTab">小工具</system:String>
     <system:String x:Key="EncodingToolsTab">编码转换工具</system:String>
     <system:String x:Key="EncodingToolsJobs">转换任务</system:String>
