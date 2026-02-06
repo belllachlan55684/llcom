@@ -295,8 +295,14 @@
     <Compile Include="Pages\DataShowPage.xaml.cs">
       <DependentUpon>DataShowPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\SettingWindow.xaml.cs">
-      <DependentUpon>SettingWindow.xaml</DependentUpon>
+    <Compile Include="View\Controls\BasicSettingsControl.xaml.cs">
+      <DependentUpon>BasicSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\SendScriptControl.xaml.cs">
+      <DependentUpon>SendScriptControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\RecvScriptControl.xaml.cs">
+      <DependentUpon>RecvScriptControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\Global.cs" />
     <Compile Include="Tools\LuaConvertHelper.cs" />
@@ -377,7 +383,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\SettingWindow.xaml">
+    <Page Include="View\Controls\BasicSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\SendScriptControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\RecvScriptControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

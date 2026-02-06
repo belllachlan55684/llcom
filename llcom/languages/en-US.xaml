@@ -97,6 +97,7 @@
     <system:String x:Key="SettingTitle">More serial port settings</system:String>
     <system:String x:Key="SettingBasic">Basic</system:String>
     <system:String x:Key="SettingCard">Settings</system:String>
+    <system:String x:Key="SettingSystem">System Settings</system:String>
     <system:String x:Key="SettingLanguage">Language selection</system:String>
     <system:String x:Key="SettingDisplayMode">Display mode selection</system:String>
     <system:String x:Key="LightMode">Light mode</system:String>

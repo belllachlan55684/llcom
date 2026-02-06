@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fa="http://schemas.fontawesome.io/icons/"
     xmlns:local="clr-namespace:llcom"
+    xmlns:local_controls="clr-namespace:llcom.View.Controls"
     xmlns:local_page="clr-namespace:llcom.Pages"
     xmlns:local_tool="clr-namespace:llcom.Tools"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -65,10 +66,6 @@
 
         <!--  发送数据区  -->
         <Grid Grid.Row="1" Margin="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0" />
                 <ColumnDefinition Width="0" />
@@ -80,7 +77,6 @@
             </Grid.ColumnDefinitions>
             <Button
                 Name="openClosePortButton"
-                Grid.RowSpan="2"
                 Grid.Column="3"
                 Margin="2"
                 Click="OpenClosePortButton_Click">
@@ -95,17 +91,8 @@
                 Margin="2"
                 Click="ClearLogButton_Click"
                 Content="{DynamicResource ClearLog}" />
-            <Button
-                Name="MoreSettingButton"
-                Grid.Row="1"
-                Grid.Column="4"
-                Margin="2"
-                Click="MoreSettingButton_Click"
-                Content="{DynamicResource MoreSettings}"
-                ToolTip="{DynamicResource MoreSettingsTip}" />
             <TextBox
                 Name="toSendDataTextBox"
-                Grid.RowSpan="2"
                 Grid.Column="5"
                 Height="50"
                 Margin="2"
@@ -117,7 +104,6 @@
                 VerticalScrollBarVisibility="Auto" />
             <Button
                 Name="sendDataButton"
-                Grid.RowSpan="2"
                 Grid.Column="6"
                 Margin="2"
                 Command="{StaticResource SendUartData}"
@@ -833,28 +819,41 @@
                 <TabItem.Header>
                     <TextBlock Text="{DynamicResource SettingCard}" />
                 </TabItem.Header>
-                <ScrollViewer>
-                    <WrapPanel Name="settingsContentPanel" Margin="15,10" Orientation="Horizontal">
-                        <ComboBox
-                            Name="languageComboBox"
-                            Width="120"
-                            Margin="5"
-                            ToolTip="{DynamicResource SettingLanguage}"
-                            SelectionChanged="LanguageComboBox_SelectionChanged">
-                            <ComboBoxItem Content="简体中文" Tag="zh-CN" />
-                            <ComboBoxItem Content="English" Tag="en-US" />
-                        </ComboBox>
-                        <ComboBox
-                            Name="modeComboBox"
-                            Width="120"
-                            Margin="5"
-                            ToolTip="{DynamicResource SettingDisplayMode}"
-                            SelectionChanged="ModeComboBox_SelectionChanged">
-                            <ComboBoxItem Content="{DynamicResource LightMode}" Tag="0" />
-                            <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="1" />
-                        </ComboBox>
-                    </WrapPanel>
-                </ScrollViewer>
+                <TabControl>
+                    <TabItem Header="{DynamicResource SettingBasic}">
+                        <local_controls:BasicSettingsControl />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource SettingSendLuaScript}">
+                        <local_controls:SendScriptControl />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource SettingRecvLuaScript}">
+                        <local_controls:RecvScriptControl />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource SettingSystem}">
+                        <ScrollViewer>
+                            <WrapPanel Name="settingsContentPanel" Margin="15,10" Orientation="Horizontal" Loaded="SystemSettingsPanel_Loaded">
+                                <ComboBox
+                                    Name="languageComboBox"
+                                    Width="120"
+                                    Margin="5"
+                                    ToolTip="{DynamicResource SettingLanguage}"
+                                    SelectionChanged="LanguageComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                                    <ComboBoxItem Content="English" Tag="en-US" />
+                                </ComboBox>
+                                <ComboBox
+                                    Name="modeComboBox"
+                                    Width="120"
+                                    Margin="5"
+                                    ToolTip="{DynamicResource SettingDisplayMode}"
+                                    SelectionChanged="ModeComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{DynamicResource LightMode}" Tag="0" />
+                                    <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="1" />
+                                </ComboBox>
+                            </WrapPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
             </TabItem>
         </TabControl>
 

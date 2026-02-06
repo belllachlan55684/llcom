@@ -19,6 +19,16 @@ namespace llcom
         {
             base.OnStartup(e);
 #if DEBUG
+            AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+            {
+                var ex = (Exception)args.ExceptionObject;
+                System.Windows.MessageBox.Show($"Unhandled: {ex}\n\n{ex.StackTrace}", "Debug");
+            };
+            Application.Current.DispatcherUnhandledException += (s, args) =>
+            {
+                System.Windows.MessageBox.Show($"Dispatcher: {args.Exception}\n\n{args.Exception.StackTrace}", "Debug");
+                args.Handled = true;
+            };
 #else
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             Application.Current.DispatcherUnhandledException += DispatcherOnUnhandledException;

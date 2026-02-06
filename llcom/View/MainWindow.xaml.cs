@@ -49,8 +49,9 @@ namespace llcom
     {
         public MainWindow()
         {
-            InitializeComponent();
             Tools.Global.LoadSetting();
+            Tools.Global.Initial();
+            InitializeComponent();
             if (Tools.Global.setting.windowHeight != 0 &&
                 Tools.Global.setting.windowLeft > 0 &&
                 Tools.Global.setting.windowTop > 0 &&
@@ -123,10 +124,6 @@ namespace llcom
                     QuiclListName7.DataContext = Tools.Global.setting;
                     QuiclListName8.DataContext = Tools.Global.setting;
                     QuiclListName9.DataContext = Tools.Global.setting;
-
-                    settingsContentPanel.DataContext = Tools.Global.setting;
-                    languageComboBox.SelectedIndex = Tools.Global.setting.language == "en-US" ? 1 : 0;
-                    modeComboBox.SelectedIndex = Tools.Global.setting.darkMode ? 1 : 0;
 
                     //初始化快捷发送栏的数据
                     canSaveSendList = false;
@@ -544,6 +541,11 @@ namespace llcom
             //自动保存脚本
             if (lastLuaFile != "")
                 saveLuaFile(lastLuaFile);
+            //保存发送/接收脚本
+            foreach (var ctrl in FindVisualChildren<View.Controls.SendScriptControl>(this))
+                ctrl.SaveOnUnload();
+            foreach (var ctrl in FindVisualChildren<View.Controls.RecvScriptControl>(this))
+                ctrl.SaveOnUnload();
             Tools.Global.isMainWindowsClosed = true;
             foreach (Window win in App.Current.Windows)
             {
@@ -557,10 +559,11 @@ namespace llcom
 
 
 
-        Window settingPage = new SettingWindow();
-        private void MoreSettingButton_Click(object sender, RoutedEventArgs e)
+        private void SystemSettingsPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            settingPage.Show();
+            settingsContentPanel.DataContext = Tools.Global.setting;
+            languageComboBox.SelectedIndex = Tools.Global.setting.language == "en-US" ? 1 : 0;
+            modeComboBox.SelectedIndex = Tools.Global.setting.darkMode ? 1 : 0;
         }
 
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1538,6 +1541,19 @@ namespace llcom
         private void ScriptParaCancel_Click(object sender, MouseButtonEventArgs e)
         {
             recvScriptParaPopup.IsOpen = false;
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) yield break;
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t)
+                    yield return t;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
         }
     }
 }

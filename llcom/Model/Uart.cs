@@ -201,8 +201,15 @@ namespace llcom.Model
                 return;
             serial.Write(data, 0, data.Length);
             Tools.Global.setting.SentCount += data.Length;
-            if(dataRaw != null && Tools.Global.setting.showSendRaw) UartDataSent(dataRaw, EventArgs.Empty);
-            if(Tools.Global.setting.showSend) UartDataSent(data, EventArgs.Empty);//回调
+            bool showRaw = dataRaw != null && Tools.Global.setting.showSendRaw;
+            bool showConverted = Tools.Global.setting.showSend;
+            if (showRaw && showConverted && dataRaw != null && data.SequenceEqual(dataRaw))
+                UartDataSent(data, EventArgs.Empty);
+            else
+            {
+                if (showRaw && dataRaw != null) UartDataSent(dataRaw, EventArgs.Empty);
+                if (showConverted) UartDataSent(data, EventArgs.Empty);
+            }
         }
 
         //收到串口事件的信号量
