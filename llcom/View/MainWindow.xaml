@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fa="http://schemas.fontawesome.io/icons/"
     xmlns:local="clr-namespace:llcom"
@@ -152,6 +153,8 @@
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
@@ -255,6 +258,14 @@
                         Text="{Binding ReceivedCount}"
                         ToolTip="{DynamicResource ClearCountTip}" />
                 </StatusBarItem>
+                <Separator Grid.Column="20" />
+                <StatusBarItem Grid.Column="21">
+                    <CheckBox
+                        Name="darkModeCheckBox"
+                        Content="{DynamicResource DarkMode}"
+                        IsChecked="{Binding darkMode}"
+                        ToolTip="{DynamicResource DarkMode}" />
+                </StatusBarItem>
             </StatusBar>
         </DockPanel>
 
@@ -276,7 +287,7 @@
                                 <MenuItem.Header>
                                     <Grid>
                                         <fa:FontAwesome Foreground="LightYellow" Icon="StickyNote" />
-                                        <fa:FontAwesome Foreground="Black" Icon="StickyNoteOutline" />
+                                        <fa:FontAwesome Icon="StickyNoteOutline" />
                                     </Grid>
                                 </MenuItem.Header>
                                 <MenuItem
@@ -355,7 +366,6 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid
                                                 Margin="1"
-                                                Background="#F6F6F6"
                                                 Cursor="Cross"
                                                 MouseRightButtonDown="TextBlock_MouseRightButtonDown"
                                                 Tag="{Binding}" />
@@ -465,7 +475,6 @@
                             Name="QuickListNameStackPanel"
                             Grid.Column="1"
                             HorizontalAlignment="Left"
-                            Background="#F6F6F6"
                             Cursor="Cross"
                             MouseRightButtonDown="QuickListNameStackPanel_MouseRightButtonDown"
                             Orientation="Horizontal"
@@ -509,7 +518,7 @@
                         <ComboBox Name="recvScriptCombo" Width="250" DropDownClosed="recvScriptCombo_DropDownClosed"/>
                     </Popup>
                     <Popup Name="recvScriptParaPopup" Placement="Bottom" VerticalOffset="5" StaysOpen="False">
-                        <Grid Background="White">
+                        <Grid>
                             <Border BorderBrush="DarkGray" BorderThickness="1">
                                 <avalonEdit:TextEditor
                                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -669,7 +678,7 @@
                                 Margin="2,0,0,0"
                                 Click="ApiDocumentButton_Click"
                                 ToolTip="{DynamicResource LuaApiReference}">
-                                <fa:FontAwesome Foreground="DarkSlateGray" Icon="Book" />
+                                <fa:FontAwesome Icon="Book" />
                             </Button>
                             <Button
                                 Name="scriptShareButton"
@@ -714,6 +723,8 @@
                             Grid.Row="2"
                             FontFamily="Consolas"
                             FontSize="10pt"
+                            Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
+                            Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
                             LostFocus="TextEditor_LostFocus"
                             ShowLineNumbers="True"
                             TextChanged="textEditor_TextChanged" />
@@ -744,7 +755,7 @@
                                 Name="stopLuaButton"
                                 Margin="0,3,3,3"
                                 Click="StopLuaButton_Click"
-                                Foreground="DarkRed"
+                                Foreground="Red"
                                 ToolTip="{DynamicResource LuaStop}">
                                 <fa:FontAwesome Name="stopLuaOrExitIcon" Icon="Stop" />
                             </Button>
@@ -753,7 +764,7 @@
                                 Grid.Column="1"
                                 Margin="0,3,3,3"
                                 Click="PauseLuaPrintButton_Click"
-                                Foreground="ForestGreen"
+                                Foreground="Lime"
                                 MouseRightButtonUp="pauseLuaPrintButton_MouseRightButtonUp"
                                 ToolTip="{DynamicResource LuaPause}">
                                 <fa:FontAwesome Name="pauseLuaPrintIcon" Icon="Pause" />
@@ -768,7 +779,7 @@
                                 Grid.Column="3"
                                 Margin="3,3,0,3"
                                 Click="SendLuaScriptButton_Click"
-                                Foreground="DeepSkyBlue"
+                                Foreground="DodgerBlue"
                                 ToolTip="{DynamicResource LuaSendScript}">
                                 <fa:FontAwesome Icon="ArrowUp" />
                             </Button>
@@ -779,7 +790,7 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <fa:FontAwesome Foreground="Brown" Icon="cubes" />
+                    <fa:FontAwesome Foreground="Chocolate" Icon="cubes" />
                 </TabItem.Header>
                 <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
@@ -829,7 +840,7 @@
             VerticalAlignment="Top">
             <MenuItem ToolTip="{DynamicResource ChangeLanguage}">
                 <MenuItem.Header>
-                    <fa:FontAwesome Foreground="Blue" Icon="Globe" />
+                    <fa:FontAwesome Foreground="DodgerBlue" Icon="Globe" />
                 </MenuItem.Header>
                 <MenuItem
                     Click="MenuItem_Click"

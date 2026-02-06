@@ -1,5 +1,8 @@
 --循环发送快捷发送区数据
 
+--发送目标通道："uart"=串口 "socket-client"=socket客户端(TCP/UDP) "tcp-server"=本机TCP服务端
+local sendChannel = "uart"
+
 ---例子一
 --发送数据中间间隔时间（单位ms）
 local sendDelay = 1000
@@ -19,7 +22,7 @@ sys.taskInit(function ()
         for _,i in pairs(sendList) do
             local data = apiQuickSendList(i)
             if data then
-                log.info("send data",apiSendUartData(data),data)
+                log.info("send data",apiSend(sendChannel,data),data)
             end
             sys.wait(sendDelay)
         end
@@ -42,9 +45,9 @@ local sendList = {
 sys.taskInit(function ()
     while true do
         for _,i in pairs(sendList) do
-            local data = apiQuickSendList[i[1] ]
+            local data = apiQuickSendList(i[1])
             if data then
-                log.info("send data",apiSendUartData(data),data)
+                log.info("send data",apiSend(sendChannel,data),data)
             end
             sys.wait(i[2])
         end

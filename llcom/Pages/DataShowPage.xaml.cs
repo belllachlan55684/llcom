@@ -212,8 +212,9 @@ namespace llcom.Pages
 
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
                 ArrowText = sent ? " ← " : " → ";
-                DataTextColor = sent ? Brushes.DarkRed : Brushes.DarkGreen;
-                HexTextColor = sent ? Brushes.IndianRed : Brushes.ForestGreen;
+                var dark = Tools.Global.setting.darkMode;
+                DataTextColor = sent ? (dark ? Brushes.IndianRed : Brushes.DarkRed) : (dark ? Brushes.Lime : Brushes.DarkGreen);
+                HexTextColor = sent ? (dark ? Brushes.LightCoral : Brushes.IndianRed) : (dark ? Brushes.LightGreen : Brushes.ForestGreen);
 
                 var len = temp.Length;
                 //主要数据

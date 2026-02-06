@@ -79,7 +79,7 @@ namespace llcom.Pages
                 {
                     title = $"MQTT event: ✔ connected",
                     data = new byte[0],
-                    color = Brushes.DarkGreen
+                    color = Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen
                 });
             });
             mqttClient.UseDisconnectedHandler(e =>
@@ -94,7 +94,7 @@ namespace llcom.Pages
                 {
                     title = $"MQTT event: ❌ disconnected",
                     data = new byte[0],
-                    color = Brushes.DarkGreen
+                    color = Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen
                 });
             });
             mqttClient.UseApplicationMessageReceivedHandler(e =>
@@ -112,7 +112,7 @@ namespace llcom.Pages
                 {
                     title = $"MQTT → {e.ApplicationMessage.Topic}({(int)e.ApplicationMessage.QualityOfServiceLevel})",
                     data = e.ApplicationMessage.Payload,
-                    color = Brushes.DarkGreen
+                    color = Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen
                 });
             });
 
@@ -201,7 +201,7 @@ namespace llcom.Pages
                                         {
                                             title = $"MQTT event: ‼ ssl error {eventArgs.SslPolicyErrors}",
                                             data = new byte[0],
-                                            color = Brushes.DarkGreen
+                                            color = Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen
                                         });
                                     }
                                     return true;
@@ -218,7 +218,7 @@ namespace llcom.Pages
                             {
                                 title = $"MQTT error: ‼ ssl certificate pfx file error",
                                 data = new byte[0],
-                                color = Brushes.DarkGreen
+                                color = Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen
                             });
                             return;
                         }
@@ -315,7 +315,7 @@ namespace llcom.Pages
                 {
                     title = $"MQTT ← {message.Topic}({(int)message.QualityOfServiceLevel})",
                     data = message.Payload ?? new byte[0],
-                    color = Brushes.DarkRed
+                    color = Tools.Global.setting.darkMode ? Brushes.IndianRed : Brushes.DarkRed
                 });
                 return true;
             }

@@ -258,7 +258,7 @@ namespace llcom.Pages
             {
                 title = $"🚀 public socket server: {title}",
                 data = data ?? new byte[0],
-                color = send ? Brushes.DarkRed : Brushes.DarkGreen,
+                color = send ? (Tools.Global.setting.darkMode ? Brushes.IndianRed : Brushes.DarkRed) : (Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen),
             });
         }
 

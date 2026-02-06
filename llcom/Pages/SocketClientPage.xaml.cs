@@ -1,4 +1,4 @@
-﻿using llcom.LuaEnv;
+using llcom.LuaEnv;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -90,7 +90,7 @@ namespace llcom.Pages
             {
                 title = $"🔗 socket client: {title}",
                 data = data ?? new byte[0],
-                color = send ? Brushes.DarkRed : Brushes.DarkGreen,
+                color = send ? (Tools.Global.setting.darkMode ? Brushes.IndianRed : Brushes.DarkRed) : (Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen),
             });
         }
 

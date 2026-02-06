@@ -46,17 +46,18 @@ namespace llcom.Pages
             byte[] b = new byte[d.DataSize];
             for (int i = 0; i < d.DataSize; i++)
                 b[i] = d.Data[i];
-            var c = Brushes.Black;
+            var dark = Tools.Global.setting.darkMode;
+            var c = dark ? Brushes.White : Brushes.Black;
             string show = "unknow";
             switch(d.CommState)
             {
                 case (byte)State.Send:
                     show = "→";
-                    c = Brushes.DarkRed;
+                    c = dark ? Brushes.IndianRed : Brushes.DarkRed;
                     break;
                 case (byte)State.Receive:
                     show = "←";
-                    c = Brushes.DarkGreen;
+                    c = dark ? Brushes.Lime : Brushes.DarkGreen;
                     break;
                 case (byte)State.Disconnect:
                     show = "❌";

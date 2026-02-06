@@ -17,6 +17,7 @@ using System.Management;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -194,6 +195,25 @@ namespace llcom.Tools
                 setting = new Model.Settings();
             }
             LoadLanguageFile(setting.language);
+            LoadTheme(setting.darkMode);
+        }
+
+        /// <summary>
+        /// 主题切换事件（供脚本编辑区等更新语法高亮）
+        /// </summary>
+        public static event EventHandler<bool> ThemeChanged;
+
+        /// <summary>
+        /// 更换主题（浅色/暗黑）
+        /// </summary>
+        public static void LoadTheme(bool darkMode)
+        {
+            var schemeName = darkMode ? "Dark" : "Light";
+            System.Windows.Application.Current.Resources.MergedDictionaries[1] = new System.Windows.ResourceDictionary
+            {
+                Source = new Uri($"pack://application:,,,/AdonisUI;component/ColorSchemes/{schemeName}.xaml", UriKind.RelativeOrAbsolute)
+            };
+            ThemeChanged?.Invoke(null, darkMode);
         }
 
         /// <summary>

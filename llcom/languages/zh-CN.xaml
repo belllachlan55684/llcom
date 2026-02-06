@@ -163,6 +163,7 @@
     <system:String x:Key="AddExtraEnterTip">加回车换行前，同样会经过脚本处理数据</system:String>
     <system:String x:Key="LockLogButton">锁定视图禁止滚动</system:String>
     <system:String x:Key="LockLogText">已锁定</system:String>
+    <system:String x:Key="SaveLogButtonTip">导出日志到文件</system:String>
     <system:String x:Key="ShowHexFormat">Hex显示</system:String>
     <system:String x:Key="ShowHexFormatTip">切换为：只显示Hex/只显示文本数据/同时显示Hex与文本数据</system:String>
     <system:String x:Key="HexSendMode">发Hex</system:String>
@@ -204,6 +205,7 @@
     <system:String x:Key="PlotFit">查看全局</system:String>
     <system:String x:Key="PlotClear">清空图像</system:String>
     <system:String x:Key="PlotTheme">切换主题</system:String>
+    <system:String x:Key="DarkMode">暗黑模式</system:String>
     <system:String x:Key="RefreshIpList">刷新IP</system:String>
     <system:String x:Key="StartListen">开始监听</system:String>
     <system:String x:Key="StopListen">停止监听</system:String>

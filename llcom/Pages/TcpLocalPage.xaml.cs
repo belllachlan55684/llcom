@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -108,7 +108,7 @@ namespace llcom.Pages
             {
                 title = $"🛰 local tcp server: {title}",
                 data = data ?? new byte[0],
-                color = send ? Brushes.DarkRed : Brushes.DarkGreen,
+                color = send ? (Tools.Global.setting.darkMode ? Brushes.IndianRed : Brushes.DarkRed) : (Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen),
             });
         }
 

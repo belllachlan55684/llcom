@@ -1,4 +1,4 @@
-﻿using llcom.Model;
+using llcom.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -137,12 +137,13 @@ namespace llcom.Pages
         {
             while (true)
             {
-                var (result, fileName) = Tools.InputDialog.OpenDialog(
+                var dialogResult = Tools.InputDialog.OpenDialog(
                         TryFindResource("OnlineScriptDownloadSaveNotice") as string ?? "?!",
                         $"{ScriptNow.Name}",
                         TryFindResource("OnlineScriptDownloadTitle") as string ?? "?!");
-                if (!result)
+                if (!dialogResult.Item1)
                     return;
+                var fileName = dialogResult.Item2;
                 //文件已经有了
                 if (File.Exists($"{Tools.Global.ProfilePath}user_script_run/{fileName}.lua"))
                 {

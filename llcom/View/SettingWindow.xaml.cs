@@ -173,17 +173,8 @@ namespace llcom
             //快速搜索
             SearchPanel.Install(textEditor.TextArea);
             SearchPanel.Install(textEditorRev.TextArea);
-            string name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".Lua.xshd";
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            using (System.IO.Stream s = assembly.GetManifestResourceStream(name))
-            {
-                using (XmlTextReader reader = new XmlTextReader(s))
-                {
-                    var xshd = HighlightingLoader.LoadXshd(reader);
-                    textEditor.SyntaxHighlighting = HighlightingLoader.Load(xshd, HighlightingManager.Instance);
-                    textEditorRev.SyntaxHighlighting = HighlightingLoader.Load(xshd, HighlightingManager.Instance);
-                }
-            }
+            ApplyScriptEditorTheme(Tools.Global.setting.darkMode);
+            Tools.Global.ThemeChanged += (_, dark) => Dispatcher.Invoke(() => ApplyScriptEditorTheme(dark));
             //加载上次打开的文件
             loadLuaFile(Tools.Global.setting.sendScript);
             if(!string.IsNullOrEmpty(MainWindow.recvScriptBackup)) loadLuaFileRev(MainWindow.recvScriptBackup);
@@ -336,6 +327,25 @@ namespace llcom
         private void LuaTestCancelbutton_Click(object sender, RoutedEventArgs e)
         {
             luaTestWrapPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void ApplyScriptEditorTheme(bool darkMode)
+        {
+            var asm = System.Reflection.Assembly.GetExecutingAssembly();
+            var name = asm.GetName().Name + (darkMode ? ".Lua-dark.xshd" : ".Lua.xshd");
+            using (var s = asm.GetManifestResourceStream(name))
+            {
+                if (s != null)
+                {
+                    using (var reader = new XmlTextReader(s))
+                    {
+                        var xshd = HighlightingLoader.LoadXshd(reader);
+                        var highlighting = HighlightingLoader.Load(xshd, HighlightingManager.Instance);
+                        textEditor.SyntaxHighlighting = highlighting;
+                        textEditorRev.SyntaxHighlighting = highlighting;
+                    }
+                }
+            }
         }
 
         private void TextEditor_LostFocus(object sender, RoutedEventArgs e)

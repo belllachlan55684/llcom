@@ -40,6 +40,7 @@ namespace llcom.Model
         private bool _terminal = true;
         private bool _extraEnter = false;
         private bool _enableSymbol = true;
+        private bool _darkMode = false;
 
         //窗口大小与位置
         private double _windowTop = 0;
@@ -472,6 +473,20 @@ namespace llcom.Model
             set
             {
                 _enableSymbol = value;
+                Save();
+            }
+        }
+
+        /// <summary>
+        /// 暗黑模式
+        /// </summary>
+        public bool darkMode
+        {
+            get => _darkMode;
+            set
+            {
+                _darkMode = value;
+                Tools.Global.LoadTheme(value);
                 Save();
             }
         }

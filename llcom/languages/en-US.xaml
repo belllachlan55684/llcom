@@ -163,6 +163,7 @@
     <system:String x:Key="AddExtraEnterTip">before do this, alse will use Lua script for data to send</system:String>
     <system:String x:Key="LockLogButton">Lock logs and disable auto scroll</system:String>
     <system:String x:Key="LockLogText">Locked</system:String>
+    <system:String x:Key="SaveLogButtonTip">Export log to file</system:String>
     <system:String x:Key="ShowHexFormat">Hex format</system:String>
     <system:String x:Key="ShowHexFormatTip">modes: Only Hex/Only Text/Both Hex and Text</system:String>
     <system:String x:Key="HexSendMode">Send Hex</system:String>
@@ -204,6 +205,7 @@
     <system:String x:Key="PlotFit">Fit</system:String>
     <system:String x:Key="PlotClear">Clear</system:String>
     <system:String x:Key="PlotTheme">Theme</system:String>
+    <system:String x:Key="DarkMode">Dark mode</system:String>
     <system:String x:Key="RefreshIpList">Refresh IP</system:String>
     <system:String x:Key="StartListen">Start listen</system:String>
     <system:String x:Key="StopListen">Stop listen</system:String>

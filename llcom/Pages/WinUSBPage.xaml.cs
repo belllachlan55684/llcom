@@ -1,4 +1,4 @@
-﻿using CoAP.Net;
+using CoAP.Net;
 using LibUsbDotNet;
 using LibUsbDotNet.Info;
 using LibUsbDotNet.LibUsb;
@@ -50,7 +50,7 @@ namespace llcom.Pages
             {
                 title = $"🔌 WinUSB: {title}",
                 data = data ?? new byte[0],
-                color = send ? Brushes.DarkRed : Brushes.DarkGreen,
+                color = send ? (Tools.Global.setting.darkMode ? Brushes.IndianRed : Brushes.DarkRed) : (Tools.Global.setting.darkMode ? Brushes.Lime : Brushes.DarkGreen),
             });
         }
 

@@ -123,6 +123,7 @@ namespace llcom
                     QuiclListName7.DataContext = Tools.Global.setting;
                     QuiclListName8.DataContext = Tools.Global.setting;
                     QuiclListName9.DataContext = Tools.Global.setting;
+                    darkModeCheckBox.DataContext = Tools.Global.setting;
 
                     //初始化快捷发送栏的数据
                     canSaveSendList = false;
@@ -155,16 +156,8 @@ namespace llcom
                         }
                     });
 
-                    string name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".Lua.xshd";
-                    System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                    using (System.IO.Stream s = assembly.GetManifestResourceStream(name))
-                    {
-                        using (XmlTextReader reader = new XmlTextReader(s))
-                        {
-                            var xshd = HighlightingLoader.LoadXshd(reader);
-                            textEditor.SyntaxHighlighting = HighlightingLoader.Load(xshd, HighlightingManager.Instance);
-                        }
-                    }
+                    ApplyScriptEditorTheme(Tools.Global.setting.darkMode);
+                    Tools.Global.ThemeChanged += (_, dark) => Dispatcher.Invoke(() => ApplyScriptEditorTheme(dark));
 
                     //加载上次打开的文件
                     loadLuaFile(Tools.Global.setting.runScript);
@@ -1016,6 +1009,23 @@ namespace llcom
                 loadLuaFile(fileName);
             }
         }
+        private void ApplyScriptEditorTheme(bool darkMode)
+        {
+            var asm = System.Reflection.Assembly.GetExecutingAssembly();
+            var name = asm.GetName().Name + (darkMode ? ".Lua-dark.xshd" : ".Lua.xshd");
+            using (var s = asm.GetManifestResourceStream(name))
+            {
+                if (s != null)
+                {
+                    using (var reader = new XmlTextReader(s))
+                    {
+                        var xshd = HighlightingLoader.LoadXshd(reader);
+                        textEditor.SyntaxHighlighting = HighlightingLoader.Load(xshd, HighlightingManager.Instance);
+                    }
+                }
+            }
+        }
+
         private void TextEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             //自动保存脚本
@@ -1376,9 +1386,9 @@ namespace llcom
 
         private void removeAllButton_Click(object sender, RoutedEventArgs e)
         {
-            (bool r,string s) = Tools.InputDialog.OpenDialog(TryFindResource("DeleteConfirmationMsg") as string ?? "?!",
+            var dialogResult = Tools.InputDialog.OpenDialog(TryFindResource("DeleteConfirmationMsg") as string ?? "?!",
                 "", TryFindResource("DeleteConfirmation") as string ?? "?!");
-            if (r && s == "YES")
+            if (dialogResult.Item1 && dialogResult.Item2 == "YES")
             {
                 toSendListItems.Clear();
                 SaveSendList(null, EventArgs.Empty);

@@ -190,7 +190,10 @@ namespace llcom.LuaEnv
                         lua.Global.SetInPath("runType", "script");//一次性处理标志
                         LuaLoader.Initial(lua);
                         triggerCB = lua.Global.Get<XLua.LuaFunction>("tiggerCB");
-                        lua.DoString($"require '{file.Replace("/", ".").Substring(0, file.Length - 4)}'");
+                        // 按路径直接加载，避免 require 中文模块名时的编码损坏
+                        var fullPath = Tools.Global.ProfilePath + file;
+                        var content = File.ReadAllBytes(fullPath);
+                        lua.DoString(content);
                     }
                 }
                 catch (Exception ex)
