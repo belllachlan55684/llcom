@@ -64,19 +64,6 @@
             PreviewKeyDown="uartDataFlowDocument_PreviewKeyDown"
             PreviewTextInput="uartDataFlowDocument_PreviewTextInput" />
 
-        <!--  清空日志区  -->
-        <Grid Grid.Row="1" Margin="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button
-                Name="clearLogButton"
-                Margin="2"
-                Click="ClearLogButton_Click"
-                Content="{DynamicResource ClearLog}" />
-        </Grid>
-
-
         <!--  底部状态栏  -->
         <DockPanel Grid.Row="2" Grid.ColumnSpan="3">
             <StatusBar DockPanel.Dock="Bottom">

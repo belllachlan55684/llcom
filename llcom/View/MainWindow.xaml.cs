@@ -463,11 +463,6 @@ namespace llcom
             RefreshScriptList();
         }
 
-        private void ClearLogButton_Click(object sender, RoutedEventArgs e)
-        {
-            Tools.Logger.ClearData();
-        }
-
         private void SendUartData_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if (DataInterfaceComboBox.SelectedIndex != 0)

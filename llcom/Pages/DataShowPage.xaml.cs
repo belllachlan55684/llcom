@@ -141,6 +141,11 @@ namespace llcom.Pages
             LockLog = !LockLog;
         }
 
+        private void ClearLogButton_Click(object sender, RoutedEventArgs e)
+        {
+            Tools.Logger.ClearData();
+        }
+
 
         public bool Rts {
             get

@@ -170,6 +170,12 @@
                 Margin="5,0,0,0"
                 Content="{DynamicResource DisableLog}"
                 IsChecked="{Binding DisableLog}" />
+            <Button
+                Name="ClearLogButton"
+                Margin="5,0,0,0"
+                Padding="8,2"
+                Click="ClearLogButton_Click"
+                Content="{DynamicResource ClearLog}" />
         </StackPanel>
         <Button
             Name="LockLogButton"
