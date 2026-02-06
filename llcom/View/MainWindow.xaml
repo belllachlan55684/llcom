@@ -255,29 +255,49 @@
         <!--  右侧脚本、快捷发送  -->
         <TabControl Grid.RowSpan="2" Grid.Column="3">
             <TabItem Header="{DynamicResource DataInterfaceTab}">
-                <TabControl>
-                    <TabItem Header="{DynamicResource TcpClientTitle}">
-                        <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource UdpLocalTabTitle}">
-                        <Frame Name="udpLocalTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource TcpLocalTabTitle}">
-                        <Frame Name="tcpLocalTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource TcpTabTitle}">
-                        <Frame Name="tcpTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="WinUSB">
-                        <Frame Name="WinUSBFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource SerialMonitorHeader}">
-                        <Frame Name="SerialMonitorFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="MQTT">
-                        <Frame Name="MqttTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                </TabControl>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ComboBox Name="DataInterfaceComboBox" SelectedIndex="0" Margin="2">
+                        <ComboBoxItem Content="{DynamicResource TcpClientTitle}" />
+                        <ComboBoxItem Content="{DynamicResource UdpLocalTabTitle}" />
+                        <ComboBoxItem Content="{DynamicResource TcpLocalTabTitle}" />
+                        <ComboBoxItem Content="{DynamicResource TcpTabTitle}" />
+                        <ComboBoxItem Content="WinUSB" />
+                        <ComboBoxItem Content="{DynamicResource SerialMonitorHeader}" />
+                        <ComboBoxItem Content="MQTT" />
+                    </ComboBox>
+                    <TabControl Grid.Row="1" SelectedIndex="{Binding ElementName=DataInterfaceComboBox, Path=SelectedIndex, Mode=OneWay}">
+                        <TabControl.Template>
+                            <ControlTemplate TargetType="TabControl">
+                                <ContentPresenter ContentSource="SelectedContent" />
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabItem Header="{DynamicResource TcpClientTitle}">
+                            <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource UdpLocalTabTitle}">
+                            <Frame Name="udpLocalTestFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource TcpLocalTabTitle}">
+                            <Frame Name="tcpLocalTestFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource TcpTabTitle}">
+                            <Frame Name="tcpTestFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="WinUSB">
+                            <Frame Name="WinUSBFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource SerialMonitorHeader}">
+                            <Frame Name="SerialMonitorFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="MQTT">
+                            <Frame Name="MqttTestFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                    </TabControl>
+                </Grid>
             </TabItem>
             <TabItem>
                 <TabItem.Header>
