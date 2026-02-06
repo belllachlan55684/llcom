@@ -64,51 +64,16 @@
             PreviewKeyDown="uartDataFlowDocument_PreviewKeyDown"
             PreviewTextInput="uartDataFlowDocument_PreviewTextInput" />
 
-        <!--  发送数据区  -->
+        <!--  清空日志区  -->
         <Grid Grid.Row="1" Margin="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0" />
-                <ColumnDefinition Width="0" />
-                <ColumnDefinition Width="0" />
-                <ColumnDefinition Width="55" />
-                <ColumnDefinition Width="75" />
-                <ColumnDefinition Width="4*" />
-                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Button
-                Name="openClosePortButton"
-                Grid.Column="3"
-                Margin="2"
-                Click="OpenClosePortButton_Click">
-                <WrapPanel>
-                    <TextBlock Name="openClosePortTextBlock" Text="{DynamicResource OpenPort_open}" />
-                    <TextBlock Text="{DynamicResource OpenPort_port}" />
-                </WrapPanel>
-            </Button>
-            <Button
                 Name="clearLogButton"
-                Grid.Column="4"
                 Margin="2"
                 Click="ClearLogButton_Click"
                 Content="{DynamicResource ClearLog}" />
-            <TextBox
-                Name="toSendDataTextBox"
-                Grid.Column="5"
-                Height="50"
-                Margin="2"
-                VerticalContentAlignment="Top"
-                AcceptsReturn="True"
-                FontFamily="Consolas"
-                Text="{Binding dataToSend}"
-                TextWrapping="Wrap"
-                VerticalScrollBarVisibility="Auto" />
-            <Button
-                Name="sendDataButton"
-                Grid.Column="6"
-                Margin="2"
-                Command="{StaticResource SendUartData}"
-                Content="{DynamicResource SendDataButton}"
-                ToolTip="{DynamicResource SendDataButtonTip}" />
         </Grid>
 
 
@@ -119,16 +84,7 @@
                     <ItemsPanelTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="Auto" />
@@ -143,81 +99,23 @@
                         </Grid>
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
-                <Button
-                    Name="refreshPortButton"
-                    Grid.Column="0"
-                    Click="RefreshPortButton_Click"
-                    Content="{DynamicResource RefreshPortButton}"
-                    IsEnabled="{Binding ElementName=serialPortsListComboBox, Path=IsEnabled}" />
-                <StatusBarItem Grid.Column="1">
-                    <TextBlock Text="{DynamicResource ShowPorts}" />
-                </StatusBarItem>
-                <Separator Grid.Column="2" />
-                <StatusBarItem Grid.Column="3">
-                    <ComboBox
-                        Name="serialPortsListComboBox"
-                        MinWidth="150"
-                        MaxWidth="300" />
-                </StatusBarItem>
-                <Separator Grid.Column="4" />
-                <StatusBarItem Grid.Column="5">
-                    <TextBlock Text="{DynamicResource ShowBaudRate}" />
-                </StatusBarItem>
-                <Separator Grid.Column="6" />
-                <StatusBarItem Grid.Column="7">
-                    <ComboBox
-                        Name="baudRateComboBox"
-                        Width="80"
-                        DropDownClosed="BaudRateComboBox_Changed"
-                        DropDownOpened="BaudRateComboBox_Changed">
-                        <ComboBoxItem Content="110" />
-                        <ComboBoxItem Content="330" />
-                        <ComboBoxItem Content="600" />
-                        <ComboBoxItem Content="1200" />
-                        <ComboBoxItem Content="2400" />
-                        <ComboBoxItem Content="4800" />
-                        <ComboBoxItem Content="9600" />
-                        <ComboBoxItem Content="14400" />
-                        <ComboBoxItem Content="19200" />
-                        <ComboBoxItem Content="38400" />
-                        <ComboBoxItem Content="56000" />
-                        <ComboBoxItem Content="57600" />
-                        <ComboBoxItem Content="115200" />
-                        <ComboBoxItem Content="128000" />
-                        <ComboBoxItem Content="230400" />
-                        <ComboBoxItem Content="256000" />
-                        <ComboBoxItem Content="460800" />
-                        <ComboBoxItem Content="500000" />
-                        <ComboBoxItem Content="128000" />
-                        <ComboBoxItem Content="512000" />
-                        <ComboBoxItem Content="600000" />
-                        <ComboBoxItem Content="750000" />
-                        <ComboBoxItem Content="921600" />
-                        <ComboBoxItem Content="1000000" />
-                        <ComboBoxItem Content="1500000" />
-                        <ComboBoxItem Content="2000000" />
-                        <ComboBoxItem Content="3000000" />
-                        <ComboBoxItem Content="{DynamicResource OtherRate}" />
-                    </ComboBox>
-                </StatusBarItem>
-                <Separator Grid.Column="8" />
-                <StatusBarItem Grid.Column="9">
+                <StatusBarItem Grid.Column="0">
                     <TextBlock Text="{DynamicResource ShowStatus}" />
                 </StatusBarItem>
-                <Separator Grid.Column="10" />
-                <StatusBarItem Grid.Column="11">
+                <Separator Grid.Column="1" />
+                <StatusBarItem Grid.Column="2">
                     <TextBlock Name="statusTextBlock" Text="{DynamicResource OpenPort_close}" />
                 </StatusBarItem>
-                <Separator Grid.Column="12" />
-                <StatusBarItem Grid.Column="13">
+                <Separator Grid.Column="3" />
+                <StatusBarItem Grid.Column="4">
                     <TextBlock
                         Cursor="Cross"
                         MouseRightButtonDown="sentCountTextBlock_MouseRightButtonDown"
                         Text="{DynamicResource SentCount}"
                         ToolTip="{DynamicResource ClearCountTip}" />
                 </StatusBarItem>
-                <Separator Grid.Column="14" />
-                <StatusBarItem Grid.Column="15">
+                <Separator Grid.Column="5" />
+                <StatusBarItem Grid.Column="6">
                     <TextBlock
                         Name="sentCountTextBlock"
                         Cursor="Cross"
@@ -225,16 +123,16 @@
                         Text="{Binding SentCount}"
                         ToolTip="{DynamicResource ClearCountTip}" />
                 </StatusBarItem>
-                <Separator Grid.Column="16" />
-                <StatusBarItem Grid.Column="17">
+                <Separator Grid.Column="7" />
+                <StatusBarItem Grid.Column="8">
                     <TextBlock
                         Cursor="Cross"
                         MouseRightButtonDown="receivedCountTextBlock_MouseRightButtonDown"
                         Text="{DynamicResource ReceivedCount}"
                         ToolTip="{DynamicResource ClearCountTip}" />
                 </StatusBarItem>
-                <Separator Grid.Column="18" />
-                <StatusBarItem Grid.Column="19">
+                <Separator Grid.Column="9" />
+                <StatusBarItem Grid.Column="10">
                     <TextBlock
                         Name="receivedCountTextBlock"
                         Cursor="Cross"
@@ -261,6 +159,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ComboBox Name="DataInterfaceComboBox" SelectedIndex="0" Margin="2">
+                        <ComboBoxItem Content="{DynamicResource SerialPortTabTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpClientTitle}" />
                         <ComboBoxItem Content="{DynamicResource UdpLocalTabTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpLocalTabTitle}" />
@@ -275,6 +174,9 @@
                                 <ContentPresenter ContentSource="SelectedContent" />
                             </ControlTemplate>
                         </TabControl.Template>
+                        <TabItem Header="{DynamicResource SerialPortTabTitle}">
+                            <Frame Name="SerialPortFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
                         <TabItem Header="{DynamicResource TcpClientTitle}">
                             <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
                         </TabItem>
@@ -483,6 +385,7 @@
                             </Setter>
                         </Style>
                     </Grid.Resources>
+                    <ContentControl x:Name="sendDataButton" Visibility="Collapsed" Content="{DynamicResource SendDataButton}" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30" />
