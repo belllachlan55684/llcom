@@ -254,6 +254,31 @@
 
         <!--  右侧脚本、快捷发送  -->
         <TabControl Grid.RowSpan="2" Grid.Column="3">
+            <TabItem Header="{DynamicResource DataInterfaceTab}">
+                <TabControl>
+                    <TabItem Header="{DynamicResource TcpClientTitle}">
+                        <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource UdpLocalTabTitle}">
+                        <Frame Name="udpLocalTestFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource TcpLocalTabTitle}">
+                        <Frame Name="tcpLocalTestFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource TcpTabTitle}">
+                        <Frame Name="tcpTestFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="WinUSB">
+                        <Frame Name="WinUSBFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="{DynamicResource SerialMonitorHeader}">
+                        <Frame Name="SerialMonitorFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                    <TabItem Header="MQTT">
+                        <Frame Name="MqttTestFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
+                </TabControl>
+            </TabItem>
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -772,37 +797,6 @@
                     <!--  脚本运行日志界面END  -->
                 </Grid>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <fa:FontAwesome Foreground="Chocolate" Icon="cubes" />
-                </TabItem.Header>
-                <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
-            </TabItem>
-            <TabItem Header="{DynamicResource DataInterfaceTab}">
-                <TabControl>
-                    <TabItem Header="{DynamicResource TcpClientTitle}">
-                        <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource UdpLocalTabTitle}">
-                        <Frame Name="udpLocalTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource TcpLocalTabTitle}">
-                        <Frame Name="tcpLocalTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource TcpTabTitle}">
-                        <Frame Name="tcpTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="WinUSB">
-                        <Frame Name="WinUSBFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource SerialMonitorHeader}">
-                        <Frame Name="SerialMonitorFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="MQTT">
-                        <Frame Name="MqttTestFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                </TabControl>
-            </TabItem>
             <TabItem Header="{DynamicResource ToolsTab}">
                 <TabControl>
                     <TabItem Header="{DynamicResource EncodingToolsTab}">
@@ -816,8 +810,11 @@
                     </TabItem>
                 </TabControl>
             </TabItem>
-            <TabItem Header="{DynamicResource AboutCard}">
-                <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
+            <TabItem>
+                <TabItem.Header>
+                    <fa:FontAwesome Foreground="Chocolate" Icon="cubes" />
+                </TabItem.Header>
+                <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
             <TabItem Name="settingsTabItem">
                 <TabItem.Header>
@@ -858,6 +855,9 @@
                         </ScrollViewer>
                     </TabItem>
                 </TabControl>
+            </TabItem>
+            <TabItem Header="{DynamicResource AboutCard}">
+                <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
         </TabControl>
 
