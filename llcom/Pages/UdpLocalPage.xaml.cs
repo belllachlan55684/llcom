@@ -110,7 +110,9 @@ namespace llcom.Pages
 
                     byte[] receiveBytes = u.EndReceive(ar, ref e);
                     var isV6 = e.Address.ToString().Contains(":");
-                    ShowData($"{(isV6 ? "[" : "")}{e.Address}{(isV6 ? "]" : "")}:{e.Port}", receiveBytes);
+                    var converted = Tools.LuaConvertHelper.ApplyRecvConvert(receiveBytes);
+                    if (converted != null)
+                        ShowData($"{(isV6 ? "[" : "")}{e.Address}{(isV6 ? "]" : "")}:{e.Port}", converted);
                     Server.BeginReceive(newConnectionCb, ar.AsyncState);
                 }
                 catch { }

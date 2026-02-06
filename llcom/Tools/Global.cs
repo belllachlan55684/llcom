@@ -304,6 +304,8 @@ namespace llcom.Tools
                 //通用消息通道的demo
                 if (!File.Exists(ProfilePath + "user_script_run/channel-demo.lua"))
                     CreateFile("DefaultFiles/user_script_run/channel-demo.lua", ProfilePath + "user_script_run/channel-demo.lua");
+                if (!File.Exists(ProfilePath + "user_script_run/随机发送.lua"))
+                    CreateFile("DefaultFiles/user_script_run/随机发送.lua", ProfilePath + "user_script_run/随机发送.lua");
 
                 if (!Directory.Exists(ProfilePath + "user_script_run/requires"))
                     Directory.CreateDirectory(ProfilePath + "user_script_run/requires");
@@ -332,6 +334,8 @@ namespace llcom.Tools
                     CreateFile("DefaultFiles/user_script_recv_convert/绘制曲线-多条.lua", ProfilePath + "user_script_recv_convert/绘制曲线-多条.lua");
                 if (!File.Exists(ProfilePath + "user_script_recv_convert/绘制曲线-解析结构体.lua"))
                     CreateFile("DefaultFiles/user_script_recv_convert/绘制曲线-解析结构体.lua", ProfilePath + "user_script_recv_convert/绘制曲线-解析结构体.lua");
+                if (!File.Exists(ProfilePath + "user_script_recv_convert/JSON格式化.lua"))
+                    CreateFile("DefaultFiles/user_script_recv_convert/JSON格式化.lua", ProfilePath + "user_script_recv_convert/JSON格式化.lua");
 
                 CreateFile("DefaultFiles/LICENSE", ProfilePath + "LICENSE", false);
                 CreateFile("DefaultFiles/反馈网址.txt", ProfilePath + "反馈网址.txt", false);

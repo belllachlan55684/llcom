@@ -61,10 +61,12 @@ namespace llcom.Pages
             ReconnectInterval.DataContext = Tools.Global.setting;
             NeedReconnect.DataContext = Tools.Global.setting;
 
-            //收到消息显示
+            //收到消息显示（经 recv_convert 转换）
             DataRecived += (_, buff) =>
             {
-                ShowData($" → receive", buff);
+                var converted = Tools.LuaConvertHelper.ApplyRecvConvert(buff);
+                if (converted != null)
+                    ShowData($" → receive", converted);
             };
 
             //适配一下通用通道
@@ -371,10 +373,15 @@ namespace llcom.Pages
 
         private bool Send(byte[] buff)
         {
+            if (buff == null || buff.Length == 0)
+                return false;
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, HexMode);
+            if (toSend == null)
+                return false;
             try
             {
-                socketNow.Send(buff);
-                ShowData($" ← send", buff, true);
+                socketNow.Send(toSend);
+                ShowData($" ← send", toSend, true);
                 return true;
             }
             catch(Exception ex)

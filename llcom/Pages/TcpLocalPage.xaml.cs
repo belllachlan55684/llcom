@@ -49,10 +49,12 @@ namespace llcom.Pages
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
 
-            //收到消息，显示日志
+            //收到消息，显示日志（经 recv_convert 转换）
             DataRecived += (name, data) =>
             {
-                ShowData($" → receive ({(string)name})", data);
+                var converted = Tools.LuaConvertHelper.ApplyRecvConvert(data);
+                if (converted != null)
+                    ShowData($" → receive ({(string)name})", converted);
             };
 
             //适配一下通用通道
@@ -313,6 +315,11 @@ namespace llcom.Pages
 
         private bool Broadcast(byte[] buff)
         {
+            if (buff == null || buff.Length == 0)
+                return false;
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, HexMode);
+            if (toSend == null)
+                return false;
             try
             {
                 lock (Clients)
@@ -320,11 +327,11 @@ namespace llcom.Pages
                     foreach (var c in Clients)
                         try
                         {
-                            c.Send(buff);
+                            c.Send(toSend);
                         }
                         catch { }
                 }
-                ShowData($"💥 broadcast", buff, true);
+                ShowData($"💥 broadcast", toSend, true);
                 return true;
             }
             catch (Exception ex)

@@ -96,6 +96,10 @@
     <system:String x:Key="InputDialogTitle">Notice</system:String>
     <system:String x:Key="SettingTitle">More serial port settings</system:String>
     <system:String x:Key="SettingBasic">Basic</system:String>
+    <system:String x:Key="SettingCard">Settings</system:String>
+    <system:String x:Key="SettingLanguage">Language selection</system:String>
+    <system:String x:Key="SettingDisplayMode">Display mode selection</system:String>
+    <system:String x:Key="LightMode">Light mode</system:String>
     <system:String x:Key="SettingAutoReconnect">Auto reconnect after disconnect</system:String>
     <system:String x:Key="SettingOpenLogFolder">Open serial port log data folder</system:String>
     <system:String x:Key="SettingShowFormat">Data show format:</system:String>

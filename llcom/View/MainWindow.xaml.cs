@@ -123,7 +123,10 @@ namespace llcom
                     QuiclListName7.DataContext = Tools.Global.setting;
                     QuiclListName8.DataContext = Tools.Global.setting;
                     QuiclListName9.DataContext = Tools.Global.setting;
-                    darkModeCheckBox.DataContext = Tools.Global.setting;
+
+                    settingsContentPanel.DataContext = Tools.Global.setting;
+                    languageComboBox.SelectedIndex = Tools.Global.setting.language == "en-US" ? 1 : 0;
+                    modeComboBox.SelectedIndex = Tools.Global.setting.darkMode ? 1 : 0;
 
                     //初始化快捷发送栏的数据
                     canSaveSendList = false;
@@ -560,6 +563,21 @@ namespace llcom
             settingPage.Show();
         }
 
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (languageComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+            {
+                Tools.Global.setting.language = item.Tag.ToString();
+            }
+        }
+
+        private void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (modeComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+            {
+                Tools.Global.setting.darkMode = item.Tag.ToString() == "1";
+            }
+        }
 
         private void ApiDocumentButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1261,11 +1279,6 @@ namespace llcom
         private void receivedCountTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             Tools.Global.setting.ReceivedCount = 0;
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            Tools.Global.setting.language = ((MenuItem)sender).Tag.ToString();
         }
 
         //id序号右击事件

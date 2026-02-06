@@ -153,8 +153,6 @@
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
@@ -257,14 +255,6 @@
                         MouseRightButtonDown="receivedCountTextBlock_MouseRightButtonDown"
                         Text="{Binding ReceivedCount}"
                         ToolTip="{DynamicResource ClearCountTip}" />
-                </StatusBarItem>
-                <Separator Grid.Column="20" />
-                <StatusBarItem Grid.Column="21">
-                    <CheckBox
-                        Name="darkModeCheckBox"
-                        Content="{DynamicResource DarkMode}"
-                        IsChecked="{Binding darkMode}"
-                        ToolTip="{DynamicResource DarkMode}" />
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
@@ -515,11 +505,17 @@
                         VirtualizingPanel.IsVirtualizing="True"
                         VirtualizingPanel.VirtualizationMode="Recycling" />
                     <Popup Name="recvScriptPopup" Placement="Bottom" VerticalOffset="5" StaysOpen="True">
-                        <ComboBox Name="recvScriptCombo" Width="250" DropDownClosed="recvScriptCombo_DropDownClosed"/>
+                        <Border Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
+                                BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                                BorderThickness="1"
+                                Padding="2">
+                            <ComboBox Name="recvScriptCombo" Width="250" DropDownClosed="recvScriptCombo_DropDownClosed"/>
+                        </Border>
                     </Popup>
                     <Popup Name="recvScriptParaPopup" Placement="Bottom" VerticalOffset="5" StaysOpen="False">
-                        <Grid>
-                            <Border BorderBrush="DarkGray" BorderThickness="1">
+                        <Grid Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}">
+                            <Border BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}" BorderThickness="1"
+                                    Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}">
                                 <avalonEdit:TextEditor
                                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                                     Name="recvScriptParaBox" 
@@ -528,7 +524,9 @@
                                     WordWrap="True"
                                     HorizontalContentAlignment="Left"
                                     VerticalContentAlignment="Top"
-                                    VerticalScrollBarVisibility="Visible"/>
+                                    VerticalScrollBarVisibility="Visible"
+                                    Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
+                                    Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"/>
                             </Border>
                             <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,1,3,0" Background="Transparent">
                                 <Grid.ColumnDefinitions>
@@ -831,27 +829,34 @@
             <TabItem Header="{DynamicResource AboutCard}">
                 <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
+            <TabItem Name="settingsTabItem">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource SettingCard}" />
+                </TabItem.Header>
+                <ScrollViewer>
+                    <WrapPanel Name="settingsContentPanel" Margin="15,10" Orientation="Horizontal">
+                        <ComboBox
+                            Name="languageComboBox"
+                            Width="120"
+                            Margin="5"
+                            ToolTip="{DynamicResource SettingLanguage}"
+                            SelectionChanged="LanguageComboBox_SelectionChanged">
+                            <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                            <ComboBoxItem Content="English" Tag="en-US" />
+                        </ComboBox>
+                        <ComboBox
+                            Name="modeComboBox"
+                            Width="120"
+                            Margin="5"
+                            ToolTip="{DynamicResource SettingDisplayMode}"
+                            SelectionChanged="ModeComboBox_SelectionChanged">
+                            <ComboBoxItem Content="{DynamicResource LightMode}" Tag="0" />
+                            <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="1" />
+                        </ComboBox>
+                    </WrapPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
-
-        <Menu
-            Grid.RowSpan="2"
-            Grid.Column="3"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Top">
-            <MenuItem ToolTip="{DynamicResource ChangeLanguage}">
-                <MenuItem.Header>
-                    <fa:FontAwesome Foreground="DodgerBlue" Icon="Globe" />
-                </MenuItem.Header>
-                <MenuItem
-                    Click="MenuItem_Click"
-                    Header="简体中文"
-                    Tag="zh-CN" />
-                <MenuItem
-                    Click="MenuItem_Click"
-                    Header="English"
-                    Tag="en-US" />
-            </MenuItem>
-        </Menu>
 
         <!--  统计  -->
         <WebBrowser Name="TongjiWebBrowser" Visibility="Collapsed" />
