@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using System.Management;
 using System.Text;
@@ -24,6 +25,7 @@ namespace llcom.Pages
         private bool refreshLock = false;
         private bool skipSearch = false;
         private int searchCount = 0;
+        private bool sendScriptLoading = false;
 
         public SerialPortPage()
         {
@@ -64,7 +66,60 @@ namespace llcom.Pages
                     encodingComboBox.SelectedIndex = index;
             }
 
+            LoadSendScriptList();
             RefreshPortList();
+        }
+
+        private void LoadSendScriptList()
+        {
+            sendScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    sendScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.sendScript;
+            sendScriptLoading = true;
+            if (sendScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
+                {
+                    if ((sendScriptComboBox.Items[i] as string) == current)
+                    {
+                        sendScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.sendScript = sendScriptComboBox.Items[0] as string ?? "default";
+                    sendScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            sendScriptLoading = false;
+        }
+
+        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadSendScriptList();
+        }
+
+        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
+            var name = sendScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.sendScript)
+                Tools.Global.setting.sendScript = name;
         }
 
         private void DataBitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

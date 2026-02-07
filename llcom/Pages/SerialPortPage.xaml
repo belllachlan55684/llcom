@@ -199,6 +199,14 @@
                 <CheckBox Content="{DynamicResource AddExtraEnter}" Margin="4,0" VerticalAlignment="Center"
                           IsChecked="{Binding extraEnter}" ToolTip="{DynamicResource AddExtraEnterTip}"/>
                 <CheckBox Content="Hex" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding hexSend}"/>
+                <ComboBox
+                    Name="sendScriptComboBox"
+                    MinWidth="120"
+                    Margin="4,0"
+                    VerticalAlignment="Center"
+                    ToolTip="{DynamicResource SendScriptTab}"
+                    DropDownOpened="SendScriptComboBox_DropDownOpened"
+                    SelectionChanged="SendScriptComboBox_SelectionChanged"/>
             </WrapPanel>
         </DockPanel>
     </Grid>
