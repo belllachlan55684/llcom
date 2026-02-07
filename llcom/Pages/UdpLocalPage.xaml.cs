@@ -124,10 +124,8 @@ namespace llcom.Pages
                     IPEndPoint e = ((UdpState)(ar.AsyncState)).e;
 
                     byte[] receiveBytes = u.EndReceive(ar, ref e);
-                    var isV6 = e.Address.ToString().Contains(":");
-                    var converted = Tools.LuaConvertHelper.ApplyRecvConvert(receiveBytes);
-                    if (converted != null)
-                        ShowData($"{(isV6 ? "[" : "")}{e.Address}{(isV6 ? "]" : "")}:{e.Port}", converted);
+                    Tools.Global.setting.ReceivedCount += receiveBytes.Length;
+                    Tools.Logger.ShowData(receiveBytes, false);
                     Server.BeginReceive(newConnectionCb, ar.AsyncState);
                 }
                 catch { }

@@ -63,12 +63,11 @@ namespace llcom.Pages
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
 
-            //收到消息，显示日志（经 recv_convert 转换）
-            DataRecived += (name, data) =>
+            //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
+            DataRecived += (_, data) =>
             {
-                var converted = Tools.LuaConvertHelper.ApplyRecvConvert(data);
-                if (converted != null)
-                    ShowData($" → receive ({(string)name})", converted);
+                Tools.Global.setting.ReceivedCount += data.Length;
+                Tools.Logger.ShowData(data, false);
             };
 
             //适配一下通用通道
@@ -324,7 +323,9 @@ namespace llcom.Pages
         {
             if (Server != null)
             {
-                byte[] buff = Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
+                var buff = Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
+                MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
+                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Broadcast(buff);
             }
         }
@@ -333,6 +334,8 @@ namespace llcom.Pages
         {
             if (buff == null || buff.Length == 0)
                 return false;
+            if (Tools.Global.recvPara == null)
+                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
             var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
             if (toSend == null)
                 return false;
@@ -341,13 +344,18 @@ namespace llcom.Pages
                 lock (Clients)
                 {
                     foreach (var c in Clients)
-                        try
-                        {
-                            c.Send(toSend);
-                        }
-                        catch { }
+                        try { c.Send(toSend); } catch { }
                 }
-                ShowData($"💥 broadcast", toSend, true);
+                Tools.Global.setting.SentCount += toSend.Length;
+                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
+                bool showConverted = Tools.Global.setting.showSend;
+                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                    Tools.Logger.ShowData(toSend, true);
+                else
+                {
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
+                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                }
                 return true;
             }
             catch (Exception ex)
