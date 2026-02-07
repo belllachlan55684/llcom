@@ -13,17 +13,6 @@
                 Margin="5"
                 Content="{DynamicResource SettingAutoReconnect}"
                 IsChecked="{Binding autoReconnect}" />
-            <WrapPanel Margin="5">
-                <TextBlock VerticalAlignment="Center" Text="{DynamicResource SettingShowFormat}" />
-                <ComboBox
-                    Name="showHexComboBox"
-                    Width="170"
-                    SelectedIndex="{Binding showHexFormat}">
-                    <ComboBoxItem Content="{DynamicResource SettingShowBoth}" />
-                    <ComboBoxItem Content="{DynamicResource SettingShoText}" />
-                    <ComboBoxItem Content="{DynamicResource SettingShowHexOnly}" />
-                </ComboBox>
-            </WrapPanel>
             <CheckBox
                 Margin="5"
                 Content="{DynamicResource SettingShowSend}"

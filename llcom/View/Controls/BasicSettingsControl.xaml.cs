@@ -19,7 +19,6 @@ namespace llcom.View.Controls
             dataBitsComboBox.SelectedIndex = Tools.Global.setting.dataBits - 5;
             stopBitComboBox.SelectedIndex = Tools.Global.setting.stopBit - 1;
             dataCheckComboBox.SelectedIndex = Tools.Global.setting.parity;
-            showHexComboBox.DataContext = Tools.Global.setting;
 
             var el = Encoding.GetEncodings();
             var encodingList = new List<EncodingInfo>(el);
