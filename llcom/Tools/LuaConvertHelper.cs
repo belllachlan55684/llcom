@@ -14,16 +14,20 @@ namespace llcom.Tools
         /// 发送前转换：对原始数据执行 send_convert 脚本
         /// </summary>
         /// <param name="data">待发送的原始数据</param>
+        /// <param name="interfaceKey">数据接口键（Serial/TcpClient/TcpLocal 等），null 时使用全局 sendScript</param>
         /// <param name="isHex">保留参数，兼容调用方，已忽略</param>
         /// <returns>转换后的数据，失败时返回 null</returns>
-        public static byte[] ApplySendConvert(byte[] data, bool? isHex = null)
+        public static byte[] ApplySendConvert(byte[] data, string interfaceKey = null, bool? isHex = null)
         {
             if (data == null || data.Length == 0)
                 return data;
             try
             {
+                var scriptName = string.IsNullOrEmpty(interfaceKey)
+                    ? Global.setting.sendScript
+                    : Global.setting.GetSendScriptForInterface(interfaceKey);
                 var result = LuaEnv.LuaLoader.Run(
-                    $"{Global.setting.sendScript}.lua",
+                    $"{scriptName}.lua",
                     new ArrayList { "uartData", data });
                 return result ?? new byte[0];
             }

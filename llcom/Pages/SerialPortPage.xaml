@@ -18,9 +18,9 @@
     </Page.Resources>
     <Grid Name="MainGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="35" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="35" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="60" />
             <RowDefinition Height="Auto" />

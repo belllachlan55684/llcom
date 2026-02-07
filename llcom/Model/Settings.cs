@@ -27,6 +27,7 @@ namespace llcom.Model
         private int _dataBits = 8;
         private int _stopBit = 1;
         private string _sendScript = "RawData";
+        private Dictionary<string, string> _sendScriptByInterface = null;
         private string _recvScript = "RawData";
         private string _runScript = "example";
         private bool _topmost = false;
@@ -390,6 +391,35 @@ namespace llcom.Model
                 _sendScript = value;
                 Save();
             }
+        }
+
+        /// <summary>
+        /// 各数据接口独立使用的发送脚本，键为接口名（Serial/TcpClient/TcpLocal 等）
+        /// </summary>
+        public Dictionary<string, string> sendScriptByInterface
+        {
+            get => _sendScriptByInterface ??= new Dictionary<string, string>();
+            set => _sendScriptByInterface = value ?? new Dictionary<string, string>();
+        }
+
+        /// <summary>
+        /// 获取指定接口的发送脚本，无则回退到全局 sendScript
+        /// </summary>
+        public string GetSendScriptForInterface(string key)
+        {
+            if (key != null && sendScriptByInterface.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
+            return sendScript;
+        }
+
+        /// <summary>
+        /// 设置指定接口的发送脚本
+        /// </summary>
+        public void SetSendScriptForInterface(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            sendScriptByInterface[key] = value ?? sendScript;
+            Save();
         }
 
         public string recvScript

@@ -34,6 +34,7 @@ namespace llcom.Pages
             InitializeComponent();
         }
         private bool initial = false;
+        private bool sendScriptLoading = false;
 
         //收到消息的事件
         public event EventHandler<byte[]> DataRecived;
@@ -42,7 +43,6 @@ namespace llcom.Pages
 
         //是否可更改服务器信息
         public bool Changeable { get; set; } = true;
-        public bool HexMode { get; set; } = false;
 
         //暂存一个对象
         SocketObj socketNow = null;
@@ -55,11 +55,11 @@ namespace llcom.Pages
 
             this.DataContext = this;
 
-            ServerTextBox.DataContext = Tools.Global.setting;
-            PortTextBox.DataContext = Tools.Global.setting;
-            ProtocolTypeComboBox.DataContext = Tools.Global.setting;
-            ReconnectInterval.DataContext = Tools.Global.setting;
-            NeedReconnect.DataContext = Tools.Global.setting;
+            ConfigWrapPanel.DataContext = Tools.Global.setting;
+            OptionsScrollViewer.DataContext = Tools.Global.setting;
+            toSendDataTextBox.DataContext = Tools.Global.setting;
+
+            LoadSendScriptList();
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, buff) =>
@@ -351,6 +351,58 @@ namespace llcom.Pages
             catch { }
         }
 
+        private void LoadSendScriptList()
+        {
+            sendScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    sendScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetSendScriptForInterface("TcpClient");
+            sendScriptLoading = true;
+            if (sendScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
+                {
+                    if ((sendScriptComboBox.Items[i] as string) == current)
+                    {
+                        sendScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetSendScriptForInterface("TcpClient", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    sendScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            sendScriptLoading = false;
+        }
+
+        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadSendScriptList();
+        }
+
+        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
+            var name = sendScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("TcpClient"))
+                Tools.Global.setting.SetSendScriptForInterface("TcpClient", name);
+        }
+
         private void Reconnect_TextInputCheck(object sender, TextCompositionEventArgs e)
         {
             if (!int.TryParse(e.Text, out int num) || num < 0 || num > 120)
@@ -388,7 +440,10 @@ namespace llcom.Pages
         {
             if (socketNow != null)
             {
-                var buff = Tools.Global.GetEncoding().GetBytes(ToSendTextBox.Text);
+                var text = Tools.Global.setting.dataToSend ?? "";
+                byte[] buff = Tools.Global.GetEncoding().GetBytes(text);
+                if (buff == null || buff.Length == 0)
+                    return;
                 MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Send(buff);
@@ -401,7 +456,7 @@ namespace llcom.Pages
                 return false;
             if (Tools.Global.recvPara == null)
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
-            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "TcpClient");
             if (toSend == null)
                 return false;
             try

@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="llcom.Pages.TcpLocalPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -87,13 +87,24 @@
             FontFamily="Consolas"
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto" />
-        <Button
-            Name="SendDataButton"
-            Grid.Row="4"
-            Margin="2"
-            HorizontalAlignment="Right"
-            Click="SendDataButton_Click"
-            Content="{DynamicResource NetSendDataButton}"
-            IsEnabled="{Binding IsConnected}" />
+        <DockPanel Grid.Row="4" Margin="2">
+            <Button
+                Name="SendDataButton"
+                DockPanel.Dock="Right"
+                Margin="0,0,0,0"
+                Click="SendDataButton_Click"
+                Content="{DynamicResource NetSendDataButton}"
+                IsEnabled="{Binding IsConnected}" />
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox
+                    Name="sendScriptComboBox"
+                    MinWidth="120"
+                    Margin="4,0"
+                    VerticalAlignment="Center"
+                    ToolTip="{DynamicResource SendScriptTab}"
+                    DropDownOpened="SendScriptComboBox_DropDownOpened"
+                    SelectionChanged="SendScriptComboBox_SelectionChanged" />
+            </WrapPanel>
+        </DockPanel>
     </Grid>
 </Page>

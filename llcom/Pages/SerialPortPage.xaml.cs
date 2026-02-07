@@ -86,7 +86,7 @@ namespace llcom.Pages
                 }
             }
             catch { }
-            var current = Tools.Global.setting.sendScript;
+            var current = Tools.Global.setting.GetSendScriptForInterface("Serial");
             sendScriptLoading = true;
             if (sendScriptComboBox.Items.Count > 0)
             {
@@ -102,7 +102,7 @@ namespace llcom.Pages
                 }
                 if (!found)
                 {
-                    Tools.Global.setting.sendScript = sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName();
+                    Tools.Global.setting.SetSendScriptForInterface("Serial", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
                     sendScriptComboBox.SelectedIndex = 0;
                 }
             }
@@ -118,8 +118,8 @@ namespace llcom.Pages
         {
             if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
             var name = sendScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.sendScript)
-                Tools.Global.setting.sendScript = name;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("Serial"))
+                Tools.Global.setting.SetSendScriptForInterface("Serial", name);
         }
 
         private void DataBitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -406,7 +406,7 @@ namespace llcom.Pages
             }
             if (Tools.Global.uart.IsOpen())
             {
-                var dataConvert = LuaConvertHelper.ApplySendConvert(data);
+                var dataConvert = LuaConvertHelper.ApplySendConvert(data, "Serial");
                 if (dataConvert == null)
                     return;
                 try

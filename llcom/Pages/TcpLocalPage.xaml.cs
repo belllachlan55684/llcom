@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
@@ -62,6 +63,8 @@ namespace llcom.Pages
             //绑定
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
+
+            LoadSendScriptList();
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, data) =>
@@ -319,6 +322,60 @@ namespace llcom.Pages
         }
 
         public bool HexMode { get; set; } = false;
+        private bool sendScriptLoading = false;
+
+        private void LoadSendScriptList()
+        {
+            sendScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    sendScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetSendScriptForInterface("TcpLocal");
+            sendScriptLoading = true;
+            if (sendScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
+                {
+                    if ((sendScriptComboBox.Items[i] as string) == current)
+                    {
+                        sendScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetSendScriptForInterface("TcpLocal", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    sendScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            sendScriptLoading = false;
+        }
+
+        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadSendScriptList();
+        }
+
+        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
+            var name = sendScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("TcpLocal"))
+                Tools.Global.setting.SetSendScriptForInterface("TcpLocal", name);
+        }
+
         private void SendDataButton_Click(object sender, RoutedEventArgs e)
         {
             if (Server != null)
@@ -336,7 +393,7 @@ namespace llcom.Pages
                 return false;
             if (Tools.Global.recvPara == null)
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
-            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "TcpLocal");
             if (toSend == null)
                 return false;
             try

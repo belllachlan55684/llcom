@@ -424,6 +424,8 @@ namespace llcom
             if (!IsLoaded)
                 return;
             RefreshDataInterfaceStatus();
+            foreach (var ctrl in FindVisualChildren<View.Controls.SendScriptControl>(this))
+                ctrl.RefreshSelectionForCurrentInterface();
         }
 
         private void statusTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)

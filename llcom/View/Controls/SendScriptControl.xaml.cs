@@ -14,9 +14,38 @@ namespace llcom.View.Controls
         private static bool fileLoading;
         private static string lastLuaFile = "";
 
+        private static readonly string[] InterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal", "Tcp", "WinUSB", "SerialMonitor", "MQTT" };
+
         public SendScriptControl()
         {
             InitializeComponent();
+        }
+
+        private string GetCurrentInterfaceKey()
+        {
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw?.DataInterfaceComboBox == null) return null;
+            var idx = mw.DataInterfaceComboBox.SelectedIndex;
+            return (idx >= 0 && idx < InterfaceKeys.Length) ? InterfaceKeys[idx] : null;
+        }
+
+        internal void RefreshSelectionForCurrentInterface()
+        {
+            var key = GetCurrentInterfaceKey();
+            var script = string.IsNullOrEmpty(key) ? Tools.Global.setting.sendScript : Tools.Global.setting.GetSendScriptForInterface(key);
+            if (luaFileList.Items.Count > 0 && !string.IsNullOrEmpty(script))
+            {
+                for (int i = 0; i < luaFileList.Items.Count; i++)
+                {
+                    if ((luaFileList.Items[i] as string) == script)
+                    {
+                        fileLoading = true;
+                        luaFileList.SelectedIndex = i;
+                        fileLoading = false;
+                        break;
+                    }
+                }
+            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -25,21 +54,36 @@ namespace llcom.View.Controls
             SearchPanel.Install(textEditor.TextArea);
             ApplyScriptEditorTheme(Tools.Global.setting.darkMode);
             Tools.Global.ThemeChanged += (_, dark) => Dispatcher.Invoke(() => ApplyScriptEditorTheme(dark));
-            loadLuaFile(Tools.Global.setting.sendScript);
+            var key = GetCurrentInterfaceKey();
+            var script = string.IsNullOrEmpty(key) ? Tools.Global.setting.sendScript : Tools.Global.setting.GetSendScriptForInterface(key);
+            loadLuaFile(script);
         }
 
         private void loadLuaFile(string fileName)
         {
+            var key = GetCurrentInterfaceKey();
+            var defaultScript = Tools.Global.GetDefaultScriptName();
+
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{fileName}.lua"))
             {
-                Tools.Global.setting.sendScript = Tools.Global.GetDefaultScriptName();
-                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{Tools.Global.setting.sendScript}.lua"))
-                    File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{Tools.Global.setting.sendScript}.lua").Close();
+                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua"))
+                    File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua").Close();
+                fileName = defaultScript;
+                if (!string.IsNullOrEmpty(key))
+                    Tools.Global.setting.SetSendScriptForInterface(key, fileName);
+                else
+                    Tools.Global.setting.sendScript = fileName;
             }
             else
-                Tools.Global.setting.sendScript = fileName;
+            {
+                if (!string.IsNullOrEmpty(key))
+                    Tools.Global.setting.SetSendScriptForInterface(key, fileName);
+                else
+                    Tools.Global.setting.sendScript = fileName;
+            }
 
-            textEditor.Text = File.ReadAllText(Tools.Global.ProfilePath + $"user_script_send_convert/{Tools.Global.setting.sendScript}.lua");
+            var scriptToLoad = string.IsNullOrEmpty(key) ? Tools.Global.setting.sendScript : Tools.Global.setting.GetSendScriptForInterface(key);
+            textEditor.Text = File.ReadAllText(Tools.Global.ProfilePath + $"user_script_send_convert/{scriptToLoad}.lua");
 
             var luaFileDir = new DirectoryInfo(Tools.Global.ProfilePath + "user_script_send_convert/");
             var luaFiles = luaFileDir.GetFileSystemInfos();
@@ -52,11 +96,11 @@ namespace llcom.View.Controls
                 {
                     string name = file.Name.Substring(0, file.Name.Length - 4);
                     luaFileList.Items.Add(name);
-                    if (name == Tools.Global.setting.sendScript)
+                    if (name == scriptToLoad)
                         luaFileList.SelectedIndex = luaFileList.Items.Count - 1;
                 }
             }
-            lastLuaFile = Tools.Global.setting.sendScript;
+            lastLuaFile = scriptToLoad;
             fileLoading = false;
             LuaEnv.LuaLoader.ClearRun();
         }
