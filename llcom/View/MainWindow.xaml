@@ -481,167 +481,201 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="{DynamicResource LuaCard}">
+            <TabItem Header="{DynamicResource ScriptTab}">
                 <Grid>
-                    <!--  脚本编辑界面  -->
-                    <Grid Name="luaScriptEditorGrid" Visibility="Visible">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <WrapPanel Margin="0,0,0,5" Orientation="Horizontal">
-                            <ComboBox
-                                Name="luaFileList"
-                                Width="150"
-                                SelectionChanged="LuaFileList_SelectionChanged" />
-                            <Button
-                                Name="newScriptButton"
-                                Margin="3,0,0,0"
-                                Click="NewScriptButton_Click"
-                                ToolTip="{DynamicResource LuaNewScript}">
-                                <Grid>
-                                    <fa:FontAwesome Foreground="LightSkyBlue" Icon="File" />
-                                    <fa:FontAwesome Icon="FileCodeOutline" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ComboBox Name="ScriptTypeComboBox" SelectedIndex="0" Margin="2">
+                        <ComboBoxItem Content="{DynamicResource SendScriptTab}" />
+                        <ComboBoxItem Content="{DynamicResource RecvScriptTab}" />
+                        <ComboBoxItem Content="{DynamicResource LuaCard}" />
+                        <ComboBoxItem Content="{DynamicResource OnlineScriptTitle}" />
+                    </ComboBox>
+                    <TabControl Grid.Row="1" SelectedIndex="{Binding ElementName=ScriptTypeComboBox, Path=SelectedIndex, Mode=OneWay}">
+                        <TabControl.Template>
+                            <ControlTemplate TargetType="TabControl">
+                                <ContentPresenter ContentSource="SelectedContent" />
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabItem>
+                            <ScrollViewer>
+                                <local_controls:SendScriptControl />
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem>
+                            <ScrollViewer>
+                                <local_controls:RecvScriptControl />
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem>
+                            <Grid>
+                                <!--  脚本编辑界面  -->
+                                <Grid Name="luaScriptEditorGrid" Visibility="Visible">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <WrapPanel Margin="0,0,0,5" Orientation="Horizontal">
+                                        <ComboBox
+                                            Name="luaFileList"
+                                            Width="150"
+                                            SelectionChanged="LuaFileList_SelectionChanged" />
+                                        <Button
+                                            Name="newScriptButton"
+                                            Margin="3,0,0,0"
+                                            Click="NewScriptButton_Click"
+                                            ToolTip="{DynamicResource LuaNewScript}">
+                                            <Grid>
+                                                <fa:FontAwesome Foreground="LightSkyBlue" Icon="File" />
+                                                <fa:FontAwesome Icon="FileCodeOutline" />
+                                            </Grid>
+                                        </Button>
+                                        <Button
+                                            Name="runScriptButton"
+                                            Margin="2,0,0,0"
+                                            Click="RunScriptButton_Click"
+                                            ToolTip="{DynamicResource LuaRunScript}">
+                                            <fa:FontAwesome Foreground="DarkGreen" Icon="Play" />
+                                        </Button>
+                                        <Button
+                                            Name="openScriptFolderButton"
+                                            Margin="2,0,0,0"
+                                            Click="OpenScriptFolderButton_Click"
+                                            ToolTip="{DynamicResource LuaOpenFolder}">
+                                            <Grid>
+                                                <fa:FontAwesome Foreground="Yellow" Icon="FolderOpen" />
+                                                <fa:FontAwesome Icon="FolderOutlinepenOutline" />
+                                            </Grid>
+                                        </Button>
+                                        <Button
+                                            Name="refreshScriptListButton"
+                                            Margin="2,0,0,0"
+                                            Click="RefreshScriptListButton_Click"
+                                            ToolTip="{DynamicResource LuaRefreshList}">
+                                            <fa:FontAwesome Foreground="Green" Icon="Refresh" />
+                                        </Button>
+                                        <Button
+                                            Name="apiDocumentButton"
+                                            Margin="2,0,0,0"
+                                            Click="ApiDocumentButton_Click"
+                                            ToolTip="{DynamicResource LuaApiReference}">
+                                            <fa:FontAwesome Icon="Book" />
+                                        </Button>
+                                        <Button
+                                            Name="scriptShareButton"
+                                            Margin="2,0,0,0"
+                                            Click="ScriptShareButton_Click"
+                                            ToolTip="{DynamicResource LuaGetShare}">
+                                            <fa:FontAwesome Foreground="DarkCyan" Icon="ShareAlt" />
+                                        </Button>
+                                    </WrapPanel>
+                                    <WrapPanel
+                                        Name="newLuaFileWrapPanel"
+                                        Grid.Row="1"
+                                        Margin="3"
+                                        Visibility="Collapsed">
+                                        <TextBlock VerticalAlignment="Center" Text="{DynamicResource LuaFileName}" />
+                                        <TextBox
+                                            Name="newLuaFileNameTextBox"
+                                            Width="90"
+                                            Text="new script" />
+                                        <Button
+                                            Name="newLuaFilebutton"
+                                            Margin="3,0,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Click="NewLuaFilebutton_Click"
+                                            ToolTip="{DynamicResource LuaConfirmCreate}">
+                                            <fa:FontAwesome Foreground="Green" Icon="Check" />
+                                        </Button>
+                                        <Button
+                                            Name="newLuaFileCancelbutton"
+                                            Margin="3,0,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Click="NewLuaFileCancelbutton_Click"
+                                            ToolTip="{DynamicResource LuaCancel}">
+                                            <fa:FontAwesome Foreground="Red" Icon="Ban" />
+                                        </Button>
+                                    </WrapPanel>
+                                    <avalonEdit:TextEditor
+                                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                                        Name="textEditor"
+                                        Grid.Row="2"
+                                        FontFamily="Consolas"
+                                        FontSize="10pt"
+                                        Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
+                                        Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                                        LostFocus="TextEditor_LostFocus"
+                                        ShowLineNumbers="True"
+                                        TextChanged="textEditor_TextChanged" />
                                 </Grid>
-                            </Button>
-                            <Button
-                                Name="runScriptButton"
-                                Margin="2,0,0,0"
-                                Click="RunScriptButton_Click"
-                                ToolTip="{DynamicResource LuaRunScript}">
-                                <fa:FontAwesome Foreground="DarkGreen" Icon="Play" />
-                            </Button>
-                            <Button
-                                Name="openScriptFolderButton"
-                                Margin="2,0,0,0"
-                                Click="OpenScriptFolderButton_Click"
-                                ToolTip="{DynamicResource LuaOpenFolder}">
-                                <Grid>
-                                    <fa:FontAwesome Foreground="Yellow" Icon="FolderOpen" />
-                                    <fa:FontAwesome Icon="FolderOutlinepenOutline" />
-                                </Grid>
-                            </Button>
-                            <Button
-                                Name="refreshScriptListButton"
-                                Margin="2,0,0,0"
-                                Click="RefreshScriptListButton_Click"
-                                ToolTip="{DynamicResource LuaRefreshList}">
-                                <fa:FontAwesome Foreground="Green" Icon="Refresh" />
-                            </Button>
-                            <Button
-                                Name="apiDocumentButton"
-                                Margin="2,0,0,0"
-                                Click="ApiDocumentButton_Click"
-                                ToolTip="{DynamicResource LuaApiReference}">
-                                <fa:FontAwesome Icon="Book" />
-                            </Button>
-                            <Button
-                                Name="scriptShareButton"
-                                Margin="2,0,0,0"
-                                Click="ScriptShareButton_Click"
-                                ToolTip="{DynamicResource LuaGetShare}">
-                                <fa:FontAwesome Foreground="DarkCyan" Icon="ShareAlt" />
-                            </Button>
-                        </WrapPanel>
-                        <WrapPanel
-                            Name="newLuaFileWrapPanel"
-                            Grid.Row="1"
-                            Margin="3"
-                            Visibility="Collapsed">
-                            <TextBlock VerticalAlignment="Center" Text="{DynamicResource LuaFileName}" />
-                            <TextBox
-                                Name="newLuaFileNameTextBox"
-                                Width="90"
-                                Text="new script" />
-                            <Button
-                                Name="newLuaFilebutton"
-                                Margin="3,0,0,0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Click="NewLuaFilebutton_Click"
-                                ToolTip="{DynamicResource LuaConfirmCreate}">
-                                <fa:FontAwesome Foreground="Green" Icon="Check" />
-                            </Button>
-                            <Button
-                                Name="newLuaFileCancelbutton"
-                                Margin="3,0,0,0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Click="NewLuaFileCancelbutton_Click"
-                                ToolTip="{DynamicResource LuaCancel}">
-                                <fa:FontAwesome Foreground="Red" Icon="Ban" />
-                            </Button>
-                        </WrapPanel>
-                        <avalonEdit:TextEditor
-                            xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-                            Name="textEditor"
-                            Grid.Row="2"
-                            FontFamily="Consolas"
-                            FontSize="10pt"
-                            Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
-                            Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
-                            LostFocus="TextEditor_LostFocus"
-                            ShowLineNumbers="True"
-                            TextChanged="textEditor_TextChanged" />
-                    </Grid>
-                    <!--  脚本编辑界面END  -->
+                                <!--  脚本编辑界面END  -->
 
-                    <!--  脚本运行日志界面  -->
-                    <Grid Name="luaLogShowGrid" Visibility="Collapsed">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="auto" />
-                        </Grid.RowDefinitions>
-                        <TextBox
-                            Name="luaLogTextBox"
-                            VerticalContentAlignment="Top"
-                            IsReadOnly="true"
-                            MouseLeave="luaLogTextBox_MouseLeave"
-                            TextWrapping="Wrap"
-                            VerticalScrollBarVisibility="Auto" />
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                Name="stopLuaButton"
-                                Margin="0,3,3,3"
-                                Click="StopLuaButton_Click"
-                                Foreground="Red"
-                                ToolTip="{DynamicResource LuaStop}">
-                                <fa:FontAwesome Name="stopLuaOrExitIcon" Icon="Stop" />
-                            </Button>
-                            <Button
-                                Name="pauseLuaPrintButton"
-                                Grid.Column="1"
-                                Margin="0,3,3,3"
-                                Click="PauseLuaPrintButton_Click"
-                                Foreground="Lime"
-                                MouseRightButtonUp="pauseLuaPrintButton_MouseRightButtonUp"
-                                ToolTip="{DynamicResource LuaPause}">
-                                <fa:FontAwesome Name="pauseLuaPrintIcon" Icon="Pause" />
-                            </Button>
-                            <TextBox
-                                Name="runOneLineLuaTextBox"
-                                Grid.Column="2"
-                                Margin="0,3"
-                                KeyDown="RunOneLineLuaTextBox_KeyDown" />
-                            <Button
-                                Name="sendLuaScriptButton"
-                                Grid.Column="3"
-                                Margin="3,3,0,3"
-                                Click="SendLuaScriptButton_Click"
-                                Foreground="DodgerBlue"
-                                ToolTip="{DynamicResource LuaSendScript}">
-                                <fa:FontAwesome Icon="ArrowUp" />
-                            </Button>
-                        </Grid>
-                    </Grid>
-                    <!--  脚本运行日志界面END  -->
+                                <!--  脚本运行日志界面  -->
+                                <Grid Name="luaLogShowGrid" Visibility="Collapsed">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBox
+                                        Name="luaLogTextBox"
+                                        VerticalContentAlignment="Top"
+                                        IsReadOnly="true"
+                                        MouseLeave="luaLogTextBox_MouseLeave"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto" />
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button
+                                            Name="stopLuaButton"
+                                            Margin="0,3,3,3"
+                                            Click="StopLuaButton_Click"
+                                            Foreground="Red"
+                                            ToolTip="{DynamicResource LuaStop}">
+                                            <fa:FontAwesome Name="stopLuaOrExitIcon" Icon="Stop" />
+                                        </Button>
+                                        <Button
+                                            Name="pauseLuaPrintButton"
+                                            Grid.Column="1"
+                                            Margin="0,3,3,3"
+                                            Click="PauseLuaPrintButton_Click"
+                                            Foreground="Lime"
+                                            MouseRightButtonUp="pauseLuaPrintButton_MouseRightButtonUp"
+                                            ToolTip="{DynamicResource LuaPause}">
+                                            <fa:FontAwesome Name="pauseLuaPrintIcon" Icon="Pause" />
+                                        </Button>
+                                        <TextBox
+                                            Name="runOneLineLuaTextBox"
+                                            Grid.Column="2"
+                                            Margin="0,3"
+                                            KeyDown="RunOneLineLuaTextBox_KeyDown" />
+                                        <Button
+                                            Name="sendLuaScriptButton"
+                                            Grid.Column="3"
+                                            Margin="3,3,0,3"
+                                            Click="SendLuaScriptButton_Click"
+                                            Foreground="DodgerBlue"
+                                            ToolTip="{DynamicResource LuaSendScript}">
+                                            <fa:FontAwesome Icon="ArrowUp" />
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                                <!--  脚本运行日志界面END  -->
+                            </Grid>
+                        </TabItem>
+                        <TabItem>
+                            <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                    </TabControl>
                 </Grid>
             </TabItem>
             <TabItem Header="{DynamicResource ToolsTab}">
@@ -657,12 +691,6 @@
                     </TabItem>
                 </TabControl>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Text="{DynamicResource OnlineScriptTitle}" />
-                </TabItem.Header>
-                <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
-            </TabItem>
             <TabItem Name="settingsTabItem">
                 <TabItem.Header>
                     <TextBlock Text="{DynamicResource SettingCard}" />
@@ -670,12 +698,6 @@
                 <TabControl>
                     <TabItem Header="{DynamicResource SettingBasic}">
                         <local_controls:BasicSettingsControl />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource SettingSendLuaScript}">
-                        <local_controls:SendScriptControl />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource SettingRecvLuaScript}">
-                        <local_controls:RecvScriptControl />
                     </TabItem>
                     <TabItem Header="{DynamicResource SettingSystem}">
                         <ScrollViewer>

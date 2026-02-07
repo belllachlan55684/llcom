@@ -57,6 +57,9 @@
     <system:String x:Key="QuickSendChangeIdButton">Enter where you want to insert(empty means delete this line)</system:String>
     <system:String x:Key="QuickSendChangeIdTitle">Change index of this line</system:String>
     <system:String x:Key="QuickSendChangeList">Change to another quick send list</system:String>
+    <system:String x:Key="ScriptTab">Scripts</system:String>
+    <system:String x:Key="SendScriptTab">Send script</system:String>
+    <system:String x:Key="RecvScriptTab">Receive script</system:String>
     <system:String x:Key="LuaCard">Run script</system:String>
     <system:String x:Key="LuaNewScript">New script</system:String>
     <system:String x:Key="LuaRunScript">Run script</system:String>
