@@ -61,12 +61,11 @@ namespace llcom.Pages
             ReconnectInterval.DataContext = Tools.Global.setting;
             NeedReconnect.DataContext = Tools.Global.setting;
 
-            //收到消息显示（经 recv_convert 转换）
+            //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, buff) =>
             {
-                var converted = Tools.LuaConvertHelper.ApplyRecvConvert(buff);
-                if (converted != null)
-                    ShowData($" → receive", converted);
+                Tools.Global.setting.ReceivedCount += buff.Length;
+                Tools.Logger.ShowData(buff, false);
             };
 
             //适配一下通用通道
@@ -389,7 +388,9 @@ namespace llcom.Pages
         {
             if (socketNow != null)
             {
-                byte[] buff = Tools.Global.GetEncoding().GetBytes(ToSendTextBox.Text);
+                var buff = Tools.Global.GetEncoding().GetBytes(ToSendTextBox.Text);
+                MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
+                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Send(buff);
             }
         }
@@ -398,16 +399,27 @@ namespace llcom.Pages
         {
             if (buff == null || buff.Length == 0)
                 return false;
+            if (Tools.Global.recvPara == null)
+                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
             var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
             if (toSend == null)
                 return false;
             try
             {
                 socketNow.Send(toSend);
-                ShowData($" ← send", toSend, true);
+                Tools.Global.setting.SentCount += toSend.Length;
+                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
+                bool showConverted = Tools.Global.setting.showSend;
+                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                    Tools.Logger.ShowData(toSend, true);
+                else
+                {
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
+                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                }
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ShowData($"❗ Send data error {ex.Message}");
                 return false;

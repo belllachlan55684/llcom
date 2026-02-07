@@ -406,22 +406,9 @@ namespace llcom.Pages
             }
             if (Tools.Global.uart.IsOpen())
             {
-                byte[] dataConvert;
-                try
-                {
-                    dataConvert = LuaEnv.LuaLoader.Run(
-                        $"{Tools.Global.setting.sendScript}.lua",
-                        new System.Collections.ArrayList
-                        {
-                            "uartData",
-                            data
-                        });
-                }
-                catch (Exception ex)
-                {
-                    Tools.MessageBox.Show($"{TryFindResource("ErrorScript") as string ?? "?!"}\r\n" + ex.ToString());
+                var dataConvert = LuaConvertHelper.ApplySendConvert(data);
+                if (dataConvert == null)
                     return;
-                }
                 try
                 {
                     Tools.Global.uart.SendData(dataConvert, data);

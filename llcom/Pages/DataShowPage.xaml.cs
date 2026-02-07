@@ -229,11 +229,13 @@ namespace llcom.Pages
                 //转换下接收数据
                 if (!sent)
                 {
+                    var uartPara = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[0] : new byte[0];
+                    var uartSendRaw = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[1] : new byte[0];
                     try
                     {
                         temp = LuaEnv.LuaLoader.Run(
                             $"{Tools.Global.setting.recvScript}.lua",
-                            new System.Collections.ArrayList { "uartData", temp , "uartPara", Global.recvPara[0], "uartSendRaw", Global.recvPara[1] },
+                            new System.Collections.ArrayList { "uartData", temp , "uartPara", uartPara, "uartSendRaw", uartSendRaw },
                             "user_script_recv_convert/");
                     }
                     catch (Exception ex)
