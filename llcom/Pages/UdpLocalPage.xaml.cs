@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
@@ -16,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static llcom.Pages.SocketClientPage;
 using System.Net.NetworkInformation;
+using llcom.LuaEnv;
 
 namespace llcom.Pages
 {
@@ -32,6 +34,9 @@ namespace llcom.Pages
 
 
         public bool IsConnected { get; set; } = false;
+
+        private IPEndPoint lastRemoteEndPoint = null;
+        private bool sendScriptLoading = false;
 
         public string GetStatusBarText()
         {
@@ -57,6 +62,19 @@ namespace llcom.Pages
             //绑定
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
+            OptionsScrollViewer.DataContext = Tools.Global.setting;
+            toSendDataTextBox.DataContext = Tools.Global.setting;
+
+            LoadSendScriptList();
+
+            LuaApis.SendChannelsRegister("udp-server", (data, _) =>
+            {
+                if (Server != null && data != null && lastRemoteEndPoint != null)
+                {
+                    return SendToClient(lastRemoteEndPoint, data);
+                }
+                return false;
+            });
         }
 
         /// <summary>
@@ -96,6 +114,7 @@ namespace llcom.Pages
 
 
         private UdpClient Server = null;
+        private readonly object lastRemoteLock = new object();
 
         /// <summary>
         /// 开始监听服务器
@@ -121,12 +140,14 @@ namespace llcom.Pages
                 try
                 {
                     UdpClient u = ((UdpState)(ar.AsyncState)).u;
-                    IPEndPoint e = ((UdpState)(ar.AsyncState)).e;
+                    IPEndPoint remoteEp = ((UdpState)(ar.AsyncState)).e;
 
-                    byte[] receiveBytes = u.EndReceive(ar, ref e);
+                    byte[] receiveBytes = u.EndReceive(ar, ref remoteEp);
+                    lock (lastRemoteLock)
+                        lastRemoteEndPoint = remoteEp;
                     Tools.Global.setting.ReceivedCount += receiveBytes.Length;
                     Tools.Logger.ShowData(receiveBytes, false);
-                    Server.BeginReceive(newConnectionCb, ar.AsyncState);
+                    Server.BeginReceive(newConnectionCb, new UdpState { u = Server, e = remoteEp });
                 }
                 catch { }
             }); 
@@ -154,6 +175,8 @@ namespace llcom.Pages
             Server?.Close();
             Server?.Dispose();
             Server = null;
+            lock (lastRemoteLock)
+                lastRemoteEndPoint = null;
             IsConnected = false;
             NotifyStatusChanged();
         }
@@ -190,6 +213,105 @@ namespace llcom.Pages
                 ShowData($"🚫 server closed");
             }
             catch { }
+        }
+
+        private void LoadSendScriptList()
+        {
+            sendScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    sendScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetSendScriptForInterface("UdpLocal");
+            sendScriptLoading = true;
+            if (sendScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
+                {
+                    if ((sendScriptComboBox.Items[i] as string) == current)
+                    {
+                        sendScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetSendScriptForInterface("UdpLocal", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    sendScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            sendScriptLoading = false;
+        }
+
+        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadSendScriptList();
+        }
+
+        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
+            var name = sendScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("UdpLocal"))
+                Tools.Global.setting.SetSendScriptForInterface("UdpLocal", name);
+        }
+
+        private void SendDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Server == null) return;
+            IPEndPoint target;
+            lock (lastRemoteLock)
+                target = lastRemoteEndPoint;
+            if (target == null)
+            {
+                Tools.MessageBox.Show(TryFindResource("UdpNoClientTip") as string ?? "No client has sent data yet. Send data to the server first.");
+                return;
+            }
+            var text = Tools.Global.setting.dataToSend ?? "";
+            var buff = Tools.Global.GetEncoding().GetBytes(text);
+            MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
+            Tools.Global.recvPara = new byte[][] { new byte[0], buff };
+            SendToClient(target, buff);
+        }
+
+        private bool SendToClient(IPEndPoint target, byte[] buff)
+        {
+            if (buff == null || buff.Length == 0 || target == null || Server == null)
+                return false;
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "UdpLocal");
+            if (toSend == null)
+                return false;
+            try
+            {
+                Server.Send(toSend, toSend.Length, target);
+                Tools.Global.setting.SentCount += toSend.Length;
+                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
+                bool showConverted = Tools.Global.setting.showSend;
+                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                    Tools.Logger.ShowData(toSend, true);
+                else
+                {
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
+                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowData($"❗ send error {ex.Message}");
+                return false;
+            }
         }
     }
 

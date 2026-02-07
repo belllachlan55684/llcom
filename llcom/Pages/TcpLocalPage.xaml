@@ -20,36 +20,35 @@
     </Page.Resources>
     <Grid Name="MainGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="35" />
-            <RowDefinition Height="35" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="60" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="0,5,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="70" />
-            </Grid.ColumnDefinitions>
+        <WrapPanel
+            x:Name="ConfigWrapPanel"
+            Margin="0,5,0,0"
+            Orientation="Horizontal">
             <ComboBox
                 Name="IpListComboBox"
+                MinWidth="150"
+                Margin="0,0,5,0"
                 IsEditable="True"
                 IsEnabled="{Binding IsConnected, Converter={StaticResource boolNotConverter}}" />
             <Button
                 x:Name="RefreshIpButton"
-                Grid.Column="1"
-                Margin="5,0,0,0"
+                Margin="0,0,5,0"
                 Click="RefreshIpButton_Click"
                 Content="{DynamicResource RefreshIpList}"
                 IsEnabled="{Binding IsConnected, Converter={StaticResource boolNotConverter}}" />
             <TextBox
                 x:Name="IpPortTextBox"
-                Grid.Column="2"
-                Margin="5,0,0,0"
+                Width="80"
+                Margin="0,0,5,0"
                 IsEnabled="{Binding ElementName=RefreshIpButton, Path=IsEnabled}"
                 Text="{Binding tcpServerPort}" />
-        </Grid>
+        </WrapPanel>
         <Button
             x:Name="StopListenButton"
             Grid.Row="1"
@@ -64,20 +63,20 @@
             Click="ListenButton_Click"
             Content="{DynamicResource StartListen}"
             Visibility="{Binding IsConnected, Converter={StaticResource boolNotVisibeConverter}}" />
-        <TextBlock
-            Grid.Row="2"
-            Margin="2"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Text="{DynamicResource ToSendDataTextBlock}" />
-        <CheckBox
-            Grid.Row="2"
-            Margin="2"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Content="Hex"
-            IsChecked="{Binding HexMode}" />
-
+        <ScrollViewer x:Name="OptionsScrollViewer" Grid.Row="2" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
+            <WrapPanel Margin="10,0,0,0" Orientation="Horizontal">
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingShowSendData}"
+                    ToolTip="{DynamicResource SettingShowSendDataTip}"
+                    IsChecked="{Binding showSend}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingShowRawData}"
+                    ToolTip="{DynamicResource SettingShowRawDataTip}"
+                    IsChecked="{Binding showSendRaw}" />
+            </WrapPanel>
+        </ScrollViewer>
         <TextBox
             Name="toSendDataTextBox"
             Grid.Row="3"
@@ -85,8 +84,10 @@
             VerticalContentAlignment="Top"
             AcceptsReturn="True"
             FontFamily="Consolas"
+            Text="{Binding dataToSend}"
             TextWrapping="Wrap"
-            VerticalScrollBarVisibility="Auto" />
+            VerticalScrollBarVisibility="Auto"
+            MinHeight="60" />
         <DockPanel Grid.Row="4" Margin="2">
             <Button
                 Name="SendDataButton"

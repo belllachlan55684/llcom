@@ -176,6 +176,7 @@
     <system:String x:Key="TcpTabTitle">socket公共服务端</system:String>
     <system:String x:Key="TcpLocalTabTitle">本机TCP服务端</system:String>
     <system:String x:Key="UdpLocalTabTitle">本机UDP服务端</system:String>
+    <system:String x:Key="UdpNoClientTip">暂无客户端发送过数据，请先让客户端向服务端发送数据。</system:String>
     <system:String x:Key="TcpClientTitle">socket客户端</system:String>
     <system:String x:Key="CreateTcpButton">测试TCP</system:String>
     <system:String x:Key="CreateTcpSSLButton">测试TCPSSL</system:String>

@@ -63,6 +63,8 @@ namespace llcom.Pages
             //绑定
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
+            OptionsScrollViewer.DataContext = Tools.Global.setting;
+            toSendDataTextBox.DataContext = Tools.Global.setting;
 
             LoadSendScriptList();
 
@@ -321,7 +323,6 @@ namespace llcom.Pages
             catch { }
         }
 
-        public bool HexMode { get; set; } = false;
         private bool sendScriptLoading = false;
 
         private void LoadSendScriptList()
@@ -380,7 +381,8 @@ namespace llcom.Pages
         {
             if (Server != null)
             {
-                var buff = Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
+                var text = Tools.Global.setting.dataToSend ?? "";
+                var buff = Tools.Global.GetEncoding().GetBytes(text);
                 MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Broadcast(buff);

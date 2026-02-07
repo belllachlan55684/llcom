@@ -176,6 +176,7 @@
     <system:String x:Key="TcpTabTitle">Socket Public Server</system:String>
     <system:String x:Key="TcpLocalTabTitle">TCP Local Server</system:String>
     <system:String x:Key="UdpLocalTabTitle">UDP Local Server</system:String>
+    <system:String x:Key="UdpNoClientTip">No client has sent data yet. Send data to the server first.</system:String>
     <system:String x:Key="TcpClientTitle">Socket Client</system:String>
     <system:String x:Key="CreateTcpButton">Tset TCP</system:String>
     <system:String x:Key="CreateTcpSSLButton">Tset TCP SSL</system:String>
