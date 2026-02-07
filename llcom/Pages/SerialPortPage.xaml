@@ -196,9 +196,6 @@
             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <CheckBox Content="RTS" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Rts}"/>
                 <CheckBox Content="DTR" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Dtr}"/>
-                <CheckBox Content="{DynamicResource AddExtraEnter}" Margin="4,0" VerticalAlignment="Center"
-                          IsChecked="{Binding extraEnter}" ToolTip="{DynamicResource AddExtraEnterTip}"/>
-                <CheckBox Content="Hex" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding hexSend}"/>
                 <ComboBox
                     Name="sendScriptComboBox"
                     MinWidth="120"

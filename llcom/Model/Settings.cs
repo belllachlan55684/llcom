@@ -19,7 +19,6 @@ namespace llcom.Model
         private bool _autoReconnect = true;
         private bool _autoSaveLog = true;
         private int _showHexFormat = 0;
-        private bool _hexSend = false;
         private bool _showSend = true;
         private bool _showSendRaw = true;
         private int _parity = 0;
@@ -27,8 +26,8 @@ namespace llcom.Model
         private int _packTimeoutValue = 50;
         private int _dataBits = 8;
         private int _stopBit = 1;
-        private string _sendScript = System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("zh") ? "原始数据" : "rawdata";
-        private string _recvScript = System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("zh") ? "原始数据" : "rawdata";
+        private string _sendScript = "RawData";
+        private string _recvScript = "RawData";
         private string _runScript = "example";
         private bool _topmost = false;
         public List<List<ToSendData>> quickSendList = new List<List<ToSendData>>();
@@ -39,7 +38,6 @@ namespace llcom.Model
         private string _language = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
         private int _encoding = 65001;
         private bool _terminal = true;
-        private bool _extraEnter = false;
         private bool _enableSymbol = true;
         private bool _darkMode = false;
 
@@ -244,22 +242,6 @@ namespace llcom.Model
         /// </summary>
         [JsonIgnore]
         public bool Dtr { get => Tools.Global.uart.Dtr; set => Tools.Global.uart.Dtr = value; }
-
-        /// <summary>
-        /// 主数据发送框是否发hex
-        /// </summary>
-        public bool hexSend
-        {
-            get
-            {
-                return _hexSend;
-            }
-            set
-            {
-                _hexSend = value;
-                Save();
-            }
-        }
 
         public bool showSend
         {
@@ -496,19 +478,6 @@ namespace llcom.Model
                     Save();
                 }
                 catch { }//获取出错说明编码不对
-            }
-        }
-
-        public bool extraEnter
-        {
-            get
-            {
-                return _extraEnter;
-            }
-            set
-            {
-                _extraEnter = value;
-                Save();
             }
         }
 

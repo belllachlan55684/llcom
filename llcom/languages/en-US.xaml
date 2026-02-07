@@ -191,8 +191,6 @@
     <system:String x:Key="ToSendDataTextBlock">To send data:</system:String>
     <system:String x:Key="NetSendDataButton">Send</system:String>
     <system:String x:Key="KickClientButton">Kick Client</system:String>
-    <system:String x:Key="AddExtraEnter">CRLF</system:String>
-    <system:String x:Key="AddExtraEnterTip">Before adding CRLF, Lua script will process the data to send</system:String>
     <system:String x:Key="LockLogButton">Disable scroll</system:String>
     <system:String x:Key="LockLogText">Locked</system:String>
     <system:String x:Key="SaveLogButtonTip">Save log</system:String>

@@ -14,7 +14,7 @@ namespace llcom.Tools
         /// 发送前转换：对原始数据执行 send_convert 脚本
         /// </summary>
         /// <param name="data">待发送的原始数据</param>
-        /// <param name="isHex">是否为 hex 模式，null 时使用 setting.hexSend</param>
+        /// <param name="isHex">保留参数，兼容调用方，已忽略</param>
         /// <returns>转换后的数据，失败时返回 null</returns>
         public static byte[] ApplySendConvert(byte[] data, bool? isHex = null)
         {
@@ -22,12 +22,9 @@ namespace llcom.Tools
                 return data;
             try
             {
-                var input = isHex == null
-                    ? (Global.setting.hexSend ? Global.Hex2Byte(Global.Byte2String(data)) : data)
-                    : data;
                 var result = LuaEnv.LuaLoader.Run(
                     $"{Global.setting.sendScript}.lua",
-                    new ArrayList { "uartData", input });
+                    new ArrayList { "uartData", data });
                 return result ?? new byte[0];
             }
             catch (Exception ex)

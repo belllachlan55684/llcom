@@ -389,8 +389,7 @@ namespace llcom.Pages
         {
             if (socketNow != null)
             {
-                byte[] buff = HexMode ? Tools.Global.Hex2Byte(ToSendTextBox.Text) :
-                    Tools.Global.GetEncoding().GetBytes(ToSendTextBox.Text);
+                byte[] buff = Tools.Global.GetEncoding().GetBytes(ToSendTextBox.Text);
                 Send(buff);
             }
         }
@@ -399,7 +398,7 @@ namespace llcom.Pages
         {
             if (buff == null || buff.Length == 0)
                 return false;
-            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, HexMode);
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
             if (toSend == null)
                 return false;
             try

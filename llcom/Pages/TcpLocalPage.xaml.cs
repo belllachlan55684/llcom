@@ -324,8 +324,7 @@ namespace llcom.Pages
         {
             if (Server != null)
             {
-                byte[] buff = HexMode ? Tools.Global.Hex2Byte(toSendDataTextBox.Text) :
-                    Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
+                byte[] buff = Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
                 Broadcast(buff);
             }
         }
@@ -334,7 +333,7 @@ namespace llcom.Pages
         {
             if (buff == null || buff.Length == 0)
                 return false;
-            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, HexMode);
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff);
             if (toSend == null)
                 return false;
             try

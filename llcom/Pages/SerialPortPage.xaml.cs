@@ -414,8 +414,7 @@ namespace llcom.Pages
                         new System.Collections.ArrayList
                         {
                             "uartData",
-                            is_hex == null ?
-                            (Tools.Global.setting.hexSend ? Tools.Global.Hex2Byte(Tools.Global.Byte2String(data)) : data) : data
+                            data
                         });
                 }
                 catch (Exception ex)
@@ -425,11 +424,6 @@ namespace llcom.Pages
                 }
                 try
                 {
-                    if (Tools.Global.setting.extraEnter)
-                    {
-                        var temp = new List<byte>(dataConvert) { 0x0d, 0x0a };
-                        dataConvert = temp.ToArray();
-                    }
                     Tools.Global.uart.SendData(dataConvert, data);
                 }
                 catch (Exception ex)

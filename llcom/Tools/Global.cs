@@ -107,27 +107,24 @@ namespace llcom.Tools
         }
 
         /// <summary>
-        /// 根据当前语言返回默认脚本名称（发送/接收脚本的「原样输出」项）
-        /// zh-CN -> 原始数据，en-US -> rawdata
+        /// 返回默认脚本名称（发送/接收脚本的「原样输出」项），统一为 RawData
         /// </summary>
         public static string GetDefaultScriptName()
         {
-            var lang = setting?.language ?? System.Threading.Thread.CurrentThread.CurrentCulture.Name;
-            return (lang == "en-US") ? "rawdata" : "原始数据";
+            return "RawData";
         }
 
         /// <summary>
-        /// 按当前语言确保默认脚本文件存在（中文仅创建原始数据，英文仅创建rawdata）
+        /// 确保默认脚本 RawData.lua 存在
         /// </summary>
         public static void EnsureDefaultScriptFiles()
         {
-            var name = GetDefaultScriptName();
-            var sendPath = ProfilePath + "user_script_send_convert/" + name + ".lua";
-            var recvPath = ProfilePath + "user_script_recv_convert/" + name + ".lua";
+            var sendPath = ProfilePath + "user_script_send_convert/RawData.lua";
+            var recvPath = ProfilePath + "user_script_recv_convert/RawData.lua";
             if (Directory.Exists(ProfilePath + "user_script_send_convert") && !File.Exists(sendPath))
-                CreateFile("DefaultFiles/user_script_send_convert/" + name + ".lua", sendPath);
+                CreateFile("DefaultFiles/user_script_send_convert/RawData.lua", sendPath);
             if (Directory.Exists(ProfilePath + "user_script_recv_convert") && !File.Exists(recvPath))
-                CreateFile("DefaultFiles/user_script_recv_convert/" + name + ".lua", recvPath);
+                CreateFile("DefaultFiles/user_script_recv_convert/RawData.lua", recvPath);
         }
 
         /// <summary>
@@ -196,15 +193,21 @@ namespace llcom.Tools
                     setting.SentCount = 0;
                     setting.ReceivedCount = 0;
                     setting.DisableLog = false;
-                    // 迁移：default -> 原始数据/rawdata
-                    if (setting.sendScript == "default")
-                        setting.sendScript = GetDefaultScriptName();
-                    if (setting.recvScript == "default")
-                        setting.recvScript = GetDefaultScriptName();
+                    // 迁移：default 或 原始数据 或 rawdata -> RawData；加上换行回车 -> CRLF
+                    if (setting.sendScript == "default" || setting.sendScript == "原始数据" || setting.sendScript == "rawdata")
+                        setting.sendScript = "RawData";
+                    if (setting.sendScript == "加上换行回车")
+                        setting.sendScript = "CRLF";
+                    if (setting.sendScript == "解析换行回车的转义字符")
+                        setting.sendScript = "ParseEscapeSeq";
+                    if (setting.sendScript == "16进制数据")
+                        setting.sendScript = "Hex";
+                    if (setting.recvScript == "default" || setting.recvScript == "原始数据" || setting.recvScript == "rawdata")
+                        setting.recvScript = "RawData";
                     foreach (var list in setting.quickSendList)
                         foreach (var data in list)
-                            if (data.recvScriptPath == "default")
-                                data.recvScriptPath = GetDefaultScriptName();
+                            if (data.recvScriptPath == "default" || data.recvScriptPath == "原始数据" || data.recvScriptPath == "rawdata")
+                                data.recvScriptPath = "RawData";
                 }
                 catch
                 {
@@ -348,36 +351,109 @@ namespace llcom.Tools
                 if (!Directory.Exists(ProfilePath + "user_script_send_convert"))
                 {
                     Directory.CreateDirectory(ProfilePath + "user_script_send_convert");
+                    CreateFile("DefaultFiles/user_script_send_convert/RawData.lua", ProfilePath + "user_script_send_convert/RawData.lua");
                     CreateFile("DefaultFiles/user_script_send_convert/checksum.lua", ProfilePath + "user_script_send_convert/checksum.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/16进制数据.lua", ProfilePath + "user_script_send_convert/16进制数据.lua");
+                    CreateFile("DefaultFiles/user_script_send_convert/Hex.lua", ProfilePath + "user_script_send_convert/Hex.lua");
                     CreateFile("DefaultFiles/user_script_send_convert/GPS NMEA.lua", ProfilePath + "user_script_send_convert/GPS NMEA.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/加上换行回车.lua", ProfilePath + "user_script_send_convert/加上换行回车.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/解析换行回车的转义字符.lua", ProfilePath + "user_script_send_convert/解析换行回车的转义字符.lua");
+                    CreateFile("DefaultFiles/user_script_send_convert/CRLF.lua", ProfilePath + "user_script_send_convert/CRLF.lua");
+                    CreateFile("DefaultFiles/user_script_send_convert/ParseEscapeSeq.lua", ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua");
                 }
                 if (!Directory.Exists(ProfilePath + "user_script_recv_convert"))
                 {
                     Directory.CreateDirectory(ProfilePath + "user_script_recv_convert");
+                    CreateFile("DefaultFiles/user_script_recv_convert/RawData.lua", ProfilePath + "user_script_recv_convert/RawData.lua");
                 }
                 EnsureDefaultScriptFiles();
-                // 迁移：已有 default.lua 时重命名为按语言的默认名
+                // 迁移：已有 default.lua 或 原始数据.lua 或 rawdata.lua 时重命名为 RawData.lua
+                var sendRawPath = ProfilePath + "user_script_send_convert/RawData.lua";
                 var sendDefaultPath = ProfilePath + "user_script_send_convert/default.lua";
                 if (File.Exists(sendDefaultPath))
                 {
-                    var target = ProfilePath + "user_script_send_convert/" + GetDefaultScriptName() + ".lua";
-                    if (!File.Exists(target))
-                        File.Move(sendDefaultPath, target);
+                    if (!File.Exists(sendRawPath))
+                        File.Move(sendDefaultPath, sendRawPath);
                     else
                         File.Delete(sendDefaultPath);
                 }
+                var sendRawDataPath = ProfilePath + "user_script_send_convert/原始数据.lua";
+                if (File.Exists(sendRawDataPath))
+                {
+                    if (!File.Exists(sendRawPath))
+                        File.Move(sendRawDataPath, sendRawPath);
+                    else
+                        File.Delete(sendRawDataPath);
+                }
+                var sendRawDataLegacyPath = ProfilePath + "user_script_send_convert/rawdata.lua";
+                if (File.Exists(sendRawDataLegacyPath))
+                {
+                    if (!File.Exists(sendRawPath))
+                        File.Move(sendRawDataLegacyPath, sendRawPath);
+                    else
+                    {
+                        // Windows 下 rawdata.lua 与 RawData.lua 为同一文件，用 Move 更新大小写，勿删除
+                        try { File.Move(sendRawDataLegacyPath, sendRawPath); } catch { }
+                    }
+                }
+                var recvRawPath = ProfilePath + "user_script_recv_convert/RawData.lua";
                 var recvDefaultPath = ProfilePath + "user_script_recv_convert/default.lua";
                 if (File.Exists(recvDefaultPath))
                 {
-                    var target = ProfilePath + "user_script_recv_convert/" + GetDefaultScriptName() + ".lua";
-                    if (!File.Exists(target))
-                        File.Move(recvDefaultPath, target);
+                    if (!File.Exists(recvRawPath))
+                        File.Move(recvDefaultPath, recvRawPath);
                     else
                         File.Delete(recvDefaultPath);
                 }
+                var recvRawDataPath = ProfilePath + "user_script_recv_convert/原始数据.lua";
+                if (File.Exists(recvRawDataPath))
+                {
+                    if (!File.Exists(recvRawPath))
+                        File.Move(recvRawDataPath, recvRawPath);
+                    else
+                        File.Delete(recvRawDataPath);
+                }
+                var recvRawDataLegacyPath = ProfilePath + "user_script_recv_convert/rawdata.lua";
+                if (File.Exists(recvRawDataLegacyPath))
+                {
+                    if (!File.Exists(recvRawPath))
+                        File.Move(recvRawDataLegacyPath, recvRawPath);
+                    else
+                    {
+                        // Windows 下 rawdata.lua 与 RawData.lua 为同一文件，用 Move 更新大小写，勿删除
+                        try { File.Move(recvRawDataLegacyPath, recvRawPath); } catch { }
+                    }
+                }
+                var sendCrlfPath = ProfilePath + "user_script_send_convert/CRLF.lua";
+                var sendCrlfOldPath = ProfilePath + "user_script_send_convert/加上换行回车.lua";
+                if (File.Exists(sendCrlfOldPath))
+                {
+                    if (!File.Exists(sendCrlfPath))
+                        File.Move(sendCrlfOldPath, sendCrlfPath);
+                    else
+                        File.Delete(sendCrlfOldPath);
+                }
+                if (!File.Exists(ProfilePath + "user_script_send_convert/CRLF.lua"))
+                    CreateFile("DefaultFiles/user_script_send_convert/CRLF.lua", ProfilePath + "user_script_send_convert/CRLF.lua");
+                var sendParseEscapePath = ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua";
+                var sendParseEscapeOldPath = ProfilePath + "user_script_send_convert/解析换行回车的转义字符.lua";
+                if (File.Exists(sendParseEscapeOldPath))
+                {
+                    if (!File.Exists(sendParseEscapePath))
+                        File.Move(sendParseEscapeOldPath, sendParseEscapePath);
+                    else
+                        File.Delete(sendParseEscapeOldPath);
+                }
+                if (!File.Exists(ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua"))
+                    CreateFile("DefaultFiles/user_script_send_convert/ParseEscapeSeq.lua", ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua");
+                var sendHexPath = ProfilePath + "user_script_send_convert/Hex.lua";
+                var sendHexOldPath = ProfilePath + "user_script_send_convert/16进制数据.lua";
+                if (File.Exists(sendHexOldPath))
+                {
+                    if (!File.Exists(sendHexPath))
+                        File.Move(sendHexOldPath, sendHexPath);
+                    else
+                        File.Delete(sendHexOldPath);
+                }
+                if (!File.Exists(ProfilePath + "user_script_send_convert/Hex.lua"))
+                    CreateFile("DefaultFiles/user_script_send_convert/Hex.lua", ProfilePath + "user_script_send_convert/Hex.lua");
                 if (!File.Exists(ProfilePath + "user_script_recv_convert/绘制曲线.lua"))
                     CreateFile("DefaultFiles/user_script_recv_convert/绘制曲线.lua", ProfilePath + "user_script_recv_convert/绘制曲线.lua");
                 if (!File.Exists(ProfilePath + "user_scrispt_recv_convert/绘制曲线-多条.lua"))

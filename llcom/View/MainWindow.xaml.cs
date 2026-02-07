@@ -550,24 +550,7 @@ namespace llcom
         {
             if (languageComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
             {
-                var newLang = item.Tag.ToString();
-                var oldLang = Tools.Global.setting.language;
-                Tools.Global.setting.language = newLang;
-                if (oldLang != newLang)
-                {
-                    Tools.Global.EnsureDefaultScriptFiles();
-                    var newDefault = Tools.Global.GetDefaultScriptName();
-                    if (Tools.Global.setting.sendScript == "原始数据" || Tools.Global.setting.sendScript == "rawdata")
-                        Tools.Global.setting.sendScript = newDefault;
-                    if (Tools.Global.setting.recvScript == "原始数据" || Tools.Global.setting.recvScript == "rawdata")
-                        Tools.Global.setting.recvScript = newDefault;
-                    if (recvScriptBackup == "原始数据" || recvScriptBackup == "rawdata")
-                        recvScriptBackup = newDefault;
-                    foreach (var list in Tools.Global.setting.quickSendList)
-                        foreach (var data in list)
-                            if (data.recvScriptPath == "原始数据" || data.recvScriptPath == "rawdata")
-                                data.recvScriptPath = newDefault;
-                }
+                Tools.Global.setting.language = item.Tag.ToString();
             }
         }
 
@@ -650,10 +633,21 @@ namespace llcom
                 Tools.Global.setting.recvScript = recvScriptBackup;
             }
 
-            var sendData = data.hex ? Global.Hex2Byte(data.text) : Global.GetEncoding().GetBytes(data.text);
+            var sendData = Global.GetEncoding().GetBytes(data.text);
             Global.recvPara = new byte[][] { Global.GetEncoding().GetBytes(data.recvScriptPara), sendData };
-            var serialPage = SerialPortFrame.Content as Pages.SerialPortPage;
-            serialPage?.SendUartData(sendData, true);
+            var sendScriptBackup = Tools.Global.setting.sendScript;
+            if (data.hex)
+                Tools.Global.setting.sendScript = "Hex";
+            try
+            {
+                var serialPage = SerialPortFrame.Content as Pages.SerialPortPage;
+                serialPage?.SendUartData(sendData);
+            }
+            finally
+            {
+                if (data.hex)
+                    Tools.Global.setting.sendScript = sendScriptBackup;
+            }
         }
 
         private void Button_MouseDoubleClick(object sender, MouseButtonEventArgs e)
