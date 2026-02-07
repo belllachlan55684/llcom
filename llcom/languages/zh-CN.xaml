@@ -113,6 +113,10 @@
     <system:String x:Key="SettingShowSend">显示串口发送出去的数据</system:String>
     <system:String x:Key="SettingShowSendRaw">显示原始发送数据</system:String>
     <system:String x:Key="SettingKeepTop">窗口保持置顶显示</system:String>
+    <system:String x:Key="WindowMinimize">最小化</system:String>
+    <system:String x:Key="WindowMaximize">最大化</system:String>
+    <system:String x:Key="WindowRestore">还原</system:String>
+    <system:String x:Key="WindowClose">关闭</system:String>
     <system:String x:Key="SettingUartTimeout">分包数据超时时间：</system:String>
     <system:String x:Key="SettingMs">毫秒（负数为不分包模式）</system:String>
     <system:String x:Key="SettingSplitByEmpty">超时时间表示空白间隔（不勾选表示从第一个字节开始算超时时间）</system:String>

@@ -52,6 +52,17 @@ namespace llcom
             Tools.Global.LoadSetting();
             Tools.Global.Initial();
             InitializeComponent();
+
+            // SystemCommands 用于自定义标题栏的最小化/关闭
+            CommandBindings.Add(new CommandBinding(
+                SystemCommands.MinimizeWindowCommand,
+                (s, e) => SystemCommands.MinimizeWindow(this)));
+            CommandBindings.Add(new CommandBinding(
+                SystemCommands.CloseWindowCommand,
+                (s, e) => SystemCommands.CloseWindow(this)));
+
+            StateChanged += MainWindow_StateChanged;
+
             if (Tools.Global.setting.windowHeight != 0 &&
                 Tools.Global.setting.windowLeft > 0 &&
                 Tools.Global.setting.windowTop > 0 &&
@@ -433,6 +444,46 @@ namespace llcom
         private void topEvent(object sender, EventArgs e)
         {
             this.Topmost = (bool)sender;
+        }
+
+        /// <summary>
+        /// Pin 按钮点击：切换窗口置顶
+        /// </summary>
+        private void PinTopmostButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (PinTopmostButton?.IsChecked == true)
+                Tools.Global.setting.topmost = true;
+            else
+                Tools.Global.setting.topmost = false;
+        }
+
+        /// <summary>
+        /// 最大化/还原按钮点击
+        /// </summary>
+        private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+                SystemCommands.RestoreWindow(this);
+            else
+                SystemCommands.MaximizeWindow(this);
+        }
+
+        /// <summary>
+        /// 窗口状态变化时更新最大化/还原按钮图标和 ToolTip
+        /// </summary>
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            if (MaximizeRestoreIcon == null || MaximizeRestoreButton == null) return;
+            if (WindowState == WindowState.Maximized)
+            {
+                MaximizeRestoreIcon.Icon = FontAwesomeIcon.Compress;
+                MaximizeRestoreButton.ToolTip = TryFindResource("WindowRestore") as string ?? "还原";
+            }
+            else
+            {
+                MaximizeRestoreIcon.Icon = FontAwesomeIcon.Expand;
+                MaximizeRestoreButton.ToolTip = TryFindResource("WindowMaximize") as string ?? "最大化";
+            }
         }
 
         /// <summary>
