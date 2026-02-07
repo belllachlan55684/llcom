@@ -68,7 +68,7 @@
             Grid.Row="0"
             Grid.ColumnSpan="4"
             Height="32"
-            Background="{DynamicResource {x:Static adonisUi:Brushes.Layer0BackgroundBrush}}"
+            Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
             LastChildFill="True">
             <TextBlock
                 Margin="12,0,0,0"
@@ -97,21 +97,18 @@
                             FontSize="12"
                             RenderTransformOrigin="0.5,0.5"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}">
-                            <fa:FontAwesome.RenderTransform>
-                                <RotateTransform Angle="0" />
-                            </fa:FontAwesome.RenderTransform>
                             <fa:FontAwesome.Style>
                                 <Style TargetType="fa:FontAwesome">
-                                    <Setter Property="RenderTransform">
+                                        <Setter Property="RenderTransform">
                                         <Setter.Value>
-                                            <RotateTransform Angle="0" />
+                                            <RotateTransform Angle="45" />
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=PinTopmostButton}" Value="False">
+                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Value="True">
                                             <Setter Property="RenderTransform">
                                                 <Setter.Value>
-                                                    <RotateTransform Angle="-45" />
+                                                    <RotateTransform Angle="0" />
                                                 </Setter.Value>
                                             </Setter>
                                         </DataTrigger>
@@ -126,6 +123,7 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ToggleButton">
                                         <Border
+                                            x:Name="PinButtonBorder"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                             <ContentPresenter
@@ -133,9 +131,6 @@
                                                 VerticalAlignment="Center" />
                                         </Border>
                                         <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" />
-                                            </Trigger>
                                             <Trigger Property="IsChecked" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" />
                                             </Trigger>
@@ -169,11 +164,6 @@
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -204,11 +194,6 @@
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -238,12 +223,6 @@
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#E81123" />
-                                                <Setter Property="Foreground" Value="White" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -268,7 +247,9 @@
 
         <!--  底部状态栏  -->
         <DockPanel Grid.Row="3" Grid.ColumnSpan="3">
-            <StatusBar DockPanel.Dock="Bottom">
+            <StatusBar
+                DockPanel.Dock="Bottom"
+                Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>

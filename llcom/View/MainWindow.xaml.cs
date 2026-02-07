@@ -447,7 +447,7 @@ namespace llcom
         }
 
         /// <summary>
-        /// Pin 按钮 Loaded：设置初始 Tooltip 并订阅状态变化
+        /// Pin 按钮 Loaded：设置初始 Tooltip，并订阅状态变化
         /// </summary>
         private void PinTopmostButton_Loaded(object sender, RoutedEventArgs e)
         {
