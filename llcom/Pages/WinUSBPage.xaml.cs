@@ -1,3 +1,4 @@
+using System.IO;
 using CoAP.Net;
 using LibUsbDotNet;
 using LibUsbDotNet.Info;
@@ -43,6 +44,7 @@ namespace llcom.Pages
         public bool HexMode { get; set; } = false;
 
         private static bool loaded = false;
+        private bool sendScriptLoading = false;
 
         private void ShowData(string title, byte[] data = null, bool send = false)
         {
@@ -139,6 +141,10 @@ namespace llcom.Pages
 
             //绑定
             MainGrid.DataContext = this;
+            OptionsScrollViewer.DataContext = Tools.Global.setting;
+            toSendDataTextBox.DataContext = Tools.Global.setting;
+
+            LoadSendScriptList();
 
             //适配一下通用通道
             LuaApis.SendChannelsRegister("winusb", (data,_) =>
@@ -281,10 +287,6 @@ namespace llcom.Pages
                                                 out realSent);
                                             if (sr != Error.Success)
                                                 ShowData($"send error: {sr}");
-                                            if(realSent > 0)
-                                                ShowData($"sent {realSent} bytes", 
-                                                    data.Skip(sent).Take(realSent).ToArray(),
-                                                    true);
                                             sent += len;
                                         }
                                             
@@ -324,14 +326,79 @@ namespace llcom.Pages
             needClose = true;
         }
 
+        private void LoadSendScriptList()
+        {
+            sendScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    sendScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetSendScriptForInterface("WinUSB");
+            sendScriptLoading = true;
+            if (sendScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
+                {
+                    if ((sendScriptComboBox.Items[i] as string) == current)
+                    {
+                        sendScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetSendScriptForInterface("WinUSB", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    sendScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            sendScriptLoading = false;
+        }
+
+        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadSendScriptList();
+        }
+
+        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
+            var name = sendScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("WinUSB"))
+                Tools.Global.setting.SetSendScriptForInterface("WinUSB", name);
+        }
+
         private void SendDataButton_Click(object sender, RoutedEventArgs e)
         {
             if (!IsConnected)
                 return;
-            byte[] data = HexMode ? Tools.Global.Hex2Byte(toSendDataTextBox.Text) :
-                            Tools.Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
+            var text = Tools.Global.setting.dataToSend ?? "";
+            var buff = HexMode ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "WinUSB");
+            if (toSend == null)
+                return;
             lock (toSendBuffer)
-                toSendBuffer.Add(data);
+                toSendBuffer.Add(toSend);
+            Tools.Global.setting.SentCount += toSend.Length;
+            bool showRaw = buff != null && buff.Length > 0 && Tools.Global.setting.showSendRaw;
+            bool showConverted = Tools.Global.setting.showSend;
+            if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                Tools.Logger.ShowData(toSend, true);
+            else
+            {
+                if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
+                if (showConverted) Tools.Logger.ShowData(toSend, true);
+            }
         }
 
         private void UsbListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

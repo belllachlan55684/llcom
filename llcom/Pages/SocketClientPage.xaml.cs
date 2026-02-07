@@ -56,6 +56,7 @@ namespace llcom.Pages
             this.DataContext = this;
 
             ConfigWrapPanel.DataContext = Tools.Global.setting;
+            ReconnectInterval.DataContext = Tools.Global.setting;
             OptionsScrollViewer.DataContext = Tools.Global.setting;
             toSendDataTextBox.DataContext = Tools.Global.setting;
 
@@ -405,10 +406,17 @@ namespace llcom.Pages
 
         private void Reconnect_TextInputCheck(object sender, TextCompositionEventArgs e)
         {
-            if (!int.TryParse(e.Text, out int num) || num < 0 || num > 120)
+            if (string.IsNullOrEmpty(e.Text)) return;
+            if (!e.Text.All(char.IsDigit))
             {
                 e.Handled = true;
+                return;
             }
+            var tb = sender as TextBox;
+            if (tb == null) return;
+            var newText = tb.Text.Substring(0, tb.SelectionStart) + e.Text + tb.Text.Substring(tb.SelectionStart + tb.SelectionLength);
+            if (!string.IsNullOrEmpty(newText) && (!int.TryParse(newText, out int num) || num < 0 || num > 120))
+                e.Handled = true;
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)

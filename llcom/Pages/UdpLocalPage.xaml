@@ -18,7 +18,7 @@
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
         <local:boolNot x:Key="boolNotConverter" />
     </Page.Resources>
-    <Grid Name="MainGrid">
+    <Grid Name="MainGrid" Margin="2,0,2,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -49,22 +49,22 @@
                 IsEnabled="{Binding ElementName=RefreshIpButton, Path=IsEnabled}"
                 Text="{Binding udpServerPort}" />
         </WrapPanel>
-        <Button
-            x:Name="StopListenButton"
-            Grid.Row="1"
-            Margin="0,5,0,0"
-            Click="StopListenButton_Click"
-            Content="{DynamicResource StopListen}"
-            Visibility="{Binding IsConnected, Converter={StaticResource boolVisibeConverter}}" />
-        <Button
-            x:Name="ListenButton"
-            Grid.Row="1"
-            Margin="0,5,0,0"
-            Click="ListenButton_Click"
-            Content="{DynamicResource StartListen}"
-            Visibility="{Binding IsConnected, Converter={StaticResource boolNotVisibeConverter}}" />
+        <Grid Grid.Row="1" Margin="0,5,0,0">
+            <Button
+                x:Name="StopListenButton"
+                HorizontalAlignment="Stretch"
+                Click="StopListenButton_Click"
+                Content="{DynamicResource StopListen}"
+                Visibility="{Binding IsConnected, Converter={StaticResource boolVisibeConverter}}" />
+            <Button
+                x:Name="ListenButton"
+                HorizontalAlignment="Stretch"
+                Click="ListenButton_Click"
+                Content="{DynamicResource StartListen}"
+                Visibility="{Binding IsConnected, Converter={StaticResource boolNotVisibeConverter}}" />
+        </Grid>
         <ScrollViewer x:Name="OptionsScrollViewer" Grid.Row="2" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
-            <WrapPanel Margin="10,0,0,0" Orientation="Horizontal">
+            <WrapPanel Orientation="Horizontal">
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowSendData}"
@@ -80,7 +80,7 @@
         <TextBox
             Name="toSendDataTextBox"
             Grid.Row="3"
-            Margin="2"
+            Margin="0,5,0,0"
             VerticalContentAlignment="Top"
             AcceptsReturn="True"
             FontFamily="Consolas"
@@ -88,7 +88,7 @@
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             MinHeight="60" />
-        <DockPanel Grid.Row="4" Margin="2">
+        <DockPanel Grid.Row="4" Margin="0,5,0,0">
             <Button
                 Name="SendDataButton"
                 DockPanel.Dock="Right"

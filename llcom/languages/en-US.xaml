@@ -188,6 +188,7 @@
     <system:String x:Key="SocketDisconnectButton">Disconnect</system:String>
     <system:String x:Key="TcpReconnect">Auto Reconnect</system:String>
     <system:String x:Key="TcpReconnectInterval">Reconnect Interval:</system:String>
+    <system:String x:Key="TcpReconnectIntervalUnit">s</system:String>
     <system:String x:Key="TcpServerAddr">Server address</system:String>
     <system:String x:Key="TcpServerPort">Server port</system:String>
     <system:String x:Key="TcpServerProtocol">Protocol</system:String>
