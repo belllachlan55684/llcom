@@ -14,9 +14,38 @@ namespace llcom.View.Controls
         private static bool fileLoadingRev;
         private static string lastLuaFileRev = "";
 
+        private static readonly string[] InterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal", "Tcp", "WinUSB", "SerialMonitor", "MQTT" };
+
         public RecvScriptControl()
         {
             InitializeComponent();
+        }
+
+        private string GetCurrentInterfaceKey()
+        {
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw?.DataInterfaceComboBox == null) return null;
+            var idx = mw.DataInterfaceComboBox.SelectedIndex;
+            return (idx >= 0 && idx < InterfaceKeys.Length) ? InterfaceKeys[idx] : null;
+        }
+
+        internal void RefreshSelectionForCurrentInterface()
+        {
+            var key = GetCurrentInterfaceKey();
+            var script = string.IsNullOrEmpty(key) ? Tools.Global.setting.recvScript : Tools.Global.setting.GetRecvScriptForInterface(key);
+            if (luaFileListRev.Items.Count > 0 && !string.IsNullOrEmpty(script))
+            {
+                for (int i = 0; i < luaFileListRev.Items.Count; i++)
+                {
+                    if ((luaFileListRev.Items[i] as string) == script)
+                    {
+                        fileLoadingRev = true;
+                        luaFileListRev.SelectedIndex = i;
+                        fileLoadingRev = false;
+                        break;
+                    }
+                }
+            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -25,24 +54,36 @@ namespace llcom.View.Controls
             SearchPanel.Install(textEditorRev.TextArea);
             ApplyScriptEditorTheme(Tools.Global.setting.darkMode);
             Tools.Global.ThemeChanged += (_, dark) => Dispatcher.Invoke(() => ApplyScriptEditorTheme(dark));
-            if (!string.IsNullOrEmpty(MainWindow.recvScriptBackup))
-                loadLuaFileRev(MainWindow.recvScriptBackup);
-            else
-                loadLuaFileRev(Tools.Global.setting.recvScript);
+            var key = GetCurrentInterfaceKey();
+            var script = string.IsNullOrEmpty(key) ? Tools.Global.setting.recvScript : Tools.Global.setting.GetRecvScriptForInterface(key);
+            loadLuaFileRev(script);
         }
 
         private void loadLuaFileRev(string fileName)
         {
+            var key = GetCurrentInterfaceKey();
+            var defaultScript = Tools.Global.GetDefaultScriptName();
+
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{fileName}.lua"))
             {
-                Tools.Global.setting.recvScript = Tools.Global.GetDefaultScriptName();
-                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua"))
-                    File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua").Close();
+                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{defaultScript}.lua"))
+                    File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{defaultScript}.lua").Close();
+                fileName = defaultScript;
+                if (!string.IsNullOrEmpty(key))
+                    Tools.Global.setting.SetRecvScriptForInterface(key, fileName);
+                else
+                    Tools.Global.setting.recvScript = fileName;
             }
             else
-                Tools.Global.setting.recvScript = fileName;
+            {
+                if (!string.IsNullOrEmpty(key))
+                    Tools.Global.setting.SetRecvScriptForInterface(key, fileName);
+                else
+                    Tools.Global.setting.recvScript = fileName;
+            }
 
-            textEditorRev.Text = File.ReadAllText(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua");
+            var scriptToLoad = string.IsNullOrEmpty(key) ? Tools.Global.setting.recvScript : Tools.Global.setting.GetRecvScriptForInterface(key);
+            textEditorRev.Text = File.ReadAllText(Tools.Global.ProfilePath + $"user_script_recv_convert/{scriptToLoad}.lua");
 
             var luaFileDir = new DirectoryInfo(Tools.Global.ProfilePath + "user_script_recv_convert/");
             var luaFiles = luaFileDir.GetFileSystemInfos();
@@ -55,11 +96,11 @@ namespace llcom.View.Controls
                 {
                     string name = file.Name.Substring(0, file.Name.Length - 4);
                     luaFileListRev.Items.Add(name);
-                    if (name == Tools.Global.setting.recvScript)
+                    if (name == scriptToLoad)
                         luaFileListRev.SelectedIndex = luaFileListRev.Items.Count - 1;
                 }
             }
-            lastLuaFileRev = Tools.Global.setting.recvScript;
+            lastLuaFileRev = scriptToLoad;
             fileLoadingRev = false;
             LuaEnv.LuaLoader.ClearRun();
         }
@@ -101,7 +142,6 @@ namespace llcom.View.Controls
                 if (lastLuaFileRev != "")
                     saveLuaFileRev(lastLuaFileRev);
                 loadLuaFileRev(luaFileListRev.SelectedItem as string);
-                MainWindow.recvScriptBackup = luaFileListRev.SelectedItem as string;
             }
         }
 

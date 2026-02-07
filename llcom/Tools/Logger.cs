@@ -21,18 +21,19 @@ namespace llcom.Tools
             DataClearEvent?.Invoke(null,null);
         }
         //显示日志数据
-        public static void ShowData(byte[] data, bool send)
+        public static void ShowData(byte[] data, bool send, string interfaceKey = null)
         {
-            //不刷新日志
-            if (Tools.Global.setting.DisableLog)
+            //不刷新日志（按接口过滤）
+            if (Tools.Global.setting.GetDisableLogForInterface(interfaceKey))
                 return;
             DataShowTask?.Invoke(null, new DataShowPara
             {
                 data = data,
-                send = send
+                send = send,
+                interfaceKey = interfaceKey
             });
         }
-        //显示日志数据
+        //显示日志数据（DataShowRaw 无 interfaceKey，使用全局 DisableLog）
         public static void ShowDataRaw(DataShowRaw s)
         {
             //不刷新日志
@@ -140,6 +141,10 @@ namespace llcom.Tools
     class DataShowPara : DataShow
     {
         public bool send;
+        /// <summary>
+        /// 数据来源接口键（Serial/TcpClient/TcpLocal 等），用于接收脚本分接口选择
+        /// </summary>
+        public string interfaceKey;
     }
 
     /// <summary>

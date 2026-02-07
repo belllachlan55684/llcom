@@ -141,10 +141,12 @@ namespace llcom.Pages
 
             //绑定
             MainGrid.DataContext = this;
-            OptionsScrollViewer.DataContext = Tools.Global.setting;
-            toSendDataTextBox.DataContext = Tools.Global.setting;
+            var displayProxy = new Model.InterfaceConfigProxy("WinUSB");
+            OptionsScrollViewer.DataContext = displayProxy;
+            toSendDataTextBox.DataContext = displayProxy;
 
             LoadSendScriptList();
+            LoadRecvScriptList();
 
             //适配一下通用通道
             LuaApis.SendChannelsRegister("winusb", (data,_) =>
@@ -378,11 +380,64 @@ namespace llcom.Pages
                 Tools.Global.setting.SetSendScriptForInterface("WinUSB", name);
         }
 
+        private bool recvScriptLoading = false;
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetRecvScriptForInterface("WinUSB");
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetRecvScriptForInterface("WinUSB", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("WinUSB"))
+                Tools.Global.setting.SetRecvScriptForInterface("WinUSB", name);
+        }
+
         private void SendDataButton_Click(object sender, RoutedEventArgs e)
         {
             if (!IsConnected)
                 return;
-            var text = Tools.Global.setting.dataToSend ?? "";
+            var text = Tools.Global.setting.GetDataToSendForInterface("WinUSB") ?? "";
             var buff = HexMode ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
             var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "WinUSB");
             if (toSend == null)
@@ -390,14 +445,14 @@ namespace llcom.Pages
             lock (toSendBuffer)
                 toSendBuffer.Add(toSend);
             Tools.Global.setting.SentCount += toSend.Length;
-            bool showRaw = buff != null && buff.Length > 0 && Tools.Global.setting.showSendRaw;
-            bool showConverted = Tools.Global.setting.showSend;
+            bool showRaw = buff != null && buff.Length > 0 && Tools.Global.setting.GetShowSendRawForInterface("WinUSB");
+            bool showConverted = Tools.Global.setting.GetShowSendForInterface("WinUSB");
             if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
-                Tools.Logger.ShowData(toSend, true);
+                Tools.Logger.ShowData(toSend, true, "WinUSB");
             else
             {
-                if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
-                if (showConverted) Tools.Logger.ShowData(toSend, true);
+                if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "WinUSB");
+                if (showConverted) Tools.Logger.ShowData(toSend, true, "WinUSB");
             }
         }
 

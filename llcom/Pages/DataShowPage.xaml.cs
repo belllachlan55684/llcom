@@ -1,3 +1,4 @@
+using llcom;
 using llcom.Tools;
 using ScottPlot.Drawing.Colormaps;
 using System;
@@ -39,7 +40,6 @@ namespace llcom.Pages
         /// </summary>
         public bool LockLog { get; set; } = false;
         private bool loaded = false;
-        private bool recvScriptLoading = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (loaded)
@@ -57,66 +57,9 @@ namespace llcom.Pages
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
 
-            HEXBox.DataContext = Tools.Global.setting;
-            DisableLogCheckBox.DataContext = Tools.Global.setting;
-            EnableSymbolCheckBox.DataContext = Tools.Global.setting;
-
-            LoadRecvScriptList();
             lastPackShowMode = Tools.Global.setting.timeout >= 0;
             MainListScrollViewer.Visibility = lastPackShowMode ? Visibility.Visible : Visibility.Collapsed;
             MainTextBox.Visibility = lastPackShowMode ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private void LoadRecvScriptList()
-        {
-            recvScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    recvScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.recvScript;
-            recvScriptLoading = true;
-            if (recvScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
-                {
-                    if ((recvScriptComboBox.Items[i] as string) == current)
-                    {
-                        recvScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.recvScript = recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName();
-                    recvScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            recvScriptLoading = false;
-        }
-
-        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadRecvScriptList();
-        }
-
-        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
-            var name = recvScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.recvScript)
-                Tools.Global.setting.recvScript = name;
         }
 
         //记录一下上次是不是分包显示的
@@ -138,16 +81,20 @@ namespace llcom.Pages
             }
 
             //如果不开回显，就别打印
-            if(!Tools.Global.setting.showSend && !Tools.Global.setting.showSendRaw && e is DataShowPara para && para.send)
+            var para = e as DataShowPara;
+            var ifKey = para?.interfaceKey ?? "Serial";
+            if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && !Tools.Global.setting.GetShowSendRawForInterface(ifKey) && para != null && para.send)
                 return;
 
             //显示到列表
             if (!needPack && e is not DataShowRaw)//不分包模式
             {
-                var DataText = Tools.Global.setting.showHexFormat switch
+                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
+                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);
+                var DataText = fmt switch
                 {
                     2 => Tools.Global.Byte2Hex(e.data, " ", e.data.Length) + " ",
-                    _ => Tools.Global.Byte2Readable(e.data, e.data.Length),
+                    _ => Tools.Global.Byte2Readable(e.data, e.data.Length, enableSym),
                 };
                 DoInvoke(() =>
                 {
@@ -160,7 +107,7 @@ namespace llcom.Pages
             {
                 var data = e is DataShowRaw ? 
                     new DataShow((e as DataShowRaw).title, e.data, e.time, (e as DataShowRaw).color) :
-                    new DataShow(e.data, e.time, (e as DataShowPara).send);
+                    new DataShow(e.data, e.time, (e as DataShowPara).send, (e as DataShowPara).interfaceKey);
                 if (data != null)
                 {
                     DoInvoke(() =>
@@ -221,7 +168,7 @@ namespace llcom.Pages
             public SolidColorBrush HexTextColor { get; set; }
 
 
-            public DataShow(byte[] data, DateTime time, bool sent)
+            public DataShow(byte[] data, DateTime time, bool sent, string interfaceKey = null)
             {
                 if (data == null || data.Count() == 0)
                     return;
@@ -231,10 +178,11 @@ namespace llcom.Pages
                 {
                     var uartPara = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[0] : new byte[0];
                     var uartSendRaw = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[1] : new byte[0];
+                    var scriptName = Tools.Global.GetEffectiveRecvScriptForInterface(interfaceKey ?? "Serial");
                     try
                     {
                         temp = LuaEnv.LuaLoader.Run(
-                            $"{Tools.Global.setting.recvScript}.lua",
+                            $"{scriptName}.lua",
                             new System.Collections.ArrayList { "uartData", temp , "uartPara", uartPara, "uartSendRaw", uartSendRaw },
                             "user_script_recv_convert/");
                     }
@@ -254,16 +202,18 @@ namespace llcom.Pages
                 HexTextColor = sent ? (dark ? Brushes.LightCoral : Brushes.IndianRed) : (dark ? Brushes.LightGreen : Brushes.ForestGreen);
 
                 var len = temp.Length;
+                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(interfaceKey ?? "Serial");
+                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(interfaceKey ?? "Serial");
                 //主要数据
                 if (temp != null && temp.Length > 0)
                 {
-                    DataText = Tools.Global.setting.showHexFormat switch
+                    DataText = fmt switch
                     {
                         2 => Tools.Global.Byte2Hex(temp, " ", len),
-                        _ => Tools.Global.Byte2Readable(temp, len),
+                        _ => Tools.Global.Byte2Readable(temp, len, enableSym),
                     };
                     //同时显示模式时，才显示小字hex
-                    if (Tools.Global.setting.showHexFormat == 0)
+                    if (fmt == 0)
                         HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
                 }
             }
@@ -275,16 +225,25 @@ namespace llcom.Pages
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
 
                 var len = temp.Length;
+                // DataShowRaw 无 interfaceKey，使用当前选中接口或全局
+                var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                var ifKey = (mw?.DataInterfaceComboBox?.SelectedIndex ?? 0) switch
+                {
+                    0 => "Serial", 1 => "TcpClient", 2 => "UdpLocal", 3 => "TcpLocal", 4 => "Tcp", 5 => "WinUSB",
+                    6 => "SerialMonitor", 7 => "MQTT", _ => "Serial"
+                };
+                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
+                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);
                 //主要数据
                 if (temp != null && temp.Length > 0)
                 {
-                    RawText = "\n" + Tools.Global.setting.showHexFormat switch
+                    RawText = "\n" + fmt switch
                     {
                         2 => Tools.Global.Byte2Hex(temp, " ", len),
-                        _ => Tools.Global.Byte2Readable(temp, len),
+                        _ => Tools.Global.Byte2Readable(temp, len, enableSym),
                     };
                     //同时显示模式时，才显示小字hex
-                    if (Tools.Global.setting.showHexFormat == 0)
+                    if (fmt == 0)
                         HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
                 }
 

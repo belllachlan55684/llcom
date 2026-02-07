@@ -62,10 +62,12 @@ namespace llcom.Pages
             //绑定
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
-            OptionsScrollViewer.DataContext = Tools.Global.setting;
-            toSendDataTextBox.DataContext = Tools.Global.setting;
+            var displayProxy = new Model.InterfaceConfigProxy("UdpLocal");
+            OptionsScrollViewer.DataContext = displayProxy;
+            toSendDataTextBox.DataContext = displayProxy;
 
             LoadSendScriptList();
+            LoadRecvScriptList();
 
             LuaApis.SendChannelsRegister("udp-server", (data, _) =>
             {
@@ -146,7 +148,7 @@ namespace llcom.Pages
                     lock (lastRemoteLock)
                         lastRemoteEndPoint = remoteEp;
                     Tools.Global.setting.ReceivedCount += receiveBytes.Length;
-                    Tools.Logger.ShowData(receiveBytes, false);
+                    Tools.Logger.ShowData(receiveBytes, false, "UdpLocal");
                     Server.BeginReceive(newConnectionCb, new UdpState { u = Server, e = remoteEp });
                 }
                 catch { }
@@ -267,6 +269,59 @@ namespace llcom.Pages
                 Tools.Global.setting.SetSendScriptForInterface("UdpLocal", name);
         }
 
+        private bool recvScriptLoading = false;
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetRecvScriptForInterface("UdpLocal");
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetRecvScriptForInterface("UdpLocal", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("UdpLocal"))
+                Tools.Global.setting.SetRecvScriptForInterface("UdpLocal", name);
+        }
+
         private void SendDataButton_Click(object sender, RoutedEventArgs e)
         {
             if (Server == null) return;
@@ -278,9 +333,8 @@ namespace llcom.Pages
                 Tools.MessageBox.Show(TryFindResource("UdpNoClientTip") as string ?? "No client has sent data yet. Send data to the server first.");
                 return;
             }
-            var text = Tools.Global.setting.dataToSend ?? "";
+            var text = Tools.Global.setting.GetDataToSendForInterface("UdpLocal") ?? "";
             var buff = Tools.Global.GetEncoding().GetBytes(text);
-            MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
             Tools.Global.recvPara = new byte[][] { new byte[0], buff };
             SendToClient(target, buff);
         }
@@ -296,14 +350,14 @@ namespace llcom.Pages
             {
                 Server.Send(toSend, toSend.Length, target);
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
-                bool showConverted = Tools.Global.setting.showSend;
+                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("UdpLocal");
+                bool showConverted = Tools.Global.setting.GetShowSendForInterface("UdpLocal");
                 if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
-                    Tools.Logger.ShowData(toSend, true);
+                    Tools.Logger.ShowData(toSend, true, "UdpLocal");
                 else
                 {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
-                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "UdpLocal");
+                    if (showConverted) Tools.Logger.ShowData(toSend, true, "UdpLocal");
                 }
                 return true;
             }

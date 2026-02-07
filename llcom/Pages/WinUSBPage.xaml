@@ -17,6 +17,7 @@
         <local:boolVisibe x:Key="boolVisibeConverter" />
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
         <local:boolNot x:Key="boolNotConverter" />
+        <local:showHexFormat x:Key="showHexFormatConverter" />
     </Page.Resources>
     <Grid Name="MainGrid" Margin="2,0,2,0">
         <Grid.RowDefinitions>
@@ -85,16 +86,39 @@
         </Grid>
         <ScrollViewer x:Name="OptionsScrollViewer" Grid.Row="3" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
             <WrapPanel Orientation="Horizontal">
+                <ComboBox
+                    Name="recvScriptComboBox"
+                    MinWidth="120"
+                    Margin="5,0"
+                    VerticalAlignment="Center"
+                    ToolTip="{DynamicResource RecvScriptTab}"
+                    DropDownOpened="RecvScriptComboBox_DropDownOpened"
+                    SelectionChanged="RecvScriptComboBox_SelectionChanged"/>
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowSendData}"
                     ToolTip="{DynamicResource SettingShowSendDataTip}"
-                    IsChecked="{Binding showSend}" />
+                    IsChecked="{Binding ShowSend, Mode=TwoWay}" />
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowRawData}"
                     ToolTip="{DynamicResource SettingShowRawDataTip}"
-                    IsChecked="{Binding showSendRaw}" />
+                    IsChecked="{Binding ShowSendRaw, Mode=TwoWay}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource ShowHexFormat}"
+                    IsChecked="{Binding ShowHexFormat, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
+                    IsThreeState="True"
+                    ToolTip="{DynamicResource ShowHexFormatTip}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource ShowSymbol}"
+                    IsChecked="{Binding EnableSymbol, Mode=TwoWay}"
+                    ToolTip="{DynamicResource ShowSymbolTooltip}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource DisableLog}"
+                    IsChecked="{Binding DisableLog, Mode=TwoWay}" />
             </WrapPanel>
         </ScrollViewer>
         <TextBox
@@ -104,7 +128,7 @@
             VerticalContentAlignment="Top"
             AcceptsReturn="True"
             FontFamily="Consolas"
-            Text="{Binding dataToSend}"
+            Text="{Binding DataToSend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             MinHeight="60" />
@@ -117,11 +141,6 @@
                 Content="{DynamicResource NetSendDataButton}"
                 IsEnabled="{Binding IsConnected}" />
             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <CheckBox
-                    Content="Hex"
-                    Margin="4,0"
-                    VerticalAlignment="Center"
-                    IsChecked="{Binding HexMode}" />
                 <ComboBox
                     Name="sendScriptComboBox"
                     MinWidth="120"
@@ -130,6 +149,11 @@
                     ToolTip="{DynamicResource SendScriptTab}"
                     DropDownOpened="SendScriptComboBox_DropDownOpened"
                     SelectionChanged="SendScriptComboBox_SelectionChanged" />
+                <CheckBox
+                    Content="Hex"
+                    Margin="4,0"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding HexMode}" />
             </WrapPanel>
         </DockPanel>
     </Grid>

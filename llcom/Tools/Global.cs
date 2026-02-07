@@ -147,6 +147,20 @@ namespace llcom.Tools
         public static bool HasNewVersion { get; set; } = false;
         public static byte[][] recvPara { get; set; } = null; // recvPara = [ uartPara, uartSendRaw ]
 
+        /// <summary>
+        /// 快捷发送区临时覆盖的接收脚本（接口键 -> 脚本名），不持久化
+        /// </summary>
+        public static Dictionary<string, string> recvScriptTempOverride { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// 获取指定接口的有效接收脚本（优先临时覆盖，否则使用持久配置）
+        /// </summary>
+        public static string GetEffectiveRecvScriptForInterface(string key)
+        {
+            if (!string.IsNullOrEmpty(key) && recvScriptTempOverride.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
+            return setting?.GetRecvScriptForInterface(key) ?? "RawData";
+        }
 
         /// <summary>
         /// 更换软件标题栏文字
@@ -581,15 +595,18 @@ namespace llcom.Tools
         /// byte转string（可读）
         /// </summary>
         /// <param name="vBytes"></param>
+        /// <param name="len"></param>
+        /// <param name="enableSymbol">若为 null 则使用全局 setting.EnableSymbol</param>
         /// <returns></returns>
-        public static string Byte2Readable(byte[] vBytes, int len = -1)
+        public static string Byte2Readable(byte[] vBytes, int len = -1, bool? enableSymbol = null)
         {
             if (len == -1)
-                len = vBytes.Length;
+                len = vBytes?.Length ?? 0;
             if (vBytes == null)//fix
                 return "";
+            var useSymbol = enableSymbol ?? setting.EnableSymbol;
             //没开这个功能/非utf8就别搞了
-            if (!setting.EnableSymbol || setting.encoding != 65001)
+            if (!useSymbol || setting.encoding != 65001)
                 return Byte2String(vBytes, len);
             var tb = new List<byte>();
             for (int i = 0; i < len; i++)

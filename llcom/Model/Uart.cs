@@ -201,8 +201,8 @@ namespace llcom.Model
                 return;
             serial.Write(data, 0, data.Length);
             Tools.Global.setting.SentCount += data.Length;
-            bool showRaw = dataRaw != null && Tools.Global.setting.showSendRaw;
-            bool showConverted = Tools.Global.setting.showSend;
+            bool showRaw = dataRaw != null && Tools.Global.setting.GetShowSendRawForInterface("Serial");
+            bool showConverted = Tools.Global.setting.GetShowSendForInterface("Serial");
             if (showRaw && showConverted && dataRaw != null && data.SequenceEqual(dataRaw))
                 UartDataSent(data, EventArgs.Empty);
             else

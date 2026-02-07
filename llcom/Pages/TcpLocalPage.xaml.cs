@@ -63,16 +63,18 @@ namespace llcom.Pages
             //绑定
             MainGrid.DataContext = this;
             IpPortTextBox.DataContext = Tools.Global.setting;
-            OptionsScrollViewer.DataContext = Tools.Global.setting;
-            toSendDataTextBox.DataContext = Tools.Global.setting;
+            var displayProxy = new Model.InterfaceConfigProxy("TcpLocal");
+            OptionsScrollViewer.DataContext = displayProxy;
+            toSendDataTextBox.DataContext = displayProxy;
 
             LoadSendScriptList();
+            LoadRecvScriptList();
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, data) =>
             {
                 Tools.Global.setting.ReceivedCount += data.Length;
-                Tools.Logger.ShowData(data, false);
+                Tools.Logger.ShowData(data, false, "TcpLocal");
             };
 
             //适配一下通用通道
@@ -377,13 +379,65 @@ namespace llcom.Pages
                 Tools.Global.setting.SetSendScriptForInterface("TcpLocal", name);
         }
 
+        private bool recvScriptLoading = false;
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetRecvScriptForInterface("TcpLocal");
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetRecvScriptForInterface("TcpLocal", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("TcpLocal"))
+                Tools.Global.setting.SetRecvScriptForInterface("TcpLocal", name);
+        }
+
         private void SendDataButton_Click(object sender, RoutedEventArgs e)
         {
             if (Server != null)
             {
-                var text = Tools.Global.setting.dataToSend ?? "";
+                var text = Tools.Global.setting.GetDataToSendForInterface("TcpLocal") ?? "";
                 var buff = Tools.Global.GetEncoding().GetBytes(text);
-                MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Broadcast(buff);
             }
@@ -406,14 +460,14 @@ namespace llcom.Pages
                         try { c.Send(toSend); } catch { }
                 }
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
-                bool showConverted = Tools.Global.setting.showSend;
+                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("TcpLocal");
+                bool showConverted = Tools.Global.setting.GetShowSendForInterface("TcpLocal");
                 if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
-                    Tools.Logger.ShowData(toSend, true);
+                    Tools.Logger.ShowData(toSend, true, "TcpLocal");
                 else
                 {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
-                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "TcpLocal");
+                    if (showConverted) Tools.Logger.ShowData(toSend, true, "TcpLocal");
                 }
                 return true;
             }

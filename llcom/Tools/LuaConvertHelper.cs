@@ -44,12 +44,14 @@ namespace llcom.Tools
         /// <param name="data">接收到的原始数据</param>
         /// <param name="uartPara">可选，recv 脚本参数（快捷发送区等场景）</param>
         /// <param name="uartSendRaw">可选，发送前的原始数据（快捷发送区等场景）</param>
+        /// <param name="interfaceKey">数据接口键（Serial/TcpClient 等），null 时回退到 Serial</param>
         /// <returns>转换后的数据，失败时返回 null，脚本返回空时返回空数组</returns>
-        public static byte[] ApplyRecvConvert(byte[] data, byte[] uartPara = null, byte[] uartSendRaw = null)
+        public static byte[] ApplyRecvConvert(byte[] data, byte[] uartPara = null, byte[] uartSendRaw = null, string interfaceKey = null)
         {
             if (data == null)
                 return null;
-            if (!File.Exists(Global.ProfilePath + $"user_script_recv_convert/{Global.setting.recvScript}.lua"))
+            var scriptName = Global.GetEffectiveRecvScriptForInterface(interfaceKey ?? "Serial");
+            if (!File.Exists(Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua"))
                 return (byte[])data.Clone();
             try
             {
@@ -60,7 +62,7 @@ namespace llcom.Tools
                 try
                 {
                     var result = LuaEnv.LuaLoader.Run(
-                        $"{Global.setting.recvScript}.lua",
+                        $"{scriptName}.lua",
                         new ArrayList { "uartData", data, "uartPara", para, "uartSendRaw", sendRaw },
                         "user_script_recv_convert/");
                     return result ?? new byte[0];

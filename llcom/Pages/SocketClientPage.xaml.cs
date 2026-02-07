@@ -57,16 +57,18 @@ namespace llcom.Pages
 
             ConfigWrapPanel.DataContext = Tools.Global.setting;
             ReconnectInterval.DataContext = Tools.Global.setting;
-            OptionsScrollViewer.DataContext = Tools.Global.setting;
-            toSendDataTextBox.DataContext = Tools.Global.setting;
+            var displayProxy = new Model.InterfaceConfigProxy("TcpClient");
+            OptionsScrollViewer.DataContext = displayProxy;
+            toSendDataTextBox.DataContext = displayProxy;
 
             LoadSendScriptList();
+            LoadRecvScriptList();
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, buff) =>
             {
                 Tools.Global.setting.ReceivedCount += buff.Length;
-                Tools.Logger.ShowData(buff, false);
+                Tools.Logger.ShowData(buff, false, "TcpClient");
             };
 
             //适配一下通用通道
@@ -404,6 +406,59 @@ namespace llcom.Pages
                 Tools.Global.setting.SetSendScriptForInterface("TcpClient", name);
         }
 
+        private bool recvScriptLoading = false;
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetRecvScriptForInterface("TcpClient");
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetRecvScriptForInterface("TcpClient", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("TcpClient"))
+                Tools.Global.setting.SetRecvScriptForInterface("TcpClient", name);
+        }
+
         private void Reconnect_TextInputCheck(object sender, TextCompositionEventArgs e)
         {
             if (string.IsNullOrEmpty(e.Text)) return;
@@ -448,11 +503,10 @@ namespace llcom.Pages
         {
             if (socketNow != null)
             {
-                var text = Tools.Global.setting.dataToSend ?? "";
+                var text = Tools.Global.setting.GetDataToSendForInterface("TcpClient") ?? "";
                 byte[] buff = Tools.Global.GetEncoding().GetBytes(text);
                 if (buff == null || buff.Length == 0)
                     return;
-                MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
                 Tools.Global.recvPara = new byte[][] { new byte[0], buff };
                 Send(buff);
             }
@@ -471,14 +525,14 @@ namespace llcom.Pages
             {
                 socketNow.Send(toSend);
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.showSendRaw;
-                bool showConverted = Tools.Global.setting.showSend;
+                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("TcpClient");
+                bool showConverted = Tools.Global.setting.GetShowSendForInterface("TcpClient");
                 if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
-                    Tools.Logger.ShowData(toSend, true);
+                    Tools.Logger.ShowData(toSend, true, "TcpClient");
                 else
                 {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true);
-                    if (showConverted) Tools.Logger.ShowData(toSend, true);
+                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "TcpClient");
+                    if (showConverted) Tools.Logger.ShowData(toSend, true, "TcpClient");
                 }
                 return true;
             }

@@ -77,7 +77,6 @@ namespace llcom
         }
         ObservableCollection<ToSendData> toSendListItems = new ObservableCollection<ToSendData>();
         private bool canSaveSendList = true;
-        public static string recvScriptBackup = "";
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //延迟启动，加快软件第一屏出现速度
@@ -283,8 +282,6 @@ namespace llcom
                     };
                 }));
             });
-            recvScriptBackup = Tools.Global.setting.recvScript;
-            if (string.IsNullOrEmpty(recvScriptBackup)) recvScriptBackup = Tools.Global.GetDefaultScriptName();
         }
 
         private bool DoInvoke(Action action)
@@ -324,12 +321,12 @@ namespace llcom
 
         private void Uart_UartDataSent(object sender, EventArgs e)
         {
-            Tools.Logger.ShowData(sender as byte[], true);
+            Tools.Logger.ShowData(sender as byte[], true, "Serial");
         }
 
         private void Uart_UartDataRecived(object sender, EventArgs e)
         {
-            Tools.Logger.ShowData(sender as byte[], false);
+            Tools.Logger.ShowData(sender as byte[], false, "Serial");
         }
 
         private void RefreshScriptList()
@@ -425,6 +422,8 @@ namespace llcom
                 return;
             RefreshDataInterfaceStatus();
             foreach (var ctrl in FindVisualChildren<View.Controls.SendScriptControl>(this))
+                ctrl.RefreshSelectionForCurrentInterface();
+            foreach (var ctrl in FindVisualChildren<View.Controls.RecvScriptControl>(this))
                 ctrl.RefreshSelectionForCurrentInterface();
         }
 
@@ -612,27 +611,24 @@ namespace llcom
         {
             ToSendData data = ((Button)sender).Tag as ToSendData;
 
-            // 如果有指定接收脚本，则切换
+            // 快捷发送区接收脚本临时覆盖（Serial 接口）
             if (!string.IsNullOrEmpty(data.recvScriptPath))
             {
-                //检查文件是否存在
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{data.recvScriptPath}.lua"))
                 {
-                    Tools.Global.setting.recvScript = Tools.Global.GetDefaultScriptName();
                     data.recvScriptPath = "";
-                    if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua"))
-                    {
-                        File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua").Close();
-                    }
+                    if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.GetDefaultScriptName()}.lua"))
+                        File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.GetDefaultScriptName()}.lua").Close();
+                    Tools.Global.recvScriptTempOverride.Remove("Serial");
                 }
                 else
                 {
-                    Tools.Global.setting.recvScript = data.recvScriptPath;
+                    Tools.Global.recvScriptTempOverride["Serial"] = data.recvScriptPath;
                 }
             }
             else
             {
-                Tools.Global.setting.recvScript = recvScriptBackup;
+                Tools.Global.recvScriptTempOverride.Remove("Serial");
             }
 
             var sendData = Global.GetEncoding().GetBytes(data.text);

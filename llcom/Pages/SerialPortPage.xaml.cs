@@ -26,6 +26,7 @@ namespace llcom.Pages
         private bool skipSearch = false;
         private int searchCount = 0;
         private bool sendScriptLoading = false;
+        private bool recvScriptLoading = false;
 
         public SerialPortPage()
         {
@@ -34,8 +35,7 @@ namespace llcom.Pages
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            MainGrid.DataContext = Tools.Global.setting;
-            toSendDataTextBox.DataContext = Tools.Global.setting;
+            MainGrid.DataContext = new { Display = new Model.InterfaceConfigProxy("Serial"), Setting = Tools.Global.setting };
 
             var br = Tools.Global.setting.baudRate.ToString();
             if (baudRateComboBox.Items.Contains(br))
@@ -67,7 +67,60 @@ namespace llcom.Pages
             }
 
             LoadSendScriptList();
+            LoadRecvScriptList();
             RefreshPortList();
+        }
+
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.GetRecvScriptForInterface("Serial");
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.SetRecvScriptForInterface("Serial", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("Serial"))
+                Tools.Global.setting.SetRecvScriptForInterface("Serial", name);
         }
 
         private void LoadSendScriptList()
@@ -387,7 +440,6 @@ namespace llcom.Pages
         /// </summary>
         public void PerformSend()
         {
-            MainWindow.recvScriptBackup = Tools.Global.setting.recvScript;
             var data = Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
             Global.recvPara = new byte[][] { new byte[0], data };
             SendUartData(data);

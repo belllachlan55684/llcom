@@ -435,6 +435,67 @@ namespace llcom.Model
             }
         }
 
+        private Dictionary<string, string> _recvScriptByInterface = null;
+
+        /// <summary>
+        /// 各数据接口独立使用的接收脚本，键为接口名（Serial/TcpClient/TcpLocal 等）
+        /// </summary>
+        public Dictionary<string, string> recvScriptByInterface
+        {
+            get => _recvScriptByInterface ??= new Dictionary<string, string>();
+            set => _recvScriptByInterface = value ?? new Dictionary<string, string>();
+        }
+
+        /// <summary>
+        /// 获取指定接口的接收脚本，无则回退到全局 recvScript
+        /// </summary>
+        public string GetRecvScriptForInterface(string key)
+        {
+            if (key != null && recvScriptByInterface.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
+            return recvScript;
+        }
+
+        /// <summary>
+        /// 设置指定接口的接收脚本
+        /// </summary>
+        public void SetRecvScriptForInterface(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            recvScriptByInterface[key] = value ?? recvScript;
+            Save();
+        }
+
+        private Dictionary<string, bool> _showSendByInterface = null;
+        public Dictionary<string, bool> showSendByInterface { get => _showSendByInterface ??= new Dictionary<string, bool>(); set => _showSendByInterface = value ?? new Dictionary<string, bool>(); }
+        public bool GetShowSendForInterface(string key) { if (key != null && showSendByInterface.TryGetValue(key, out var v)) return v; return showSend; }
+        public void SetShowSendForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendByInterface[key] = value; Save(); }
+
+        private Dictionary<string, bool> _showSendRawByInterface = null;
+        public Dictionary<string, bool> showSendRawByInterface { get => _showSendRawByInterface ??= new Dictionary<string, bool>(); set => _showSendRawByInterface = value ?? new Dictionary<string, bool>(); }
+        public bool GetShowSendRawForInterface(string key) { if (key != null && showSendRawByInterface.TryGetValue(key, out var v)) return v; return showSendRaw; }
+        public void SetShowSendRawForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendRawByInterface[key] = value; Save(); }
+
+        private Dictionary<string, string> _dataToSendByInterface = null;
+        public Dictionary<string, string> dataToSendByInterface { get => _dataToSendByInterface ??= new Dictionary<string, string>(); set => _dataToSendByInterface = value ?? new Dictionary<string, string>(); }
+        public string GetDataToSendForInterface(string key) { if (key != null && dataToSendByInterface.TryGetValue(key, out var v) && v != null) return v; return dataToSend; }
+        public void SetDataToSendForInterface(string key, string value) { if (string.IsNullOrEmpty(key)) return; dataToSendByInterface[key] = value ?? dataToSend; Save(); }
+
+        private Dictionary<string, int> _showHexFormatByInterface = null;
+        public Dictionary<string, int> showHexFormatByInterface { get => _showHexFormatByInterface ??= new Dictionary<string, int>(); set => _showHexFormatByInterface = value ?? new Dictionary<string, int>(); }
+        public int GetShowHexFormatForInterface(string key) { if (key != null && showHexFormatByInterface.TryGetValue(key, out var v)) return v; return showHexFormat; }
+        public void SetShowHexFormatForInterface(string key, int value) { if (string.IsNullOrEmpty(key)) return; showHexFormatByInterface[key] = value; Save(); }
+
+        private Dictionary<string, bool> _enableSymbolByInterface = null;
+        public Dictionary<string, bool> enableSymbolByInterface { get => _enableSymbolByInterface ??= new Dictionary<string, bool>(); set => _enableSymbolByInterface = value ?? new Dictionary<string, bool>(); }
+        public bool GetEnableSymbolForInterface(string key) { if (key != null && enableSymbolByInterface.TryGetValue(key, out var v)) return v; return EnableSymbol; }
+        public void SetEnableSymbolForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; enableSymbolByInterface[key] = value; Save(); }
+
+        private Dictionary<string, bool> _disableLogByInterface = null;
+        public Dictionary<string, bool> disableLogByInterface { get => _disableLogByInterface ??= new Dictionary<string, bool>(); set => _disableLogByInterface = value ?? new Dictionary<string, bool>(); }
+        public bool GetDisableLogForInterface(string key) { if (key != null && disableLogByInterface.TryGetValue(key, out var v)) return v; return DisableLog; }
+        public void SetDisableLogForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; disableLogByInterface[key] = value; Save(); }
+
         public string runScript
         {
             get
