@@ -105,7 +105,7 @@
     <system:String x:Key="SettingDisplayMode">Display mode selection</system:String>
     <system:String x:Key="LightMode">Light mode</system:String>
     <system:String x:Key="SettingAutoReconnect">Auto reconnect after disconnect</system:String>
-    <system:String x:Key="SettingOpenLogFolder">Open serial port log data folder</system:String>
+    <system:String x:Key="SettingOpenLogFolder">Log Folder</system:String>
     <system:String x:Key="SettingShowFormat">Data show format:</system:String>
     <system:String x:Key="SettingShowBoth">Both Text and Hex</system:String>
     <system:String x:Key="SettingShoText">Only Text</system:String>

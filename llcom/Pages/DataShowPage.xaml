@@ -176,6 +176,12 @@
                 Padding="8,2"
                 Click="ClearLogButton_Click"
                 Content="{DynamicResource ClearLog}" />
+            <Button
+                Name="OpenLogFolderButton"
+                Margin="5,0,0,0"
+                Padding="8,2"
+                Click="OpenLogFolderButton_Click"
+                Content="{DynamicResource SettingOpenLogFolder}" />
         </StackPanel>
         <Button
             Name="LockLogButton"

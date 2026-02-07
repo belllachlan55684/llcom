@@ -13,11 +13,6 @@
                 Margin="5"
                 Content="{DynamicResource SettingAutoReconnect}"
                 IsChecked="{Binding autoReconnect}" />
-            <Button
-                Name="OpenLogButton"
-                Margin="5"
-                Click="OpenLogButton_Click"
-                Content="{DynamicResource SettingOpenLogFolder}" />
             <WrapPanel Margin="5">
                 <TextBlock VerticalAlignment="Center" Text="{DynamicResource SettingShowFormat}" />
                 <ComboBox

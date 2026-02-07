@@ -37,18 +37,6 @@ namespace llcom.View.Controls
             }
         }
 
-        private void OpenLogButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                System.Diagnostics.Process.Start("explorer.exe", Tools.Global.GetTrueProfilePath() + "logs");
-            }
-            catch
-            {
-                Tools.MessageBox.Show($"尝试打开文件夹失败，请自行打开该路径：{Tools.Global.GetTrueProfilePath()}logs");
-            }
-        }
-
         private void DataBitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (dataBitsComboBox.SelectedItem != null)

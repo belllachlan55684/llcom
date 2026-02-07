@@ -105,7 +105,7 @@
     <system:String x:Key="SettingDisplayMode">显示模式选择</system:String>
     <system:String x:Key="LightMode">浅色模式</system:String>
     <system:String x:Key="SettingAutoReconnect">自动恢复被断开的串口连接</system:String>
-    <system:String x:Key="SettingOpenLogFolder">打开串口收发日志目录</system:String>
+    <system:String x:Key="SettingOpenLogFolder">日志目录</system:String>
     <system:String x:Key="SettingShowFormat">串口数据显示方式：</system:String>
     <system:String x:Key="SettingShowBoth">同时显示Hex和文本数据</system:String>
     <system:String x:Key="SettingShoText">只显示文本数据</system:String>
