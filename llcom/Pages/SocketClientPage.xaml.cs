@@ -27,7 +27,7 @@ namespace llcom.Pages
     /// SocketClientPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class SocketClientPage : Page
+    public partial class SocketClientPage : Page, IDataInterfaceStatusProvider
     {
         public SocketClientPage()
         {
@@ -84,6 +84,22 @@ namespace llcom.Pages
             {
                 LuaApis.SendChannelsReceived("socket-client", data);
             };
+        }
+
+        public string GetStatusBarText()
+        {
+            if (!IsConnected)
+                return "";
+            var protocol = ProtocolTypeComboBox.SelectedIndex switch { 0 => "TCP", 1 => "UDP", 2 => "TCP SSL", _ => "TCP" };
+            var addr = ServerTextBox?.Text?.Trim() ?? "";
+            var port = PortTextBox?.Text?.Trim() ?? "";
+            return string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port) ? $"{protocol}：{port}" : $"{protocol} {addr}：{port}";
+        }
+
+        private void NotifyStatusChanged()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+                (Application.Current.MainWindow as MainWindow)?.RefreshDataInterfaceStatus()));
         }
 
         private void ShowData(string title, byte[] data = null, bool send = false)
@@ -143,6 +159,7 @@ namespace llcom.Pages
                         IsConnected = true;
                         NeedDisconnected = true;
                         ShowData("✔ Server connected");
+                        NotifyStatusChanged();
                     }
                     else
                     {
@@ -173,6 +190,7 @@ namespace llcom.Pages
                                 NeedDisconnected = false;
                             Changeable = true;
                             s.Close();
+                            NotifyStatusChanged();
                             s.Dispose();
                             ShowData("❌ Server disconnected");
                             return;
@@ -181,6 +199,7 @@ namespace llcom.Pages
                         {
                             socketNow = new SocketObj(ssl);
                             ssl.BeginRead(so.buffer, 0, StateObject.BUFFER_SIZE, new AsyncCallback(Read_Callback), so);
+                            NotifyStatusChanged();
                         }
                         catch (Exception ex)
                         {
@@ -191,6 +210,7 @@ namespace llcom.Pages
                             s.Close();
                             s.Dispose();
                             ShowData("❌ Server disconnected");
+                            NotifyStatusChanged();
                             return;
                         }
                     }
@@ -200,6 +220,7 @@ namespace llcom.Pages
                         try
                         {
                             s.BeginReceive(so.buffer, 0, StateObject.BUFFER_SIZE, 0, new AsyncCallback(Read_Callback), so);
+                            NotifyStatusChanged();
                         }
                         catch(Exception ex)
                         {
@@ -288,6 +309,7 @@ namespace llcom.Pages
                             NeedDisconnected = false;
                         Changeable = true;
                         ShowData("❌ Server disconnected");
+                        NotifyStatusChanged();
                     }
                 }
                 catch { }
@@ -324,6 +346,7 @@ namespace llcom.Pages
                         NeedDisconnected = false;
                     Changeable = true;
                     ShowData("❌ Server disconnected");
+                    NotifyStatusChanged();
                 }
             }
             catch { }
@@ -350,6 +373,7 @@ namespace llcom.Pages
                 IsConnected = false;
                 Changeable = true;
                 ShowData("❌ Server disconnected");
+                NotifyStatusChanged();
             }
 
             NeedDisconnected = false;

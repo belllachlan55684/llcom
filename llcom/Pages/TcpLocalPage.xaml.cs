@@ -27,7 +27,7 @@ namespace llcom.Pages
     /// TcpLocalPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class TcpLocalPage : Page
+    public partial class TcpLocalPage : Page, IDataInterfaceStatusProvider
     {
         public TcpLocalPage()
         {
@@ -37,6 +37,20 @@ namespace llcom.Pages
         //收到消息的事件
         public event EventHandler<byte[]> DataRecived;
         public bool IsConnected { get; set; } = false;
+
+        public string GetStatusBarText()
+        {
+            if (!IsConnected)
+                return "";
+            var title = TryFindResource("TcpLocalTabTitle") as string ?? "TCP Server";
+            return $"{title}：{IpPortTextBox.Text}";
+        }
+
+        private void NotifyStatusChanged()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+                (Application.Current.MainWindow as MainWindow)?.RefreshDataInterfaceStatus()));
+        }
 
         private static bool loaded = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -283,6 +297,8 @@ namespace llcom.Pages
                 try
                 {
                     IsConnected = StartServer(IpListComboBox.Text, port);
+                    if (IsConnected)
+                        NotifyStatusChanged();
                 }
                 catch(Exception err)
                 {
@@ -298,6 +314,7 @@ namespace llcom.Pages
                 StopServer();
                 IsConnected = false;
                 ShowData($"🚫 server closed");
+                NotifyStatusChanged();
             }
             catch { }
         }

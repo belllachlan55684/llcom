@@ -97,10 +97,18 @@ namespace llcom
                     // 绑定事件监听,用于监听HID设备插拔
                     (PresentationSource.FromVisual(this) as HwndSource)?.AddHook(WndProc);
 
+                    // 订阅 SentCount/ReceivedCount 变化以刷新串口状态栏（PropertyChanged 在后台线程触发，必须通过 Dispatcher 切回 UI 线程）
+                    if (Tools.Global.setting is System.ComponentModel.INotifyPropertyChanged inpc)
+                    {
+                        inpc.PropertyChanged += (s, ev) =>
+                        {
+                            if (ev.PropertyName == "SentCount" || ev.PropertyName == "ReceivedCount")
+                                Dispatcher.BeginInvoke(new Action(RefreshDataInterfaceStatus));
+                        };
+                    }
+
                     //绑定数据
                     toSendList.ItemsSource = toSendListItems;
-                    this.sentCountTextBlock.DataContext = Tools.Global.setting;
-                    this.receivedCountTextBlock.DataContext = Tools.Global.setting;
                     QuiclListName0.DataContext = Tools.Global.setting;
                     QuiclListName1.DataContext = Tools.Global.setting;
                     QuiclListName2.DataContext = Tools.Global.setting;
@@ -201,6 +209,8 @@ namespace llcom
                     //加载完了，可以允许点击
                     MainGrid.IsEnabled = true;
 
+                    RefreshDataInterfaceStatus();
+
                     //检查更新
                     if (!Tools.Global.IsMSIX())
                     {
@@ -298,7 +308,7 @@ namespace llcom
                 toSendListItems.Add(i);
             }
             CheckToSendListId();
-            QuickListPageTextBlock.Text = Global.setting.GetQuickListNameNow();
+            QuickListSwitchMenuItem.Header = Global.setting.GetQuickListNameNow() + " ▾";
         }
 
         private void Uart_UartDataSent(object sender, EventArgs e)
@@ -369,11 +379,50 @@ namespace llcom
         }
 
         /// <summary>
-        /// 供 SerialPortPage 更新状态栏显示
+        /// 供各数据接口页更新状态栏显示
         /// </summary>
-        public void SetSerialStatus(string text)
+        public void SetDataInterfaceStatus(string text)
         {
-            statusTextBlock.Text = text;
+            if (statusTextBlock != null)
+                statusTextBlock.Text = text ?? "";
+        }
+
+        /// <summary>
+        /// 根据所有数据接口的打开状态刷新状态栏，显示所有已打开的接口
+        /// </summary>
+        public void RefreshDataInterfaceStatus()
+        {
+            if (statusTextBlock == null || DataInterfaceComboBox == null)
+                return;
+            var parts = new List<string>();
+            foreach (var content in new[] {
+                SerialPortFrame?.Content,
+                tcpClientFrame?.Content,
+                udpLocalTestFrame?.Content,
+                tcpLocalTestFrame?.Content })
+            {
+                var text = (content as IDataInterfaceStatusProvider)?.GetStatusBarText();
+                if (!string.IsNullOrEmpty(text))
+                    parts.Add(text);
+            }
+            statusTextBlock.Text = string.Join(" | ", parts);
+        }
+
+        private void DataInterfaceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded)
+                return;
+            RefreshDataInterfaceStatus();
+        }
+
+        private void statusTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataInterfaceComboBox.SelectedIndex == 0 && Tools.Global.uart.IsOpen())
+            {
+                Tools.Global.setting.SentCount = 0;
+                Tools.Global.setting.ReceivedCount = 0;
+                RefreshDataInterfaceStatus();
+            }
         }
 
         /// <summary>
@@ -929,15 +978,6 @@ namespace llcom
             }
         }
 
-        private void sentCountTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Tools.Global.setting.SentCount = 0;
-        }
-
-        private void receivedCountTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Tools.Global.setting.ReceivedCount = 0;
-        }
 
         //id序号右击事件
         private void TextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -981,6 +1021,7 @@ namespace llcom
             toSendListItems.Clear();
             Global.setting.quickSendSelect = select;
             LoadQuickSendList();
+            QuickListSwitchMenuItem.Header = Global.setting.GetQuickListNameNow() + " ▾";
             canSaveSendList = true;
         }
 
@@ -1017,7 +1058,7 @@ namespace llcom
         private void QuickSendExportButton_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.SaveFileDialog SaveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            SaveFileDialog.FileName = System.Text.RegularExpressions.Regex.Replace(QuickListPageTextBlock.Text, "[<>/\\|:\"?*]", "-");
+            SaveFileDialog.FileName = System.Text.RegularExpressions.Regex.Replace(Global.setting.GetQuickListNameNow(), "[<>/\\|:\"?*]", "-");
             SaveFileDialog.Filter = TryFindResource("QuickSendLLCOMFile") as string ?? "?!";
             if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
@@ -1033,7 +1074,7 @@ namespace llcom
             }
         }
 
-        private void QuickListNameStackPanel_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void QuickListRename_Click(object sender, RoutedEventArgs e)
         {
             Tuple<bool, string> ret = Tools.InputDialog.OpenDialog("↓↓↓↓↓↓",
                 Global.setting.GetQuickListNameNow(), TryFindResource("QuickSendListNameChangeTip") as string ?? "?!");
@@ -1042,7 +1083,7 @@ namespace llcom
                 return;
 
             Global.setting.SetQuickListNameNow(ret.Item2);
-            QuickListPageTextBlock.Text = ret.Item2;
+            QuickListSwitchMenuItem.Header = ret.Item2 + " ▾";
         }
 
         private void pauseLuaPrintButton_MouseRightButtonUp(object sender, MouseButtonEventArgs e)

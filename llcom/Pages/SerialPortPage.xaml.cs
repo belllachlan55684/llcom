@@ -14,7 +14,7 @@ namespace llcom.Pages
     /// <summary>
     /// SerialPortPage.xaml 的交互逻辑
     /// </summary>
-    public partial class SerialPortPage : Page
+    public partial class SerialPortPage : Page, IDataInterfaceStatusProvider
     {
         private bool forcusClosePort = true;
         private bool isOpeningPort = false;
@@ -139,7 +139,7 @@ namespace llcom.Pages
                                         {
                                             openClosePortTextBlock.Text = (TryFindResource("OpenPort_close") as string ?? "?!");
                                             serialPortsListComboBox.IsEnabled = false;
-                                            SetMainWindowStatus(Tools.Global.uart.GetName(), true);
+                                            NotifyStatusChanged();
                                         });
                                     }
                                     catch { }
@@ -150,7 +150,7 @@ namespace llcom.Pages
                         }
                     }
                     if (!Tools.Global.uart.IsOpen())
-                        SetMainWindowStatus(GetDisplayPortName(), false);
+                        NotifyStatusChanged();
                 });
             });
         }
@@ -181,7 +181,7 @@ namespace llcom.Pages
                 }
                 openClosePortTextBlock.Text = (TryFindResource("OpenPort_open") as string ?? "?!");
                 serialPortsListComboBox.IsEnabled = true;
-                SetMainWindowStatus(lastPort, false);
+                NotifyStatusChanged();
                 RefreshPortList(lastPort);
             }
         }
@@ -227,7 +227,7 @@ namespace llcom.Pages
                             {
                                 openClosePortTextBlock.Text = (TryFindResource("OpenPort_close") as string ?? "?!");
                                 serialPortsListComboBox.IsEnabled = false;
-                                SetMainWindowStatus(Tools.Global.uart.GetName(), true);
+                                NotifyStatusChanged();
                             });
                             if (toSendData != null)
                             {
@@ -355,12 +355,16 @@ namespace llcom.Pages
             return Tools.Global.uart.GetName();
         }
 
-        private void SetMainWindowStatus(string portName, bool isOpen)
+        public string GetStatusBarText()
         {
-            var openClose = (TryFindResource(isOpen ? "OpenPort_open" : "OpenPort_close") as string) ?? "?!";
-            var text = $"{portName}：{openClose}";
-            var mw = Application.Current.MainWindow as MainWindow;
-            mw?.SetSerialStatus(text);
+            if (!Tools.Global.uart.IsOpen())
+                return "";
+            return $"{Tools.Global.uart.GetName()}：Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
+        }
+
+        private void NotifyStatusChanged()
+        {
+            (Application.Current.MainWindow as MainWindow)?.RefreshDataInterfaceStatus();
         }
     }
 }

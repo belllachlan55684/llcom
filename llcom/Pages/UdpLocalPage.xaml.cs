@@ -23,7 +23,7 @@ namespace llcom.Pages
     /// UdpLocalPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class UdpLocalPage : Page
+    public partial class UdpLocalPage : Page, IDataInterfaceStatusProvider
     {
         public UdpLocalPage()
         {
@@ -32,6 +32,20 @@ namespace llcom.Pages
 
 
         public bool IsConnected { get; set; } = false;
+
+        public string GetStatusBarText()
+        {
+            if (!IsConnected)
+                return "";
+            var title = TryFindResource("UdpLocalTabTitle") as string ?? "UDP Server";
+            return $"{title}：{IpPortTextBox.Text}";
+        }
+
+        private void NotifyStatusChanged()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+                (Application.Current.MainWindow as MainWindow)?.RefreshDataInterfaceStatus()));
+        }
 
         private static bool loaded = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -99,6 +113,7 @@ namespace llcom.Pages
 
             var isV6 = ip.Contains(":");
             ShowData($"🗑 {(isV6 ? "[" : "")}{ip}{(isV6 ? "]" : "")}:{port}");
+            NotifyStatusChanged();
 
             AsyncCallback newConnectionCb = null;
             newConnectionCb = new AsyncCallback((ar) =>
@@ -141,6 +156,8 @@ namespace llcom.Pages
             Server?.Close();
             Server?.Dispose();
             Server = null;
+            IsConnected = false;
+            NotifyStatusChanged();
         }
 
         private void RefreshIpButton_Click(object sender, RoutedEventArgs e)
@@ -156,6 +173,8 @@ namespace llcom.Pages
                 try
                 {
                     IsConnected = StartServer(IpListComboBox.Text, port);
+                    if (IsConnected)
+                        NotifyStatusChanged();
                 }
                 catch (Exception err)
                 {

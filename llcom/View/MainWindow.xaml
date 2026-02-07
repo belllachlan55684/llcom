@@ -73,54 +73,19 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
                 <StatusBarItem Grid.Column="0">
-                    <TextBlock Name="statusTextBlock" Text="" />
+                    <TextBlock
+                        Name="statusTextBlock"
+                        Cursor="Cross"
+                        MouseRightButtonDown="statusTextBlock_MouseRightButtonDown"
+                        Text=""
+                        ToolTip="{DynamicResource ClearCountTip}" />
                 </StatusBarItem>
                 <Separator Grid.Column="1" />
-                <StatusBarItem Grid.Column="2">
-                    <TextBlock
-                        Cursor="Cross"
-                        MouseRightButtonDown="sentCountTextBlock_MouseRightButtonDown"
-                        Text="{DynamicResource SentCount}"
-                        ToolTip="{DynamicResource ClearCountTip}" />
-                </StatusBarItem>
-                <Separator Grid.Column="3" />
-                <StatusBarItem Grid.Column="4">
-                    <TextBlock
-                        Name="sentCountTextBlock"
-                        Cursor="Cross"
-                        MouseRightButtonDown="sentCountTextBlock_MouseRightButtonDown"
-                        Text="{Binding SentCount}"
-                        ToolTip="{DynamicResource ClearCountTip}" />
-                </StatusBarItem>
-                <Separator Grid.Column="5" />
-                <StatusBarItem Grid.Column="6">
-                    <TextBlock
-                        Cursor="Cross"
-                        MouseRightButtonDown="receivedCountTextBlock_MouseRightButtonDown"
-                        Text="{DynamicResource ReceivedCount}"
-                        ToolTip="{DynamicResource ClearCountTip}" />
-                </StatusBarItem>
-                <Separator Grid.Column="7" />
-                <StatusBarItem Grid.Column="8">
-                    <TextBlock
-                        Name="receivedCountTextBlock"
-                        Cursor="Cross"
-                        MouseRightButtonDown="receivedCountTextBlock_MouseRightButtonDown"
-                        Text="{Binding ReceivedCount}"
-                        ToolTip="{DynamicResource ClearCountTip}" />
-                </StatusBarItem>
             </StatusBar>
         </DockPanel>
 
@@ -139,7 +104,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <ComboBox Name="DataInterfaceComboBox" SelectedIndex="0" Margin="2">
+                    <ComboBox Name="DataInterfaceComboBox" SelectedIndex="0" Margin="2" SelectionChanged="DataInterfaceComboBox_SelectionChanged">
                         <ComboBoxItem Content="{DynamicResource SerialPortTabTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpClientTitle}" />
                         <ComboBoxItem Content="{DynamicResource UdpLocalTabTitle}" />
@@ -182,72 +147,7 @@
                     </TabControl>
                 </Grid>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{DynamicResource QuickSendCard}" />
-                        <Menu Grid.Column="1" HorizontalAlignment="Left">
-                            <MenuItem ToolTip="{DynamicResource QuickSendChangeList}">
-                                <MenuItem.Header>
-                                    <Grid>
-                                        <fa:FontAwesome Foreground="LightYellow" Icon="StickyNote" />
-                                        <fa:FontAwesome Icon="StickyNoteOutline" />
-                                    </Grid>
-                                </MenuItem.Header>
-                                <MenuItem
-                                    Name="QuiclListName0"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName0}"
-                                    Tag="0" />
-                                <MenuItem
-                                    Name="QuiclListName1"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName1}"
-                                    Tag="1" />
-                                <MenuItem
-                                    Name="QuiclListName2"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName2}"
-                                    Tag="2" />
-                                <MenuItem
-                                    Name="QuiclListName3"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName3}"
-                                    Tag="3" />
-                                <MenuItem
-                                    Name="QuiclListName4"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName4}"
-                                    Tag="4" />
-                                <MenuItem
-                                    Name="QuiclListName5"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName5}"
-                                    Tag="5" />
-                                <MenuItem
-                                    Name="QuiclListName6"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName6}"
-                                    Tag="6" />
-                                <MenuItem
-                                    Name="QuiclListName7"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName7}"
-                                    Tag="7" />
-                                <MenuItem
-                                    Name="QuiclListName8"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName8}"
-                                    Tag="8" />
-                                <MenuItem
-                                    Name="QuiclListName9"
-                                    Click="MenuItem_Click_QuickSendList"
-                                    Header="{Binding quickListName9}"
-                                    Tag="9" />
-                            </MenuItem>
-                        </Menu>
-                    </StackPanel>
-                </TabItem.Header>
+            <TabItem Header="{DynamicResource QuickSendCard}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -369,29 +269,72 @@
                     <ContentControl x:Name="sendDataButton" Visibility="Collapsed" Content="{DynamicResource SendDataButton}" />
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="Auto" MinWidth="80" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="40" />
                             <ColumnDefinition Width="22" />
                             <ColumnDefinition Width="25" />
                             <ColumnDefinition Width="25" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel
-                            Name="QuickListNameStackPanel"
-                            Grid.Column="1"
-                            HorizontalAlignment="Left"
-                            Cursor="Cross"
-                            MouseRightButtonDown="QuickListNameStackPanel_MouseRightButtonDown"
-                            Orientation="Horizontal"
-                            ToolTip="{DynamicResource QuickSendListNameTip}">
-                            <TextBlock Text="(" />
-                            <TextBlock Name="QuickListPageTextBlock" Text="___" />
-                            <TextBlock Text=")" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Column="0"
-                            HorizontalAlignment="Center"
-                            Text="{DynamicResource QuickSendId}" />
+                        <Menu Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="{DynamicResource QuickSendChangeList}">
+                            <MenuItem Name="QuickListSwitchMenuItem" Header="___">
+                                <MenuItem
+                                    Name="QuiclListName0"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName0}"
+                                    Tag="0" />
+                                <MenuItem
+                                    Name="QuiclListName1"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName1}"
+                                    Tag="1" />
+                                <MenuItem
+                                    Name="QuiclListName2"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName2}"
+                                    Tag="2" />
+                                <MenuItem
+                                    Name="QuiclListName3"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName3}"
+                                    Tag="3" />
+                                <MenuItem
+                                    Name="QuiclListName4"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName4}"
+                                    Tag="4" />
+                                <MenuItem
+                                    Name="QuiclListName5"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName5}"
+                                    Tag="5" />
+                                <MenuItem
+                                    Name="QuiclListName6"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName6}"
+                                    Tag="6" />
+                                <MenuItem
+                                    Name="QuiclListName7"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName7}"
+                                    Tag="7" />
+                                <MenuItem
+                                    Name="QuiclListName8"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName8}"
+                                    Tag="8" />
+                                <MenuItem
+                                    Name="QuiclListName9"
+                                    Click="MenuItem_Click_QuickSendList"
+                                    Header="{Binding quickListName9}"
+                                    Tag="9" />
+                                <Separator />
+                                <MenuItem
+                                    Name="QuickListRenameMenuItem"
+                                    Click="QuickListRename_Click"
+                                    Header="{DynamicResource QuickSendListNameChangeTip}" />
+                            </MenuItem>
+                        </Menu>
                         <TextBlock
                             Grid.Column="1"
                             HorizontalAlignment="Center"
@@ -716,7 +659,7 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <fa:FontAwesome Foreground="Chocolate" Icon="cubes" />
+                    <TextBlock Text="{DynamicResource OnlineScriptTitle}" />
                 </TabItem.Header>
                 <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
