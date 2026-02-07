@@ -13,13 +13,17 @@
     d:DesignWidth="400"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
+    <Page.Resources>
+        <local:boolVisibe x:Key="boolVisibeConverter" />
+    </Page.Resources>
     <Grid Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="35" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="35" />
-            <RowDefinition Height="35" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="60" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Grid Margin="0,5,0,0">
@@ -38,18 +42,12 @@
                 Content="{DynamicResource RefreshPortButton}"
                 IsEnabled="{Binding ElementName=serialPortsListComboBox, Path=IsEnabled}" />
         </Grid>
-        <Grid Grid.Row="1" Margin="0,5,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                Margin="0,0,5,0"
-                VerticalAlignment="Center"
-                Text="{DynamicResource ShowBaudRate}" />
+        <WrapPanel Grid.Row="1" Margin="0,5,0,0" Orientation="Horizontal">
             <ComboBox
                 Name="baudRateComboBox"
                 Width="100"
+                Margin="0,0,5,0"
+                ToolTip="{DynamicResource TooltipBaudRate}"
                 DropDownClosed="BaudRateComboBox_Changed"
                 DropDownOpened="BaudRateComboBox_Changed">
                 <ComboBoxItem Content="110" />
@@ -80,7 +78,46 @@
                 <ComboBoxItem Content="3000000" />
                 <ComboBoxItem Content="{DynamicResource OtherRate}" />
             </ComboBox>
-        </Grid>
+            <ComboBox
+                Name="dataBitsComboBox"
+                Width="50"
+                Margin="0,0,5,0"
+                ToolTip="{DynamicResource TooltipDataBits}"
+                SelectionChanged="DataBitsComboBox_SelectionChanged">
+                <ComboBoxItem Content="5" Tag="5" />
+                <ComboBoxItem Content="6" Tag="6" />
+                <ComboBoxItem Content="7" Tag="7" />
+                <ComboBoxItem Content="8" Tag="8" />
+            </ComboBox>
+            <ComboBox
+                Name="stopBitComboBox"
+                Width="50"
+                Margin="0,0,5,0"
+                ToolTip="{DynamicResource TooltipStopBit}"
+                SelectionChanged="StopBitComboBox_SelectionChanged">
+                <ComboBoxItem Content="1" />
+                <ComboBoxItem Content="2" />
+                <ComboBoxItem Content="1.5" />
+            </ComboBox>
+            <ComboBox
+                Name="dataCheckComboBox"
+                Width="70"
+                Margin="0,0,5,0"
+                ToolTip="{DynamicResource TooltipParity}"
+                SelectionChanged="DataCheckComboBox_SelectionChanged">
+                <ComboBoxItem Content="{DynamicResource SettingParityNone}" />
+                <ComboBoxItem Content="{DynamicResource SettingParityOdd}" />
+                <ComboBoxItem Content="{DynamicResource SettingParityEven}" />
+                <ComboBoxItem Content="{DynamicResource SettingParityMark}" />
+                <ComboBoxItem Content="{DynamicResource SettingParitySpace}" />
+            </ComboBox>
+            <ComboBox
+                Name="encodingComboBox"
+                MinWidth="120"
+                Margin="0,0,5,0"
+                ToolTip="{DynamicResource TooltipEncoding}"
+                SelectionChanged="EncodingComboBox_SelectionChanged" />
+        </WrapPanel>
         <Button
             Name="openClosePortButton"
             Grid.Row="2"
@@ -91,14 +128,61 @@
                 <TextBlock Text="{DynamicResource OpenPort_port}" />
             </WrapPanel>
         </Button>
+        <ScrollViewer Grid.Row="3" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
+            <WrapPanel Margin="10,0,0,0" Orientation="Horizontal">
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingAutoConnect}"
+                    ToolTip="{DynamicResource SettingAutoConnectTip}"
+                    IsChecked="{Binding autoReconnect}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingShowSendData}"
+                    ToolTip="{DynamicResource SettingShowSendDataTip}"
+                    IsChecked="{Binding showSend}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingShowRawData}"
+                    ToolTip="{DynamicResource SettingShowRawDataTip}"
+                    IsChecked="{Binding showSendRaw}" />
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <CheckBox
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Center"
+                        Content="{DynamicResource SettingPackTimeout}"
+                        IsChecked="{Binding packEnabled, Mode=TwoWay}"
+                        ToolTip="{DynamicResource SettingPackTimeoutTip}" />
+                    <TextBox
+                        MinWidth="50"
+                        Margin="0,0,2,0"
+                        Text="{Binding packTimeoutValue, UpdateSourceTrigger=PropertyChanged}"
+                        Visibility="{Binding packEnabled, Converter={StaticResource boolVisibeConverter}}" />
+                    <TextBlock
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{DynamicResource SettingPackTimeoutMs}"
+                        Visibility="{Binding packEnabled, Converter={StaticResource boolVisibeConverter}}" />
+                </StackPanel>
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingTimeoutMode}"
+                    ToolTip="{DynamicResource SettingTimeoutModeTip}"
+                    IsChecked="{Binding bitDelay}" />
+                <CheckBox
+                    Margin="5"
+                    Content="{DynamicResource SettingTerminalMode}"
+                    ToolTip="{DynamicResource SettingTerminalModeTip}"
+                    IsChecked="{Binding terminal}" />
+            </WrapPanel>
+        </ScrollViewer>
         <TextBlock
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="2"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
             Text="{DynamicResource ToSendDataTextBlock}" />
         <CheckBox
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="2"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
@@ -106,17 +190,18 @@
             IsChecked="{Binding hexSend}" />
         <TextBox
             Name="toSendDataTextBox"
-            Grid.Row="4"
+            Grid.Row="5"
             Margin="2"
             VerticalContentAlignment="Top"
             AcceptsReturn="True"
             FontFamily="Consolas"
             Text="{Binding dataToSend}"
             TextWrapping="Wrap"
-            VerticalScrollBarVisibility="Auto" />
+            VerticalScrollBarVisibility="Auto"
+            MinHeight="60" />
         <Button
             Name="sendDataButton"
-            Grid.Row="5"
+            Grid.Row="6"
             Margin="2"
             HorizontalAlignment="Right"
             Click="SendDataButton_Click"

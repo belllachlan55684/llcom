@@ -880,9 +880,6 @@
                     <TextBlock Text="{DynamicResource SettingCard}" />
                 </TabItem.Header>
                 <TabControl>
-                    <TabItem Header="{DynamicResource SettingBasic}">
-                        <local_controls:BasicSettingsControl />
-                    </TabItem>
                     <TabItem Header="{DynamicResource SettingSystem}">
                         <ScrollViewer>
                             <WrapPanel Name="settingsContentPanel" Margin="15,10" Orientation="Horizontal" Loaded="SystemSettingsPanel_Loaded">

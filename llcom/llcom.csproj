@@ -299,9 +299,6 @@
     <Compile Include="Pages\DataShowPage.xaml.cs">
       <DependentUpon>DataShowPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\BasicSettingsControl.xaml.cs">
-      <DependentUpon>BasicSettingsControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Controls\SendScriptControl.xaml.cs">
       <DependentUpon>SendScriptControl.xaml</DependentUpon>
     </Compile>
@@ -388,10 +385,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\DataShowPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\BasicSettingsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

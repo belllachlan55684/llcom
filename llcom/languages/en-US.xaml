@@ -19,6 +19,11 @@
     <system:String x:Key="RefreshPortButton">Refresh List</system:String>
     <system:String x:Key="ShowPorts">Serial Ports:</system:String>
     <system:String x:Key="ShowBaudRate">Baud Rate:</system:String>
+    <system:String x:Key="TooltipBaudRate">Baud Rate</system:String>
+    <system:String x:Key="TooltipDataBits">Data bits</system:String>
+    <system:String x:Key="TooltipStopBit">Stop bit</system:String>
+    <system:String x:Key="TooltipParity">Parity</system:String>
+    <system:String x:Key="TooltipEncoding">Encoding</system:String>
     <system:String x:Key="OtherRate">Custom</system:String>
     <system:String x:Key="OtherRateFail">Custom baud rate set fail.</system:String>
     <system:String x:Key="ShowStatus">Status:</system:String>
@@ -121,6 +126,19 @@
     <system:String x:Key="UnpinTopTip">Unpin</system:String>
     <system:String x:Key="SettingUartTimeout">Data pack time:</system:String>
     <system:String x:Key="SettingMs">Ms(minus means Not Pack Mode)</system:String>
+    <system:String x:Key="SettingPackTimeout">Pack timeout</system:String>
+    <system:String x:Key="SettingPackTimeoutMs">ms</system:String>
+    <system:String x:Key="SettingPackTimeoutTip">Checked = pack mode, unchecked = no pack</system:String>
+    <system:String x:Key="SettingAutoConnect">Auto connect</system:String>
+    <system:String x:Key="SettingAutoConnectTip">Auto restore disconnected connection</system:String>
+    <system:String x:Key="SettingShowSendData">Show send data</system:String>
+    <system:String x:Key="SettingShowSendDataTip">Show data sent out</system:String>
+    <system:String x:Key="SettingShowRawData">Show raw data</system:String>
+    <system:String x:Key="SettingShowRawDataTip">Show raw sent data</system:String>
+    <system:String x:Key="SettingTimeoutMode">Timeout mode</system:String>
+    <system:String x:Key="SettingTimeoutModeTip">Unchecked means timeout starts from first byte</system:String>
+    <system:String x:Key="SettingTerminalMode">Terminal mode</system:String>
+    <system:String x:Key="SettingTerminalModeTip">Selected data area allows direct keyboard input</system:String>
     <system:String x:Key="SettingSplitByEmpty">Split by no data time(or split by time from first time)</system:String>
     <system:String x:Key="SettingTerminal">Terminal (select data space and send key datas)</system:String>
     <system:String x:Key="EnterTerminalMode">Forced entry into terminal mode</system:String>

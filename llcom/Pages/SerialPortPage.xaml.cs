@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Management;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,7 +45,52 @@ namespace llcom.Pages
                 baudRateComboBox.Text = br;
             }
 
+            dataBitsComboBox.SelectedIndex = Tools.Global.setting.dataBits - 5;
+            stopBitComboBox.SelectedIndex = Tools.Global.setting.stopBit - 1;
+            dataCheckComboBox.SelectedIndex = Tools.Global.setting.parity;
+
+            var el = Encoding.GetEncodings();
+            var encodingList = new List<EncodingInfo>(el);
+            encodingList.Sort((x, y) => x.CodePage - y.CodePage);
+            foreach (var en in encodingList)
+            {
+                var c = new ComboBoxItem
+                {
+                    Content = $"[{en.CodePage}] {en.Name}",
+                    Tag = en.CodePage
+                };
+                int index = encodingComboBox.Items.Add(c);
+                if (Tools.Global.setting.encoding == en.CodePage)
+                    encodingComboBox.SelectedIndex = index;
+            }
+
             RefreshPortList();
+        }
+
+        private void DataBitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dataBitsComboBox.SelectedItem != null)
+                Tools.Global.setting.dataBits = dataBitsComboBox.SelectedIndex + 5;
+        }
+
+        private void StopBitComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (stopBitComboBox.SelectedItem != null)
+                Tools.Global.setting.stopBit = stopBitComboBox.SelectedIndex + 1;
+        }
+
+        private void DataCheckComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dataCheckComboBox.SelectedItem != null)
+                Tools.Global.setting.parity = dataCheckComboBox.SelectedIndex;
+        }
+
+        private void EncodingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (encodingComboBox.SelectedItem == null) return;
+            if ((int)((ComboBoxItem)encodingComboBox.SelectedItem).Tag == Tools.Global.setting.encoding)
+                return;
+            Tools.Global.setting.encoding = (int)((ComboBoxItem)encodingComboBox.SelectedItem).Tag;
         }
 
         /// <summary>

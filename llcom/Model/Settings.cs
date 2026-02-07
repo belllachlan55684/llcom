@@ -24,6 +24,7 @@ namespace llcom.Model
         private bool _showSendRaw = true;
         private int _parity = 0;
         private int _timeout = 50;
+        private int _packTimeoutValue = 50;
         private int _dataBits = 8;
         private int _stopBit = 1;
         private string _sendScript = "default";
@@ -304,7 +305,41 @@ namespace llcom.Model
             set
             {
                 _timeout = value;
+                if (value >= 0)
+                    _packTimeoutValue = value;
                 Save();
+            }
+        }
+
+        /// <summary>
+        /// 分包模式下的超时值（毫秒），仅当 packEnabled 为 true 时生效
+        /// </summary>
+        public int packTimeoutValue
+        {
+            get => _packTimeoutValue;
+            set
+            {
+                _packTimeoutValue = value > 0 ? value : 50;
+                if (_timeout >= 0)
+                    timeout = _packTimeoutValue;
+                else
+                    Save();
+            }
+        }
+
+        /// <summary>
+        /// 分包模式：选中=分包，不选中=不分包
+        /// </summary>
+        [PropertyChanged.DependsOn(nameof(timeout))]
+        public bool packEnabled
+        {
+            get => _timeout >= 0;
+            set
+            {
+                if (value)
+                    timeout = _packTimeoutValue;
+                else
+                    timeout = -1;
             }
         }
 
