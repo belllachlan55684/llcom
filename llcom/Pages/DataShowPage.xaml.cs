@@ -39,6 +39,7 @@ namespace llcom.Pages
         /// </summary>
         public bool LockLog { get; set; } = false;
         private bool loaded = false;
+        private bool recvScriptLoading = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (loaded)
@@ -60,9 +61,62 @@ namespace llcom.Pages
             DisableLogCheckBox.DataContext = Tools.Global.setting;
             EnableSymbolCheckBox.DataContext = Tools.Global.setting;
 
+            LoadRecvScriptList();
             lastPackShowMode = Tools.Global.setting.timeout >= 0;
             MainListScrollViewer.Visibility = lastPackShowMode ? Visibility.Visible : Visibility.Collapsed;
             MainTextBox.Visibility = lastPackShowMode ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void LoadRecvScriptList()
+        {
+            recvScriptComboBox.Items.Clear();
+            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            try
+            {
+                var dir = new DirectoryInfo(dirPath);
+                foreach (var file in dir.GetFiles("*.lua"))
+                {
+                    var name = file.Name.Substring(0, file.Name.Length - 4);
+                    recvScriptComboBox.Items.Add(name);
+                }
+            }
+            catch { }
+            var current = Tools.Global.setting.recvScript;
+            recvScriptLoading = true;
+            if (recvScriptComboBox.Items.Count > 0)
+            {
+                var found = false;
+                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
+                {
+                    if ((recvScriptComboBox.Items[i] as string) == current)
+                    {
+                        recvScriptComboBox.SelectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Tools.Global.setting.recvScript = recvScriptComboBox.Items[0] as string ?? "default";
+                    recvScriptComboBox.SelectedIndex = 0;
+                }
+            }
+            recvScriptLoading = false;
+        }
+
+        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            LoadRecvScriptList();
+        }
+
+        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
+            var name = recvScriptComboBox.SelectedItem as string;
+            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.recvScript)
+                Tools.Global.setting.recvScript = name;
         }
 
         //记录一下上次是不是分包显示的

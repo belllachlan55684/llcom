@@ -156,6 +156,14 @@
                     Content="{DynamicResource LockLogButton}"
                     IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource LockLogButton}" />
+                <ComboBox
+                    Name="recvScriptComboBox"
+                    MinWidth="120"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    ToolTip="{DynamicResource RecvScriptTab}"
+                    DropDownOpened="RecvScriptComboBox_DropDownOpened"
+                    SelectionChanged="RecvScriptComboBox_SelectionChanged"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button
