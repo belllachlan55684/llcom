@@ -102,7 +102,7 @@ namespace llcom.Pages
                 }
                 if (!found)
                 {
-                    Tools.Global.setting.sendScript = sendScriptComboBox.Items[0] as string ?? "default";
+                    Tools.Global.setting.sendScript = sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName();
                     sendScriptComboBox.SelectedIndex = 0;
                 }
             }

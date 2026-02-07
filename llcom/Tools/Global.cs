@@ -107,6 +107,30 @@ namespace llcom.Tools
         }
 
         /// <summary>
+        /// 根据当前语言返回默认脚本名称（发送/接收脚本的「原样输出」项）
+        /// zh-CN -> 原始数据，en-US -> rawdata
+        /// </summary>
+        public static string GetDefaultScriptName()
+        {
+            var lang = setting?.language ?? System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+            return (lang == "en-US") ? "rawdata" : "原始数据";
+        }
+
+        /// <summary>
+        /// 按当前语言确保默认脚本文件存在（中文仅创建原始数据，英文仅创建rawdata）
+        /// </summary>
+        public static void EnsureDefaultScriptFiles()
+        {
+            var name = GetDefaultScriptName();
+            var sendPath = ProfilePath + "user_script_send_convert/" + name + ".lua";
+            var recvPath = ProfilePath + "user_script_recv_convert/" + name + ".lua";
+            if (Directory.Exists(ProfilePath + "user_script_send_convert") && !File.Exists(sendPath))
+                CreateFile("DefaultFiles/user_script_send_convert/" + name + ".lua", sendPath);
+            if (Directory.Exists(ProfilePath + "user_script_recv_convert") && !File.Exists(recvPath))
+                CreateFile("DefaultFiles/user_script_recv_convert/" + name + ".lua", recvPath);
+        }
+
+        /// <summary>
         /// 是否为应用商店版本？
         /// </summary>
         /// <returns></returns>
@@ -172,6 +196,15 @@ namespace llcom.Tools
                     setting.SentCount = 0;
                     setting.ReceivedCount = 0;
                     setting.DisableLog = false;
+                    // 迁移：default -> 原始数据/rawdata
+                    if (setting.sendScript == "default")
+                        setting.sendScript = GetDefaultScriptName();
+                    if (setting.recvScript == "default")
+                        setting.recvScript = GetDefaultScriptName();
+                    foreach (var list in setting.quickSendList)
+                        foreach (var data in list)
+                            if (data.recvScriptPath == "default")
+                                data.recvScriptPath = GetDefaultScriptName();
                 }
                 catch
                 {
@@ -320,14 +353,31 @@ namespace llcom.Tools
                     CreateFile("DefaultFiles/user_script_send_convert/GPS NMEA.lua", ProfilePath + "user_script_send_convert/GPS NMEA.lua");
                     CreateFile("DefaultFiles/user_script_send_convert/加上换行回车.lua", ProfilePath + "user_script_send_convert/加上换行回车.lua");
                     CreateFile("DefaultFiles/user_script_send_convert/解析换行回车的转义字符.lua", ProfilePath + "user_script_send_convert/解析换行回车的转义字符.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/default.lua", ProfilePath + "user_script_send_convert/default.lua");
                 }
                 if (!Directory.Exists(ProfilePath + "user_script_recv_convert"))
                 {
                     Directory.CreateDirectory(ProfilePath + "user_script_recv_convert");
                 }
-                if (!File.Exists(ProfilePath + "user_script_recv_convert/default.lua"))
-                    CreateFile("DefaultFiles/user_script_recv_convert/default.lua", ProfilePath + "user_script_recv_convert/default.lua");
+                EnsureDefaultScriptFiles();
+                // 迁移：已有 default.lua 时重命名为按语言的默认名
+                var sendDefaultPath = ProfilePath + "user_script_send_convert/default.lua";
+                if (File.Exists(sendDefaultPath))
+                {
+                    var target = ProfilePath + "user_script_send_convert/" + GetDefaultScriptName() + ".lua";
+                    if (!File.Exists(target))
+                        File.Move(sendDefaultPath, target);
+                    else
+                        File.Delete(sendDefaultPath);
+                }
+                var recvDefaultPath = ProfilePath + "user_script_recv_convert/default.lua";
+                if (File.Exists(recvDefaultPath))
+                {
+                    var target = ProfilePath + "user_script_recv_convert/" + GetDefaultScriptName() + ".lua";
+                    if (!File.Exists(target))
+                        File.Move(recvDefaultPath, target);
+                    else
+                        File.Delete(recvDefaultPath);
+                }
                 if (!File.Exists(ProfilePath + "user_script_recv_convert/绘制曲线.lua"))
                     CreateFile("DefaultFiles/user_script_recv_convert/绘制曲线.lua", ProfilePath + "user_script_recv_convert/绘制曲线.lua");
                 if (!File.Exists(ProfilePath + "user_scrispt_recv_convert/绘制曲线-多条.lua"))

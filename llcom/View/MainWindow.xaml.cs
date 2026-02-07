@@ -284,7 +284,7 @@ namespace llcom
                 }));
             });
             recvScriptBackup = Tools.Global.setting.recvScript;
-            if (string.IsNullOrEmpty(recvScriptBackup)) recvScriptBackup = "default";
+            if (string.IsNullOrEmpty(recvScriptBackup)) recvScriptBackup = Tools.Global.GetDefaultScriptName();
         }
 
         private bool DoInvoke(Action action)
@@ -550,7 +550,24 @@ namespace llcom
         {
             if (languageComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
             {
-                Tools.Global.setting.language = item.Tag.ToString();
+                var newLang = item.Tag.ToString();
+                var oldLang = Tools.Global.setting.language;
+                Tools.Global.setting.language = newLang;
+                if (oldLang != newLang)
+                {
+                    Tools.Global.EnsureDefaultScriptFiles();
+                    var newDefault = Tools.Global.GetDefaultScriptName();
+                    if (Tools.Global.setting.sendScript == "原始数据" || Tools.Global.setting.sendScript == "rawdata")
+                        Tools.Global.setting.sendScript = newDefault;
+                    if (Tools.Global.setting.recvScript == "原始数据" || Tools.Global.setting.recvScript == "rawdata")
+                        Tools.Global.setting.recvScript = newDefault;
+                    if (recvScriptBackup == "原始数据" || recvScriptBackup == "rawdata")
+                        recvScriptBackup = newDefault;
+                    foreach (var list in Tools.Global.setting.quickSendList)
+                        foreach (var data in list)
+                            if (data.recvScriptPath == "原始数据" || data.recvScriptPath == "rawdata")
+                                data.recvScriptPath = newDefault;
+                }
             }
         }
 
@@ -616,7 +633,7 @@ namespace llcom
                 //检查文件是否存在
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{data.recvScriptPath}.lua"))
                 {
-                    Tools.Global.setting.recvScript = "default";
+                    Tools.Global.setting.recvScript = Tools.Global.GetDefaultScriptName();
                     data.recvScriptPath = "";
                     if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua"))
                     {

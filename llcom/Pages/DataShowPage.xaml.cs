@@ -99,7 +99,7 @@ namespace llcom.Pages
                 }
                 if (!found)
                 {
-                    Tools.Global.setting.recvScript = recvScriptComboBox.Items[0] as string ?? "default";
+                    Tools.Global.setting.recvScript = recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName();
                     recvScriptComboBox.SelectedIndex = 0;
                 }
             }

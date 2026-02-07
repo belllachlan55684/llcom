@@ -35,7 +35,7 @@ namespace llcom.View.Controls
         {
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{fileName}.lua"))
             {
-                Tools.Global.setting.recvScript = "default";
+                Tools.Global.setting.recvScript = Tools.Global.GetDefaultScriptName();
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua"))
                     File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.setting.recvScript}.lua").Close();
             }

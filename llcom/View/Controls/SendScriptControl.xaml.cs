@@ -32,7 +32,7 @@ namespace llcom.View.Controls
         {
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{fileName}.lua"))
             {
-                Tools.Global.setting.sendScript = "default";
+                Tools.Global.setting.sendScript = Tools.Global.GetDefaultScriptName();
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{Tools.Global.setting.sendScript}.lua"))
                     File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{Tools.Global.setting.sendScript}.lua").Close();
             }

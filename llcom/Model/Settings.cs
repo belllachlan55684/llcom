@@ -27,8 +27,8 @@ namespace llcom.Model
         private int _packTimeoutValue = 50;
         private int _dataBits = 8;
         private int _stopBit = 1;
-        private string _sendScript = "default";
-        private string _recvScript = "default";
+        private string _sendScript = System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("zh") ? "原始数据" : "rawdata";
+        private string _recvScript = System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("zh") ? "原始数据" : "rawdata";
         private string _runScript = "example";
         private bool _topmost = false;
         public List<List<ToSendData>> quickSendList = new List<List<ToSendData>>();
