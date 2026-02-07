@@ -36,8 +36,6 @@ namespace llcom.Pages
         public bool IsConnected { get; set; } = false;
 
         private IPEndPoint lastRemoteEndPoint = null;
-        private bool sendScriptLoading = false;
-
         public string GetStatusBarText()
         {
             if (!IsConnected)
@@ -65,9 +63,6 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("UdpLocal");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
-
-            LoadSendScriptList();
-            LoadRecvScriptList();
 
             LuaApis.SendChannelsRegister("udp-server", (data, _) =>
             {
@@ -215,111 +210,6 @@ namespace llcom.Pages
                 ShowData($"🚫 server closed");
             }
             catch { }
-        }
-
-        private void LoadSendScriptList()
-        {
-            sendScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    sendScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetSendScriptForInterface("UdpLocal");
-            sendScriptLoading = true;
-            if (sendScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
-                {
-                    if ((sendScriptComboBox.Items[i] as string) == current)
-                    {
-                        sendScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetSendScriptForInterface("UdpLocal", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    sendScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            sendScriptLoading = false;
-        }
-
-        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadSendScriptList();
-        }
-
-        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
-            var name = sendScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("UdpLocal"))
-                Tools.Global.setting.SetSendScriptForInterface("UdpLocal", name);
-        }
-
-        private bool recvScriptLoading = false;
-        private void LoadRecvScriptList()
-        {
-            recvScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    recvScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetRecvScriptForInterface("UdpLocal");
-            recvScriptLoading = true;
-            if (recvScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
-                {
-                    if ((recvScriptComboBox.Items[i] as string) == current)
-                    {
-                        recvScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetRecvScriptForInterface("UdpLocal", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    recvScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            recvScriptLoading = false;
-        }
-
-        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadRecvScriptList();
-        }
-
-        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
-            var name = recvScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("UdpLocal"))
-                Tools.Global.setting.SetRecvScriptForInterface("UdpLocal", name);
         }
 
         private void SendDataButton_Click(object sender, RoutedEventArgs e)

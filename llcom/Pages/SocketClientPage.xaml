@@ -5,6 +5,7 @@
     xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:llcom.Pages"
+    xmlns:controls="clr-namespace:llcom.View.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="SocketClientPage"
     adonisExtensions:RippleExtension.FadeInDuration="0"
@@ -96,14 +97,10 @@
         </Grid>
         <ScrollViewer x:Name="OptionsScrollViewer" Grid.Row="3" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
             <WrapPanel Orientation="Horizontal">
-                <ComboBox
-                    Name="recvScriptComboBox"
-                    MinWidth="120"
-                    Margin="5,0"
-                    VerticalAlignment="Center"
-                    ToolTip="{DynamicResource RecvScriptTab}"
-                    DropDownOpened="RecvScriptComboBox_DropDownOpened"
-                    SelectionChanged="RecvScriptComboBox_SelectionChanged"/>
+                <controls:ScriptSelectorControl
+                    x:Name="recvScriptSelector"
+                    InterfaceKey="TcpClient"
+                    IsSendScript="False" />
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowSendData}"
@@ -150,14 +147,10 @@
                 Click="SendButton_Click"
                 Content="{DynamicResource NetSendDataButton}" />
             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <ComboBox
-                    Name="sendScriptComboBox"
-                    MinWidth="120"
-                    Margin="4,0"
-                    VerticalAlignment="Center"
-                    ToolTip="{DynamicResource SendScriptTab}"
-                    DropDownOpened="SendScriptComboBox_DropDownOpened"
-                    SelectionChanged="SendScriptComboBox_SelectionChanged" />
+                <controls:ScriptSelectorControl
+                    x:Name="sendScriptSelector"
+                    InterfaceKey="TcpClient"
+                    IsSendScript="True" />
             </WrapPanel>
         </DockPanel>
     </Grid>

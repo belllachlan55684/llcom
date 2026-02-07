@@ -173,18 +173,35 @@ namespace llcom.Pages
                 if (data == null || data.Count() == 0)
                     return;
                 byte[] temp = data.ToArray();
-                //转换下接收数据
+                //转换下接收数据（按顺序执行多个 recv 脚本）
                 if (!sent)
                 {
                     var uartPara = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[0] : new byte[0];
                     var uartSendRaw = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[1] : new byte[0];
-                    var scriptName = Tools.Global.GetEffectiveRecvScriptForInterface(interfaceKey ?? "Serial");
+                    var scripts = Tools.Global.GetEffectiveRecvScriptListForInterface(interfaceKey ?? "Serial");
                     try
                     {
-                        temp = LuaEnv.LuaLoader.Run(
-                            $"{scriptName}.lua",
-                            new System.Collections.ArrayList { "uartData", temp , "uartPara", uartPara, "uartSendRaw", uartSendRaw },
-                            "user_script_recv_convert/");
+                        foreach (var scriptName in scripts ?? new System.Collections.Generic.List<string>())
+                        {
+                            if (string.IsNullOrEmpty(scriptName)) continue;
+                            if (!System.IO.File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua"))
+                                continue;
+                            var backup = Tools.Global.recvPara;
+                            Tools.Global.recvPara = new byte[][] { uartPara, uartSendRaw };
+                            try
+                            {
+                                temp = LuaEnv.LuaLoader.Run(
+                                    $"{scriptName}.lua",
+                                    new System.Collections.ArrayList { "uartData", temp, "uartPara", uartPara, "uartSendRaw", uartSendRaw },
+                                    "user_script_recv_convert/");
+                            }
+                            finally
+                            {
+                                Tools.Global.recvPara = backup;
+                            }
+                            if (temp == null)
+                                return;
+                        }
                     }
                     catch (Exception ex)
                     {

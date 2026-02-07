@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 
@@ -11,7 +12,7 @@ namespace llcom.Tools
     public static class LuaConvertHelper
     {
         /// <summary>
-        /// 发送前转换：对原始数据执行 send_convert 脚本
+        /// 发送前转换：按顺序对原始数据执行 send_convert 脚本链
         /// </summary>
         /// <param name="data">待发送的原始数据</param>
         /// <param name="interfaceKey">数据接口键（Serial/TcpClient/TcpLocal 等），null 时使用全局 sendScript</param>
@@ -21,15 +22,28 @@ namespace llcom.Tools
         {
             if (data == null || data.Length == 0)
                 return data;
+            var scripts = string.IsNullOrEmpty(interfaceKey)
+                ? new List<string> { Global.setting.sendScript }
+                : Global.setting.GetSendScriptListForInterface(interfaceKey);
+            if (scripts == null || scripts.Count == 0)
+                return data;
             try
             {
-                var scriptName = string.IsNullOrEmpty(interfaceKey)
-                    ? Global.setting.sendScript
-                    : Global.setting.GetSendScriptForInterface(interfaceKey);
-                var result = LuaEnv.LuaLoader.Run(
-                    $"{scriptName}.lua",
-                    new ArrayList { "uartData", data });
-                return result ?? new byte[0];
+                byte[] current = data;
+                foreach (var scriptName in scripts)
+                {
+                    if (string.IsNullOrEmpty(scriptName)) continue;
+                    var path = Global.ProfilePath + $"user_script_send_convert/{scriptName}.lua";
+                    if (!File.Exists(path))
+                        continue;
+                    var result = LuaEnv.LuaLoader.Run(
+                        $"{scriptName}.lua",
+                        new ArrayList { "uartData", current });
+                    if (result == null)
+                        return null;
+                    current = result;
+                }
+                return current ?? new byte[0];
             }
             catch (Exception ex)
             {
@@ -39,7 +53,7 @@ namespace llcom.Tools
         }
 
         /// <summary>
-        /// 接收后转换：对接收数据执行 recv_convert 脚本
+        /// 接收后转换：按顺序对接收数据执行 recv_convert 脚本链
         /// </summary>
         /// <param name="data">接收到的原始数据</param>
         /// <param name="uartPara">可选，recv 脚本参数（快捷发送区等场景）</param>
@@ -50,8 +64,8 @@ namespace llcom.Tools
         {
             if (data == null)
                 return null;
-            var scriptName = Global.GetEffectiveRecvScriptForInterface(interfaceKey ?? "Serial");
-            if (!File.Exists(Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua"))
+            var scripts = Global.GetEffectiveRecvScriptListForInterface(interfaceKey ?? "Serial");
+            if (scripts == null || scripts.Count == 0)
                 return (byte[])data.Clone();
             try
             {
@@ -61,11 +75,22 @@ namespace llcom.Tools
                 Global.recvPara = new byte[][] { para, sendRaw };
                 try
                 {
-                    var result = LuaEnv.LuaLoader.Run(
-                        $"{scriptName}.lua",
-                        new ArrayList { "uartData", data, "uartPara", para, "uartSendRaw", sendRaw },
-                        "user_script_recv_convert/");
-                    return result ?? new byte[0];
+                    byte[] current = data;
+                    foreach (var scriptName in scripts)
+                    {
+                        if (string.IsNullOrEmpty(scriptName)) continue;
+                        var path = Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua";
+                        if (!File.Exists(path))
+                            continue;
+                        var result = LuaEnv.LuaLoader.Run(
+                            $"{scriptName}.lua",
+                            new ArrayList { "uartData", current, "uartPara", para, "uartSendRaw", sendRaw },
+                            "user_script_recv_convert/");
+                        if (result == null)
+                            return null;
+                        current = result;
+                    }
+                    return current ?? new byte[0];
                 }
                 finally
                 {

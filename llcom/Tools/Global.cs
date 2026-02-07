@@ -163,6 +163,16 @@ namespace llcom.Tools
         }
 
         /// <summary>
+        /// 获取指定接口的有效接收脚本列表（按顺序执行）。临时覆盖时返回单元素列表。
+        /// </summary>
+        public static System.Collections.Generic.List<string> GetEffectiveRecvScriptListForInterface(string key)
+        {
+            if (!string.IsNullOrEmpty(key) && recvScriptTempOverride.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return new System.Collections.Generic.List<string> { v };
+            return setting?.GetRecvScriptListForInterface(key) ?? new System.Collections.Generic.List<string> { "RawData" };
+        }
+
+        /// <summary>
         /// 更换软件标题栏文字
         /// </summary>
         public static event EventHandler<string> ChangeTitleEvent;

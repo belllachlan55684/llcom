@@ -44,8 +44,6 @@ namespace llcom.Pages
         public bool HexMode { get; set; } = false;
 
         private static bool loaded = false;
-        private bool sendScriptLoading = false;
-
         private void ShowData(string title, byte[] data = null, bool send = false)
         {
             Tools.Logger.ShowDataRaw(new Tools.DataShowRaw
@@ -144,9 +142,6 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("WinUSB");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
-
-            LoadSendScriptList();
-            LoadRecvScriptList();
 
             //适配一下通用通道
             LuaApis.SendChannelsRegister("winusb", (data,_) =>
@@ -326,111 +321,6 @@ namespace llcom.Pages
         private void DisonnectButton_Click(object sender, RoutedEventArgs e)
         {
             needClose = true;
-        }
-
-        private void LoadSendScriptList()
-        {
-            sendScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    sendScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetSendScriptForInterface("WinUSB");
-            sendScriptLoading = true;
-            if (sendScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
-                {
-                    if ((sendScriptComboBox.Items[i] as string) == current)
-                    {
-                        sendScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetSendScriptForInterface("WinUSB", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    sendScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            sendScriptLoading = false;
-        }
-
-        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadSendScriptList();
-        }
-
-        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
-            var name = sendScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("WinUSB"))
-                Tools.Global.setting.SetSendScriptForInterface("WinUSB", name);
-        }
-
-        private bool recvScriptLoading = false;
-        private void LoadRecvScriptList()
-        {
-            recvScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    recvScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetRecvScriptForInterface("WinUSB");
-            recvScriptLoading = true;
-            if (recvScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
-                {
-                    if ((recvScriptComboBox.Items[i] as string) == current)
-                    {
-                        recvScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetRecvScriptForInterface("WinUSB", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    recvScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            recvScriptLoading = false;
-        }
-
-        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadRecvScriptList();
-        }
-
-        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
-            var name = recvScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("WinUSB"))
-                Tools.Global.setting.SetRecvScriptForInterface("WinUSB", name);
         }
 
         private void SendDataButton_Click(object sender, RoutedEventArgs e)

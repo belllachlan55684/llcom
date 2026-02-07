@@ -34,8 +34,6 @@ namespace llcom.Pages
             InitializeComponent();
         }
         private bool initial = false;
-        private bool sendScriptLoading = false;
-
         //收到消息的事件
         public event EventHandler<byte[]> DataRecived;
         public bool IsConnected { get; set; } = false;
@@ -60,9 +58,6 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("TcpClient");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
-
-            LoadSendScriptList();
-            LoadRecvScriptList();
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, buff) =>
@@ -352,111 +347,6 @@ namespace llcom.Pages
                 }
             }
             catch { }
-        }
-
-        private void LoadSendScriptList()
-        {
-            sendScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_send_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    sendScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetSendScriptForInterface("TcpClient");
-            sendScriptLoading = true;
-            if (sendScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < sendScriptComboBox.Items.Count; i++)
-                {
-                    if ((sendScriptComboBox.Items[i] as string) == current)
-                    {
-                        sendScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetSendScriptForInterface("TcpClient", sendScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    sendScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            sendScriptLoading = false;
-        }
-
-        private void SendScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadSendScriptList();
-        }
-
-        private void SendScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sendScriptLoading || sendScriptComboBox.SelectedItem == null) return;
-            var name = sendScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetSendScriptForInterface("TcpClient"))
-                Tools.Global.setting.SetSendScriptForInterface("TcpClient", name);
-        }
-
-        private bool recvScriptLoading = false;
-        private void LoadRecvScriptList()
-        {
-            recvScriptComboBox.Items.Clear();
-            var dirPath = Tools.Global.ProfilePath + "user_script_recv_convert/";
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-            try
-            {
-                var dir = new DirectoryInfo(dirPath);
-                foreach (var file in dir.GetFiles("*.lua"))
-                {
-                    var name = file.Name.Substring(0, file.Name.Length - 4);
-                    recvScriptComboBox.Items.Add(name);
-                }
-            }
-            catch { }
-            var current = Tools.Global.setting.GetRecvScriptForInterface("TcpClient");
-            recvScriptLoading = true;
-            if (recvScriptComboBox.Items.Count > 0)
-            {
-                var found = false;
-                for (int i = 0; i < recvScriptComboBox.Items.Count; i++)
-                {
-                    if ((recvScriptComboBox.Items[i] as string) == current)
-                    {
-                        recvScriptComboBox.SelectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Tools.Global.setting.SetRecvScriptForInterface("TcpClient", recvScriptComboBox.Items[0] as string ?? Tools.Global.GetDefaultScriptName());
-                    recvScriptComboBox.SelectedIndex = 0;
-                }
-            }
-            recvScriptLoading = false;
-        }
-
-        private void RecvScriptComboBox_DropDownOpened(object sender, EventArgs e)
-        {
-            LoadRecvScriptList();
-        }
-
-        private void RecvScriptComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (recvScriptLoading || recvScriptComboBox.SelectedItem == null) return;
-            var name = recvScriptComboBox.SelectedItem as string;
-            if (!string.IsNullOrEmpty(name) && name != Tools.Global.setting.GetRecvScriptForInterface("TcpClient"))
-                Tools.Global.setting.SetRecvScriptForInterface("TcpClient", name);
         }
 
         private void Reconnect_TextInputCheck(object sender, TextCompositionEventArgs e)

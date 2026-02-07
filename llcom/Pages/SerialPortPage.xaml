@@ -5,6 +5,7 @@
     xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:llcom.Pages"
+    xmlns:controls="clr-namespace:llcom.View.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="SerialPortPage"
     adonisExtensions:RippleExtension.FadeInDuration="0"
@@ -140,14 +141,10 @@
         </Grid>
         <ScrollViewer Grid.Row="4" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto">
             <WrapPanel Orientation="Horizontal">
-                <ComboBox
-                    Name="recvScriptComboBox"
-                    MinWidth="120"
-                    Margin="5,0"
-                    VerticalAlignment="Center"
-                    ToolTip="{DynamicResource RecvScriptTab}"
-                    DropDownOpened="RecvScriptComboBox_DropDownOpened"
-                    SelectionChanged="RecvScriptComboBox_SelectionChanged"/>
+                <controls:ScriptSelectorControl
+                    x:Name="recvScriptSelector"
+                    InterfaceKey="Serial"
+                    IsSendScript="False" />
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowSendData}"
@@ -223,14 +220,10 @@
                 Content="{DynamicResource SendDataButton}"
                 ToolTip="{DynamicResource SendDataButtonTip}" />
             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <ComboBox
-                    Name="sendScriptComboBox"
-                    MinWidth="120"
-                    Margin="4,0"
-                    VerticalAlignment="Center"
-                    ToolTip="{DynamicResource SendScriptTab}"
-                    DropDownOpened="SendScriptComboBox_DropDownOpened"
-                    SelectionChanged="SendScriptComboBox_SelectionChanged"/>
+                <controls:ScriptSelectorControl
+                    x:Name="sendScriptSelector"
+                    InterfaceKey="Serial"
+                    IsSendScript="True" />
                 <CheckBox Content="RTS" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Setting.Rts}"/>
                 <CheckBox Content="DTR" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Setting.Dtr}"/>
             </WrapPanel>

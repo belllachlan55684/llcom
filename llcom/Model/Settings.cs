@@ -402,6 +402,17 @@ namespace llcom.Model
             set => _sendScriptByInterface = value ?? new Dictionary<string, string>();
         }
 
+        private Dictionary<string, List<string>> _sendScriptListByInterface = null;
+
+        /// <summary>
+        /// 各数据接口独立使用的发送脚本列表（按顺序执行），键为接口名
+        /// </summary>
+        public Dictionary<string, List<string>> sendScriptListByInterface
+        {
+            get => _sendScriptListByInterface ??= new Dictionary<string, List<string>>();
+            set => _sendScriptListByInterface = value ?? new Dictionary<string, List<string>>();
+        }
+
         /// <summary>
         /// 获取指定接口的发送脚本，无则回退到全局 sendScript
         /// </summary>
@@ -419,6 +430,28 @@ namespace llcom.Model
         {
             if (string.IsNullOrEmpty(key)) return;
             sendScriptByInterface[key] = value ?? sendScript;
+            Save();
+        }
+
+        /// <summary>
+        /// 获取指定接口的发送脚本列表（按顺序执行）。若 List 未配置，从 sendScriptByInterface 迁移单值。
+        /// </summary>
+        public List<string> GetSendScriptListForInterface(string key)
+        {
+            var list = sendScriptListByInterface;
+            if (key != null && list.TryGetValue(key, out var v) && v != null && v.Count > 0)
+                return v;
+            var single = GetSendScriptForInterface(key);
+            return string.IsNullOrEmpty(single) ? new List<string> { sendScript } : new List<string> { single };
+        }
+
+        /// <summary>
+        /// 设置指定接口的发送脚本列表
+        /// </summary>
+        public void SetSendScriptListForInterface(string key, List<string> value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            sendScriptListByInterface[key] = value ?? new List<string> { sendScript };
             Save();
         }
 
@@ -446,6 +479,17 @@ namespace llcom.Model
             set => _recvScriptByInterface = value ?? new Dictionary<string, string>();
         }
 
+        private Dictionary<string, List<string>> _recvScriptListByInterface = null;
+
+        /// <summary>
+        /// 各数据接口独立使用的接收脚本列表（按顺序执行），键为接口名
+        /// </summary>
+        public Dictionary<string, List<string>> recvScriptListByInterface
+        {
+            get => _recvScriptListByInterface ??= new Dictionary<string, List<string>>();
+            set => _recvScriptListByInterface = value ?? new Dictionary<string, List<string>>();
+        }
+
         /// <summary>
         /// 获取指定接口的接收脚本，无则回退到全局 recvScript
         /// </summary>
@@ -463,6 +507,28 @@ namespace llcom.Model
         {
             if (string.IsNullOrEmpty(key)) return;
             recvScriptByInterface[key] = value ?? recvScript;
+            Save();
+        }
+
+        /// <summary>
+        /// 获取指定接口的接收脚本列表（按顺序执行）。若 List 未配置，从 recvScriptByInterface 迁移单值。
+        /// </summary>
+        public List<string> GetRecvScriptListForInterface(string key)
+        {
+            var list = recvScriptListByInterface;
+            if (key != null && list.TryGetValue(key, out var v) && v != null && v.Count > 0)
+                return v;
+            var single = GetRecvScriptForInterface(key);
+            return string.IsNullOrEmpty(single) ? new List<string> { recvScript } : new List<string> { single };
+        }
+
+        /// <summary>
+        /// 设置指定接口的接收脚本列表
+        /// </summary>
+        public void SetRecvScriptListForInterface(string key, List<string> value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            recvScriptListByInterface[key] = value ?? new List<string> { recvScript };
             Save();
         }
 

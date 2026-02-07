@@ -65,6 +65,13 @@
     <system:String x:Key="ScriptTab">Scripts</system:String>
     <system:String x:Key="SendScriptTab">Send script</system:String>
     <system:String x:Key="RecvScriptTab">Receive script</system:String>
+    <system:String x:Key="ScriptSelectorTooltip">Click to select multiple scripts and set execution order</system:String>
+    <system:String x:Key="ScriptSelectorSelectedLabel">Left: Available scripts | Right: Selected scripts (executed in order)</system:String>
+    <system:String x:Key="ScriptSelectorAdd">Add to selected</system:String>
+    <system:String x:Key="ScriptSelectorRemove">Remove from selected</system:String>
+    <system:String x:Key="ScriptSelectorMoveUp">Move up</system:String>
+    <system:String x:Key="ScriptSelectorMoveDown">Move down</system:String>
+    <system:String x:Key="ScriptSelectorOrderHint">Right list order is execution order. All selected scripts run sequentially on each send/receive.</system:String>
     <system:String x:Key="LuaCard">Run script</system:String>
     <system:String x:Key="LuaNewScript">New script</system:String>
     <system:String x:Key="LuaRunScript">Run script</system:String>
