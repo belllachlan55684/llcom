@@ -1,5 +1,6 @@
 <Page
     x:Class="llcom.Pages.DataShowPage"
+    x:Name="DataShowPageRoot"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
@@ -125,22 +126,12 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <StackPanel
+        <WrapPanel
             Grid.Row="1"
             Margin="10,0,0,3"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             Orientation="Horizontal">
-            <CheckBox
-                Name="RTSCheckBox"
-                Margin="5,0,0,0"
-                Content="RTS"
-                IsChecked="{Binding Rts}" />
-            <CheckBox
-                Name="DTRCheckBox"
-                Margin="5,0,0,0"
-                Content="DTR"
-                IsChecked="{Binding Dtr}" />
             <CheckBox
                 Name="HEXBox"
                 Margin="5,0,0,0"
@@ -148,12 +139,6 @@
                 IsChecked="{Binding showHexFormat, Converter={StaticResource showHexFormatConverter}}"
                 IsThreeState="True"
                 ToolTip="{DynamicResource ShowHexFormatTip}" />
-            <CheckBox
-                Name="ExtraEnterCheckBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource AddExtraEnter}"
-                IsChecked="{Binding extraEnter}"
-                ToolTip="{DynamicResource AddExtraEnterTip}" />
             <CheckBox
                 Name="EnableSymbolCheckBox"
                 Margin="5,0,0,0"
@@ -165,6 +150,12 @@
                 Margin="5,0,0,0"
                 Content="{DynamicResource DisableLog}"
                 IsChecked="{Binding DisableLog}" />
+            <CheckBox
+                Name="LockLogCheckBox"
+                Margin="5,0,0,0"
+                Content="{DynamicResource LockLogButton}"
+                IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                ToolTip="{DynamicResource LockLogButton}" />
             <Button
                 Name="ClearLogButton"
                 Margin="5,0,0,0"
@@ -172,49 +163,18 @@
                 Click="ClearLogButton_Click"
                 Content="{DynamicResource ClearLog}" />
             <Button
+                Name="SaveLogButton"
+                Margin="5,0,0,0"
+                Padding="8,2"
+                Click="SaveLogButton_Click"
+                Content="{DynamicResource SaveLogButtonTip}"
+                ToolTip="{DynamicResource SaveLogButtonTip}" />
+            <Button
                 Name="OpenLogFolderButton"
                 Margin="5,0,0,0"
                 Padding="8,2"
                 Click="OpenLogFolderButton_Click"
                 Content="{DynamicResource SettingOpenLogFolder}" />
-        </StackPanel>
-        <Button
-            Name="LockLogButton"
-            Margin="0,0,18,25"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="LockLogButton_Click"
-            ToolTip="{DynamicResource LockLogButton}"
-            Visibility="{Binding Path=IsMouseOver, ElementName=mainGrid, Converter={StaticResource boolVisibeConverter}}">
-            <StackPanel>
-                <fa:FontAwesome
-                    Name="LockIcon"
-                    Icon="Lock"
-                    FontSize="16"
-                    Height="12"
-                    Visibility="{Binding LockLog, Converter={StaticResource boolNotVisibeConverter}}" />
-                <fa:FontAwesome
-                    Name="UnLockIcon"
-                    Foreground="Green"
-                    Icon="Unlock"
-                    FontSize="16"
-                    Height="12"
-                    Visibility="{Binding LockLog, Converter={StaticResource boolVisibeConverter}}" />
-                <TextBlock
-                    Name="UnLockText"
-                    Text="{DynamicResource LockLogText}"
-                    Visibility="{Binding LockLog, Converter={StaticResource boolVisibeConverter}}" />
-            </StackPanel>
-        </Button>
-        <Button
-            Name="SaveLogButton"
-            Margin="0,0,18,3"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="SaveLogButton_Click"
-            ToolTip="{DynamicResource SaveLogButtonTip}"
-            Visibility="{Binding Path=IsMouseOver, ElementName=mainGrid, Converter={StaticResource boolVisibeConverter}}">
-            <fa:FontAwesome Icon="Save" HorizontalAlignment="Center" FontSize="12"/>
-        </Button>
+        </WrapPanel>
     </Grid>
 </Page>
