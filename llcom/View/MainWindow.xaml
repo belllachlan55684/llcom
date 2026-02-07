@@ -904,10 +904,10 @@
                             </WrapPanel>
                         </ScrollViewer>
                     </TabItem>
+                    <TabItem Header="{DynamicResource AboutCard}">
+                        <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
+                    </TabItem>
                 </TabControl>
-            </TabItem>
-            <TabItem Header="{DynamicResource AboutCard}">
-                <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
         </TabControl>
 

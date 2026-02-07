@@ -149,11 +149,6 @@
                 IsThreeState="True"
                 ToolTip="{DynamicResource ShowHexFormatTip}" />
             <CheckBox
-                Name="HexSendCheckBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource HexSendMode}"
-                IsChecked="{Binding hexSend}" />
-            <CheckBox
                 Name="ExtraEnterCheckBox"
                 Margin="5,0,0,0"
                 Content="{DynamicResource AddExtraEnter}"

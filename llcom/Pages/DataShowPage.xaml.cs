@@ -63,7 +63,6 @@ namespace llcom.Pages
             MainTextBox.DataContext = Tools.Global.setting;
 
             HEXBox.DataContext = Tools.Global.setting;
-            HexSendCheckBox.DataContext = Tools.Global.setting;
             this.ExtraEnterCheckBox.DataContext = Tools.Global.setting;
             DisableLogCheckBox.DataContext = Tools.Global.setting;
             EnableSymbolCheckBox.DataContext = Tools.Global.setting;
