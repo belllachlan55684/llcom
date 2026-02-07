@@ -167,11 +167,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button
-                    Name="ClearLogButton"
+                    Name="OpenLogFolderButton"
                     Margin="5,0,0,0"
                     Padding="8,2"
-                    Click="ClearLogButton_Click"
-                    Content="{DynamicResource ClearLog}" />
+                    Click="OpenLogFolderButton_Click"
+                    Content="{DynamicResource SettingOpenLogFolder}" />
                 <Button
                     Name="SaveLogButton"
                     Margin="5,0,0,0"
@@ -180,11 +180,11 @@
                     Content="{DynamicResource SaveLogButtonTip}"
                     ToolTip="{DynamicResource SaveLogButtonTip}" />
                 <Button
-                    Name="OpenLogFolderButton"
+                    Name="ClearLogButton"
                     Margin="5,0,0,0"
                     Padding="8,2"
-                    Click="OpenLogFolderButton_Click"
-                    Content="{DynamicResource SettingOpenLogFolder}" />
+                    Click="ClearLogButton_Click"
+                    Content="{DynamicResource ClearLog}" />
             </StackPanel>
         </Grid>
     </Grid>

@@ -16,7 +16,7 @@
     <system:String x:Key="MoreSettingsTip">Set stopbit, parity, Lua script for data to send and so on.</system:String>
     <system:String x:Key="SendDataButton">Send</system:String>
     <system:String x:Key="SendDataButtonTip">same as Ctrl+Enter</system:String>
-    <system:String x:Key="RefreshPortButton">Refresh List</system:String>
+    <system:String x:Key="RefreshPortButton">Refresh</system:String>
     <system:String x:Key="ShowPorts">Serial Ports:</system:String>
     <system:String x:Key="ShowBaudRate">Baud Rate:</system:String>
     <system:String x:Key="TooltipBaudRate">Baud Rate</system:String>
