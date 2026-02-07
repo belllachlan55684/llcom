@@ -86,16 +86,39 @@
                     Height="32"
                     BorderThickness="0"
                     Background="Transparent"
-                    ToolTip="{DynamicResource SettingKeepTop}"
                     IsChecked="{Binding topmost, Source={x:Static local_tool:Global.setting}, Mode=TwoWay}"
                     Click="PinTopmostButton_Click"
+                    Loaded="PinTopmostButton_Loaded"
                     shell:WindowChrome.IsHitTestVisibleInChrome="True">
                     <ToggleButton.Content>
                         <fa:FontAwesome
                             Name="PinIcon"
                             Icon="Thumbtack"
                             FontSize="12"
-                            Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                            RenderTransformOrigin="0.5,0.5"
+                            Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}">
+                            <fa:FontAwesome.RenderTransform>
+                                <RotateTransform Angle="0" />
+                            </fa:FontAwesome.RenderTransform>
+                            <fa:FontAwesome.Style>
+                                <Style TargetType="fa:FontAwesome">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="0" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=PinTopmostButton}" Value="False">
+                                            <Setter Property="RenderTransform">
+                                                <Setter.Value>
+                                                    <RotateTransform Angle="-45" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </fa:FontAwesome.Style>
+                        </fa:FontAwesome>
                     </ToggleButton.Content>
                     <ToggleButton.Style>
                         <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">

@@ -447,6 +447,27 @@ namespace llcom
         }
 
         /// <summary>
+        /// Pin 按钮 Loaded：设置初始 Tooltip 并订阅状态变化
+        /// </summary>
+        private void PinTopmostButton_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdatePinTooltip();
+            PinTopmostButton.Checked += (s, ev) => UpdatePinTooltip();
+            PinTopmostButton.Unchecked += (s, ev) => UpdatePinTooltip();
+        }
+
+        /// <summary>
+        /// 根据置顶状态更新 Pin 按钮 Tooltip
+        /// </summary>
+        private void UpdatePinTooltip()
+        {
+            if (PinTopmostButton == null) return;
+            PinTopmostButton.ToolTip = PinTopmostButton.IsChecked == true
+                ? (TryFindResource("UnpinTopTip") as string ?? "取消置顶")
+                : (TryFindResource("PinTopTip") as string ?? "置顶");
+        }
+
+        /// <summary>
         /// Pin 按钮点击：切换窗口置顶
         /// </summary>
         private void PinTopmostButton_Click(object sender, RoutedEventArgs e)
