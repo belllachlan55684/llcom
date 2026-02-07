@@ -22,9 +22,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="35" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="30" />
             <RowDefinition Height="*" MinHeight="60" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Margin="0,5,0,0">
             <Grid.ColumnDefinitions>
@@ -175,22 +174,9 @@
                     IsChecked="{Binding terminal}" />
             </WrapPanel>
         </ScrollViewer>
-        <TextBlock
-            Grid.Row="4"
-            Margin="2"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Text="{DynamicResource ToSendDataTextBlock}" />
-        <CheckBox
-            Grid.Row="4"
-            Margin="2"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Content="Hex"
-            IsChecked="{Binding hexSend}" />
         <TextBox
             Name="toSendDataTextBox"
-            Grid.Row="5"
+            Grid.Row="4"
             Margin="2"
             VerticalContentAlignment="Top"
             AcceptsReturn="True"
@@ -199,13 +185,21 @@
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             MinHeight="60" />
-        <Button
-            Name="sendDataButton"
-            Grid.Row="6"
-            Margin="2"
-            HorizontalAlignment="Right"
-            Click="SendDataButton_Click"
-            Content="{DynamicResource SendDataButton}"
-            ToolTip="{DynamicResource SendDataButtonTip}" />
+        <DockPanel Grid.Row="5" Margin="2">
+            <Button
+                Name="sendDataButton"
+                DockPanel.Dock="Right"
+                Margin="0,0,0,0"
+                Click="SendDataButton_Click"
+                Content="{DynamicResource SendDataButton}"
+                ToolTip="{DynamicResource SendDataButtonTip}" />
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox Content="RTS" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Rts}"/>
+                <CheckBox Content="DTR" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Dtr}"/>
+                <CheckBox Content="{DynamicResource AddExtraEnter}" Margin="4,0" VerticalAlignment="Center"
+                          IsChecked="{Binding extraEnter}" ToolTip="{DynamicResource AddExtraEnterTip}"/>
+                <CheckBox Content="Hex" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding hexSend}"/>
+            </WrapPanel>
+        </DockPanel>
     </Grid>
 </Page>

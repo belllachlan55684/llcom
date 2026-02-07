@@ -234,6 +234,18 @@ namespace llcom.Model
         }
 
         /// <summary>
+        /// RTS 透传至 uart（不持久化）
+        /// </summary>
+        [JsonIgnore]
+        public bool Rts { get => Tools.Global.uart.Rts; set => Tools.Global.uart.Rts = value; }
+
+        /// <summary>
+        /// DTR 透传至 uart（不持久化）
+        /// </summary>
+        [JsonIgnore]
+        public bool Dtr { get => Tools.Global.uart.Dtr; set => Tools.Global.uart.Dtr = value; }
+
+        /// <summary>
         /// 主数据发送框是否发hex
         /// </summary>
         public bool hexSend

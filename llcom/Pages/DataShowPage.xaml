@@ -126,55 +126,58 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <WrapPanel
-            Grid.Row="1"
-            Margin="10,0,0,3"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Bottom"
-            Orientation="Horizontal">
-            <CheckBox
-                Name="HEXBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource ShowHexFormat}"
-                IsChecked="{Binding showHexFormat, Converter={StaticResource showHexFormatConverter}}"
-                IsThreeState="True"
-                ToolTip="{DynamicResource ShowHexFormatTip}" />
-            <CheckBox
-                Name="EnableSymbolCheckBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource ShowSymbol}"
-                IsChecked="{Binding EnableSymbol}"
-                ToolTip="{DynamicResource ShowSymbolTooltip}" />
-            <CheckBox
-                Name="DisableLogCheckBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource DisableLog}"
-                IsChecked="{Binding DisableLog}" />
-            <CheckBox
-                Name="LockLogCheckBox"
-                Margin="5,0,0,0"
-                Content="{DynamicResource LockLogButton}"
-                IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                ToolTip="{DynamicResource LockLogButton}" />
-            <Button
-                Name="ClearLogButton"
-                Margin="5,0,0,0"
-                Padding="8,2"
-                Click="ClearLogButton_Click"
-                Content="{DynamicResource ClearLog}" />
-            <Button
-                Name="SaveLogButton"
-                Margin="5,0,0,0"
-                Padding="8,2"
-                Click="SaveLogButton_Click"
-                Content="{DynamicResource SaveLogButtonTip}"
-                ToolTip="{DynamicResource SaveLogButtonTip}" />
-            <Button
-                Name="OpenLogFolderButton"
-                Margin="5,0,0,0"
-                Padding="8,2"
-                Click="OpenLogFolderButton_Click"
-                Content="{DynamicResource SettingOpenLogFolder}" />
-        </WrapPanel>
+        <Grid Grid.Row="1" Margin="10,0,10,3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                <CheckBox
+                    Name="HEXBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource ShowHexFormat}"
+                    IsChecked="{Binding showHexFormat, Converter={StaticResource showHexFormatConverter}}"
+                    IsThreeState="True"
+                    ToolTip="{DynamicResource ShowHexFormatTip}" />
+                <CheckBox
+                    Name="EnableSymbolCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource ShowSymbol}"
+                    IsChecked="{Binding EnableSymbol}"
+                    ToolTip="{DynamicResource ShowSymbolTooltip}" />
+                <CheckBox
+                    Name="DisableLogCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource DisableLog}"
+                    IsChecked="{Binding DisableLog}" />
+                <CheckBox
+                    Name="LockLogCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource LockLogButton}"
+                    IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource LockLogButton}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button
+                    Name="ClearLogButton"
+                    Margin="5,0,0,0"
+                    Padding="8,2"
+                    Click="ClearLogButton_Click"
+                    Content="{DynamicResource ClearLog}" />
+                <Button
+                    Name="SaveLogButton"
+                    Margin="5,0,0,0"
+                    Padding="8,2"
+                    Click="SaveLogButton_Click"
+                    Content="{DynamicResource SaveLogButtonTip}"
+                    ToolTip="{DynamicResource SaveLogButtonTip}" />
+                <Button
+                    Name="OpenLogFolderButton"
+                    Margin="5,0,0,0"
+                    Padding="8,2"
+                    Click="OpenLogFolderButton_Click"
+                    Content="{DynamicResource SettingOpenLogFolder}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Page>

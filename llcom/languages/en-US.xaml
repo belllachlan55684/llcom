@@ -191,12 +191,12 @@
     <system:String x:Key="ToSendDataTextBlock">To send data:</system:String>
     <system:String x:Key="NetSendDataButton">Send</system:String>
     <system:String x:Key="KickClientButton">Kick Client</system:String>
-    <system:String x:Key="AddExtraEnter">send data add an extra enter</system:String>
-    <system:String x:Key="AddExtraEnterTip">before do this, alse will use Lua script for data to send</system:String>
-    <system:String x:Key="LockLogButton">Lock logs and disable auto scroll</system:String>
+    <system:String x:Key="AddExtraEnter">CRLF</system:String>
+    <system:String x:Key="AddExtraEnterTip">Before adding CRLF, Lua script will process the data to send</system:String>
+    <system:String x:Key="LockLogButton">Disable scroll</system:String>
     <system:String x:Key="LockLogText">Locked</system:String>
-    <system:String x:Key="SaveLogButtonTip">Export log to file</system:String>
-    <system:String x:Key="ShowHexFormat">Hex format</system:String>
+    <system:String x:Key="SaveLogButtonTip">Save log</system:String>
+    <system:String x:Key="ShowHexFormat">Hex</system:String>
     <system:String x:Key="ShowHexFormatTip">modes: Only Hex/Only Text/Both Hex and Text</system:String>
     <system:String x:Key="HexSendMode">Send Hex</system:String>
     <system:String x:Key="SerialPortTabTitle">Serial Port</system:String>
@@ -256,7 +256,7 @@
     <system:String x:Key="OnlineScriptDownloadSaveNotice">Please input a file name:</system:String>
     <system:String x:Key="SaveSucceed">File saved!</system:String>
     <system:String x:Key="DisableLog">Stop print</system:String>
-    <system:String x:Key="ShowSymbol">Replace invisible characters</system:String>
+    <system:String x:Key="ShowSymbol">Control chars</system:String>
     <system:String x:Key="ShowSymbolTooltip">Only support UTF8</system:String>
     <system:String x:Key="MQTTTLSCert">use user's certificate</system:String>
     <system:String x:Key="MQTTTLSCA">CA file path(right click me to select file)</system:String>

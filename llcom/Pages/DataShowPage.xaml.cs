@@ -51,19 +51,12 @@ namespace llcom.Pages
                 MainList.Items.Clear();
                 MainTextBox.Clear();
             };
-            LockIcon.DataContext = this;
-            UnLockIcon.DataContext = this;
-            UnLockText.DataContext = this;
-            RTSCheckBox.DataContext = this;
-            DTRCheckBox.DataContext = this;
-            Rts = false;
-            Dtr = true;
+            LockLogCheckBox.DataContext = this;
 
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
 
             HEXBox.DataContext = Tools.Global.setting;
-            this.ExtraEnterCheckBox.DataContext = Tools.Global.setting;
             DisableLogCheckBox.DataContext = Tools.Global.setting;
             EnableSymbolCheckBox.DataContext = Tools.Global.setting;
 
@@ -135,11 +128,6 @@ namespace llcom.Pages
         }
 
 
-        private void LockLogButton_Click(object sender, RoutedEventArgs e)
-        {
-            LockLog = !LockLog;
-        }
-
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
         {
             Tools.Logger.ClearData();
@@ -154,28 +142,6 @@ namespace llcom.Pages
             catch
             {
                 Tools.MessageBox.Show($"尝试打开文件夹失败，请自行打开该路径：{Tools.Global.GetTrueProfilePath()}logs");
-            }
-        }
-
-        public bool Rts {
-            get
-            {
-                return Tools.Global.uart.Rts;
-            }
-            set
-            {
-                Tools.Global.uart.Rts = value;
-            }
-        }
-        public bool Dtr
-        {
-            get
-            {
-                return Tools.Global.uart.Dtr;
-            }
-            set
-            {
-                Tools.Global.uart.Dtr = value;
             }
         }
 
@@ -276,6 +242,7 @@ namespace llcom.Pages
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Log files(*.log)|*.log";
+            saveFileDialog.InitialDirectory = Tools.Global.GetTrueProfilePath() + "logs";
             if(saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string saveFilePath = saveFileDialog.FileName;
