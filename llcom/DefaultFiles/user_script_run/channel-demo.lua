@@ -25,7 +25,7 @@ local sendResult = apiSend("mqtt",nil,
   qos     = 0
 })
 
--- tcp-server，对应 本机TCP服务端 选项卡
+-- tcp-server，对应 TCP服务端 选项卡
 apiSetCb("tcp-server",function (data)
   log.info(
     "tcp-server received",
