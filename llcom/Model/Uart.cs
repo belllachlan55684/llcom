@@ -1,6 +1,7 @@
 using llcom.LuaEnv;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -78,6 +79,10 @@ namespace llcom.Model
         /// </summary>
         private void refreshSerialDevice()
         {
+#if DEBUG
+            var st = new StackTrace(1, true);
+            Tools.Logger.AddUartLogDebug($"[refreshSerialDevice]entry caller={st.GetFrame(0)?.GetMethod()?.DeclaringType?.Name}.{st.GetFrame(0)?.GetMethod()?.Name}");
+#endif
             Tools.Logger.AddUartLogDebug($"[refreshSerialDevice]start");
             try
             {
@@ -169,7 +174,17 @@ namespace llcom.Model
         /// </summary>
         public void Open()
         {
+#if DEBUG
+            var st = new StackTrace(1, true);
+            Tools.Logger.AddUartLogDebug($"[UartOpen]entry IsOpen={serial.IsOpen} PortName={serial.PortName} caller={st.GetFrame(0)?.GetMethod()?.DeclaringType?.Name}.{st.GetFrame(0)?.GetMethod()?.Name}");
+#endif
             string temp = serial.PortName;
+            // 若已打开且端口名有效，跳过 refreshSerialDevice 和 Open，避免不必要的 Dispose 导致连接中断
+            if (serial.IsOpen && !string.IsNullOrEmpty(temp))
+            {
+                Tools.Logger.AddUartLogDebug($"[UartOpen]already open, skip");
+                return;
+            }
             Tools.Logger.AddUartLogDebug($"[UartOpen]refreshSerialDevice");
             refreshSerialDevice();
             serial.PortName = temp;
@@ -184,6 +199,10 @@ namespace llcom.Model
         /// </summary>
         public void Close()
         {
+#if DEBUG
+            var st = new StackTrace(1, true);
+            Tools.Logger.AddUartLogDebug($"[UartClose]entry IsOpen={serial.IsOpen} caller={st.GetFrame(0)?.GetMethod()?.DeclaringType?.Name}.{st.GetFrame(0)?.GetMethod()?.Name}");
+#endif
             Tools.Logger.AddUartLogDebug($"[UartClose]refreshSerialDevice");
             refreshSerialDevice();
             Tools.Logger.AddUartLogDebug($"[UartClose]Close");

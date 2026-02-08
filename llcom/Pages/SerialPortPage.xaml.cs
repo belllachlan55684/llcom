@@ -172,7 +172,7 @@ namespace llcom.Pages
                         if (c.Contains($"({lastPort})"))
                         {
                             serialPortsListComboBox.Text = c;
-                            if (!forcusClosePort && Tools.Global.setting.autoReconnect && !isOpeningPort)
+                            if (!forcusClosePort && Tools.Global.setting.autoReconnect && !isOpeningPort && !Tools.Global.uart.IsOpen())
                             {
                                 Task.Run(() =>
                                 {

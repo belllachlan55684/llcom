@@ -23,9 +23,10 @@ taskkill /F /IM llcom.exe 2>$null
 在**工作区根目录**（含 `llcom.sln` 的目录）执行：
 
 ```powershell
-msbuild llcom.sln /p:Configuration=Debug /p:Platform=x64 /t:Build
+msbuild llcom\llcom.csproj /p:Configuration=Debug /p:Platform=x64 /t:Build
 ```
 
+- **不编译整个解决方案**（`llcom.sln`）：解决方案中包含 WapProj（Windows 应用打包）项目，依赖 DesktopBridge 组件，当前环境可能缺失；只编译 llcom 主项目即可。
 - 默认使用 Debug|x64；若需 Release 或 x86，可改为 `/p:Configuration=Release` 或 `/p:Platform=x86`
 - 需已安装 Visual Studio 或 Build Tools，确保 `msbuild` 在 PATH 中
 
@@ -35,8 +36,8 @@ msbuild llcom.sln /p:Configuration=Debug /p:Platform=x64 /t:Build
 # 1. 结束可能运行的 llcom.exe
 taskkill /F /IM llcom.exe 2>$null
 
-# 2. 编译
-msbuild llcom.sln /p:Configuration=Debug /p:Platform=x64 /t:Build
+# 2. 编译（仅 llcom 主项目，不包含 Windows 应用打包）
+msbuild llcom\llcom.csproj /p:Configuration=Debug /p:Platform=x64 /t:Build
 ```
 
 ## 4. 输出路径

@@ -255,7 +255,6 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
@@ -265,7 +264,6 @@
                         <StackPanel x:Name="statusBarContentPanel" Orientation="Horizontal" VerticalAlignment="Center" />
                     </ScrollViewer>
                 </StatusBarItem>
-                <Separator Grid.Column="1" />
             </StatusBar>
         </DockPanel>
 

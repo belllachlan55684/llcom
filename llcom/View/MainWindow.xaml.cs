@@ -417,16 +417,63 @@ namespace llcom
         private static readonly string[] StatusBarInterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal" };
 
         /// <summary>
+        /// 向状态栏添加单个接口块（分隔符 + 文本 + 收发色块）
+        /// </summary>
+        private void AddInterfaceBlockToStatusBar(int interfaceIndex, string key, string text)
+        {
+            statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = " | ", VerticalAlignment = VerticalAlignment.Center });
+            var interfaceTextBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = text,
+                Cursor = System.Windows.Input.Cursors.Hand,
+                ToolTip = TryFindResource("StatusBarInterfaceClickTip"),
+                Tag = interfaceIndex,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            interfaceTextBlock.MouseLeftButtonDown += StatusBarInterfaceText_MouseLeftButtonDown;
+            statusBarContentPanel.Children.Add(interfaceTextBlock);
+
+            var sendBlock = new System.Windows.Controls.Border
+            {
+                Width = 12,
+                Height = 12,
+                Margin = new Thickness(4, 0, 2, 0),
+                Background = Tools.Global.setting.GetSendDisplayBrushForInterface(key),
+                BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
+                BorderThickness = new Thickness(1),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                ToolTip = TryFindResource("SendColorTip"),
+                Tag = key,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            sendBlock.MouseLeftButtonDown += StatusBarSendColorBlock_MouseLeftButtonDown;
+
+            var recvBlock = new System.Windows.Controls.Border
+            {
+                Width = 12,
+                Height = 12,
+                Margin = new Thickness(2, 0, 0, 0),
+                Background = Tools.Global.setting.GetRecvDisplayBrushForInterface(key),
+                BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
+                BorderThickness = new Thickness(1),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                ToolTip = TryFindResource("RecvColorTip"),
+                Tag = key,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            recvBlock.MouseLeftButtonDown += StatusBarRecvColorBlock_MouseLeftButtonDown;
+
+            statusBarContentPanel.Children.Add(sendBlock);
+            statusBarContentPanel.Children.Add(recvBlock);
+        }
+
+        /// <summary>
         /// 根据所有数据接口的打开状态刷新状态栏，显示所有已打开的接口，仅当有已连接接口时显示色块
         /// </summary>
         public void RefreshDataInterfaceStatus()
         {
             if (statusBarContentPanel == null || DataInterfaceComboBox == null || RightTabControl == null)
                 return;
-
-#if DEBUG
-            System.Diagnostics.Debug.WriteLine($"[RefreshDataInterfaceStatus] uart.IsOpen={Tools.Global.uart.IsOpen()}, ComboBox.SelectedIndex={DataInterfaceComboBox.SelectedIndex}");
-#endif
 
             var frames = new[] { SerialPortFrame, tcpClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
             var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
@@ -443,69 +490,22 @@ namespace llcom
             txRxBlock.MouseRightButtonDown += statusTextBlock_MouseRightButtonDown;
             statusBarContentPanel.Children.Add(txRxBlock);
 
-            for (int i = 0; i < frames.Length; i++)
+            // 串口 (i=0)：单独优先处理，始终从全局 uart 获取，与 Tab/Frame 无关，确保 uart 打开时必定显示
+            var uartOpen = Tools.Global.uart.IsOpen();
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"[RefreshDataInterfaceStatus] Serial uart.IsOpen={uartOpen}, ComboBox.SelectedIndex={DataInterfaceComboBox?.SelectedIndex ?? -1}");
+#endif
+            if (uartOpen)
             {
-                string text;
-                if (i == 0)
-                {
-                    // 串口：始终从全局 uart 获取状态，避免 Frame 因 Tab 切换被卸载后 Content 不可用导致状态栏消失
-                    if (!Tools.Global.uart.IsOpen())
-                        continue;
-                    text = $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}";
-                }
-                else
-                {
-                    var content = frames[i]?.Content as IDataInterfaceStatusProvider;
-                    text = content?.GetStatusBarText();
-                    if (string.IsNullOrEmpty(text)) continue;
-                }
+                AddInterfaceBlockToStatusBar(0, StatusBarInterfaceKeys[0], $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}");
+            }
 
-                var key = StatusBarInterfaceKeys[i];
-
-                statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = " | ", VerticalAlignment = VerticalAlignment.Center });
-                var interfaceTextBlock = new System.Windows.Controls.TextBlock
-                {
-                    Text = text,
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    ToolTip = TryFindResource("StatusBarInterfaceClickTip"),
-                    Tag = i,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                interfaceTextBlock.MouseLeftButtonDown += StatusBarInterfaceText_MouseLeftButtonDown;
-                statusBarContentPanel.Children.Add(interfaceTextBlock);
-
-                var sendBlock = new System.Windows.Controls.Border
-                {
-                    Width = 12,
-                    Height = 12,
-                    Margin = new Thickness(4, 0, 2, 0),
-                    Background = Tools.Global.setting.GetSendDisplayBrushForInterface(key),
-                    BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
-                    BorderThickness = new Thickness(1),
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    ToolTip = TryFindResource("SendColorTip"),
-                    Tag = key,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                sendBlock.MouseLeftButtonDown += StatusBarSendColorBlock_MouseLeftButtonDown;
-
-                var recvBlock = new System.Windows.Controls.Border
-                {
-                    Width = 12,
-                    Height = 12,
-                    Margin = new Thickness(2, 0, 0, 0),
-                    Background = Tools.Global.setting.GetRecvDisplayBrushForInterface(key),
-                    BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
-                    BorderThickness = new Thickness(1),
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    ToolTip = TryFindResource("RecvColorTip"),
-                    Tag = key,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                recvBlock.MouseLeftButtonDown += StatusBarRecvColorBlock_MouseLeftButtonDown;
-
-                statusBarContentPanel.Children.Add(sendBlock);
-                statusBarContentPanel.Children.Add(recvBlock);
+            for (int i = 1; i < frames.Length; i++)
+            {
+                var content = frames[i]?.Content as IDataInterfaceStatusProvider;
+                var text = content?.GetStatusBarText();
+                if (string.IsNullOrEmpty(text)) continue;
+                AddInterfaceBlockToStatusBar(i, StatusBarInterfaceKeys[i], text);
             }
 
             foreach (var ctrl in FindVisualChildren<View.Controls.TxRxColorBlocks>(this))
@@ -554,6 +554,8 @@ namespace llcom
                 {
                     RightTabControl.SelectedIndex = 0;
                     DataInterfaceComboBox.SelectedIndex = idx;
+                    // SelectionChanged 全部处理完后，用 ApplicationIdle 再做一次兜底刷新，确保 COM 等状态正确显示
+                    Dispatcher.BeginInvoke(new Action(RefreshDataInterfaceStatus), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }

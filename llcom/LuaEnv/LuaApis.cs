@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,6 +49,15 @@ namespace llcom.LuaEnv
         public static string GetPath()
         {
             return Tools.Global.ProfilePath;
+        }
+
+        /// <summary>
+        /// 从 ProfilePath 相对路径读取文件内容，用于 package.preload，可正确处理中文路径
+        /// </summary>
+        public static string ReadFile(string relativePath)
+        {
+            var fullPath = Path.Combine(Tools.Global.ProfilePath, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            return File.Exists(fullPath) ? File.ReadAllText(fullPath, Encoding.UTF8) : null;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using llcom.LuaEnv;
+using llcom.LuaEnv;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -190,6 +190,23 @@ namespace llcom.LuaEnv
             lock (taskLock) lua.DoString(sysCode);
             triggerCB = lua.Global.Get<XLua.LuaTable>("sys").Get<XLua.LuaFunction>("tiggerCB");
             lua.Global.SetInPath("@this", this);//自己传给自己
+
+            lua.DoString("apiReadFile = CS.llcom.LuaEnv.LuaApis.ReadFile");
+            //package.preload 核心模块，避免中文路径下 io.open 编码问题
+            lua.DoString(@"
+package.preload['strings'] = function()
+  local c = apiReadFile('core_script/strings.lua')
+  return c and load(c, '=core_script/strings.lua', 't', _G)() or nil
+end
+package.preload['log'] = function()
+  local c = apiReadFile('core_script/log.lua')
+  return c and load(c, '=core_script/log.lua', 't', _G)() or nil
+end
+package.preload['sys'] = function()
+  local c = apiReadFile('core_script/sys.lua')
+  return c and load(c, '=core_script/sys.lua', 't', _G)() or nil
+end
+");
 
             //加上需要require的路径
             lua.DoString(@"

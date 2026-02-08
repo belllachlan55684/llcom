@@ -22,6 +22,7 @@ namespace llcom.LuaEnv
             lua.DoString("apiAscii2Utf8 = CS.llcom.LuaEnv.LuaApis.Ascii2Utf8");
             //获取软件目录路径
             lua.DoString("apiGetPath = CS.llcom.LuaEnv.LuaApis.GetPath");
+            lua.DoString("apiReadFile = CS.llcom.LuaEnv.LuaApis.ReadFile");
             //输出日志
             lua.DoString("apiPrintLog = CS.llcom.LuaEnv.LuaApis.PrintLog");
             //获取快捷发送区数据
@@ -56,6 +57,22 @@ package.cpath = package.cpath..
 ';'..rootPath..'core_script/?.lua'..
 ';'..rootPath..'?.lua'..
 ';'..rootPath..'user_script_run/requires/?.lua'
+");
+
+            //package.preload 核心模块，避免中文路径下 io.open 编码问题
+            lua.DoString(@"
+package.preload['strings'] = function()
+  local c = apiReadFile('core_script/strings.lua')
+  return c and load(c, '=core_script/strings.lua', 't', _G)() or nil
+end
+package.preload['log'] = function()
+  local c = apiReadFile('core_script/log.lua')
+  return c and load(c, '=core_script/log.lua', 't', _G)() or nil
+end
+package.preload['sys'] = function()
+  local c = apiReadFile('core_script/sys.lua')
+  return c and load(c, '=core_script/sys.lua', 't', _G)() or nil
+end
 ");
 
             //运行初始化文件
