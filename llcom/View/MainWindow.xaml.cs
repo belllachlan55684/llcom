@@ -136,6 +136,7 @@ namespace llcom
                         Global.setting.quickSendSelect = 0;
                     ToSendData.DataChanged += SaveSendList;
                     LoadQuickSendList();
+                    LoadQuickSendTargetIndices();
                     canSaveSendList = true;
 
 
@@ -610,41 +611,16 @@ namespace llcom
         private void knowSendDataButton_click(object sender, RoutedEventArgs e)
         {
             ToSendData data = ((Button)sender).Tag as ToSendData;
-
-            // 快捷发送区接收脚本临时覆盖（Serial 接口）
-            if (!string.IsNullOrEmpty(data.recvScriptPath))
+            var targets = GetQuickSendTargetIndices();
+            if (targets.Count == 0)
             {
-                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{data.recvScriptPath}.lua"))
-                {
-                    data.recvScriptPath = "";
-                    if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.GetDefaultScriptName()}.lua"))
-                        File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{Tools.Global.GetDefaultScriptName()}.lua").Close();
-                    Tools.Global.recvScriptTempOverride.Remove("Serial");
-                }
-                else
-                {
-                    Tools.Global.recvScriptTempOverride["Serial"] = data.recvScriptPath;
-                }
+                targets.Add(DataInterfaceComboBox.SelectedIndex);
             }
-            else
+            foreach (var idx in targets)
             {
-                Tools.Global.recvScriptTempOverride.Remove("Serial");
-            }
-
-            var sendData = Global.GetEncoding().GetBytes(data.text);
-            Global.recvPara = new byte[][] { Global.GetEncoding().GetBytes(data.recvScriptPara), sendData };
-            var sendScriptBackup = Tools.Global.setting.sendScript;
-            if (data.hex)
-                Tools.Global.setting.sendScript = "Hex";
-            try
-            {
-                var serialPage = SerialPortFrame.Content as Pages.SerialPortPage;
-                serialPage?.SendUartData(sendData);
-            }
-            finally
-            {
-                if (data.hex)
-                    Tools.Global.setting.sendScript = sendScriptBackup;
+                var page = GetSendPageByIndex(idx);
+                if (page != null)
+                    page.PerformSendWithData(data.text, data.hex);
             }
         }
 
@@ -1224,100 +1200,117 @@ namespace llcom
                 catch { }
         }
 
-        private void ScriptIcon_Click(object sender, MouseButtonEventArgs e)
+        private HashSet<int> quickSendSelectedIndices = new HashSet<int>();
+
+        private void QuickSendInterfaceButton_Click(object sender, RoutedEventArgs e)
         {
-            // 点击📜图标时配置接收脚本
-            TextBlock icon = sender as TextBlock;
-            ToSendData data = icon.Tag as ToSendData;
-            recvScriptCombo.ItemsSource = Directory.GetFiles(Global.ProfilePath + "user_script_recv_convert", "*.lua")
-                                                   .Select(System.IO.Path.GetFileNameWithoutExtension).ToList();
-            recvScriptPopup.PlacementTarget = icon;
-            recvScriptCombo.Tag = data;
-            recvScriptCombo.SelectedItem = data.recvScriptPath ?? "";
-            recvScriptCombo.IsDropDownOpen = true;
-            recvScriptPopup.IsOpen = false;
-            recvScriptPopup.IsOpen = true;
-
-            // 打开对话框，选择接收脚本
-            //System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
-            //dialog.Filter = "Lua脚本文件 (*.lua)|*.lua|所有文件 (*.*)|*.*";
-            //dialog.InitialDirectory = System.IO.Path.Combine(Tools.Global.ProfilePath, "user_script_recv_convert");
-
-            //if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            //{
-            //    data.recvScriptPath = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName);
-            //    //SaveSendList(null, EventArgs.Empty);
-            //}
+            RefreshQuickSendInterfaceList();
+            QuickSendInterfacePopup.IsOpen = true;
         }
 
-        private void ScriptIcon_RightClick(object sender, MouseButtonEventArgs e)
+        private void RefreshQuickSendInterfaceList()
         {
-            // 右击📜图标时清除接收脚本
-            TextBlock icon = sender as TextBlock;
-            ToSendData data = icon.Tag as ToSendData;
-
-            // 清除接收脚本项
-            if (!string.IsNullOrEmpty(data.recvScriptPath))
+            var items = GetOpenedInterfaceItems();
+            QuickSendInterfaceListBox.Items.Clear();
+            foreach (var item in items)
             {
-                data.recvScriptPath = "";
-                //SaveSendList(null, EventArgs.Empty);
+                QuickSendInterfaceListBox.Items.Add(item);
+                if (quickSendSelectedIndices.Contains(item.Index))
+                    QuickSendInterfaceListBox.SelectedItems.Add(item);
+            }
+            UpdateQuickSendInterfaceButtonText();
+        }
+
+        private void QuickSendInterfaceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            quickSendSelectedIndices.Clear();
+            foreach (var item in QuickSendInterfaceListBox.SelectedItems)
+            {
+                var ii = item as QuickSendInterfaceItem;
+                if (ii != null && ii.IsOpened)
+                    quickSendSelectedIndices.Add(ii.Index);
+            }
+            UpdateQuickSendInterfaceButtonText();
+            SaveQuickSendTargetIndices();
+        }
+
+        private void UpdateQuickSendInterfaceButtonText()
+        {
+            var tip = TryFindResource("QuickSendInterfaceSelect") as string ?? "接口";
+            if (quickSendSelectedIndices.Count == 0)
+                QuickSendInterfaceButtonText.Text = tip;
+            else
+                QuickSendInterfaceButtonText.Text = $"{tip}({quickSendSelectedIndices.Count})";
+        }
+
+        private List<QuickSendInterfaceItem> GetOpenedInterfaceItems()
+        {
+            var list = new List<QuickSendInterfaceItem>();
+            var names = new[] {
+                (0, TryFindResource("SerialPortTabTitle") as string ?? "串口"),
+                (1, TryFindResource("TcpClientTitle") as string ?? "TCP客户端"),
+                (2, TryFindResource("UdpLocalTabTitle") as string ?? "UDP本地"),
+                (3, TryFindResource("TcpLocalTabTitle") as string ?? "TCP本地"),
+                (4, TryFindResource("TcpTabTitle") as string ?? "TCP服务端"),
+                (5, "WinUSB"),
+                (7, "MQTT")
+            };
+            foreach (var (idx, name) in names)
+            {
+                if (IsInterfaceOpened(idx))
+                    list.Add(new QuickSendInterfaceItem { Index = idx, Name = name, IsOpened = true });
+            }
+            return list;
+        }
+
+        private bool IsInterfaceOpened(int index)
+        {
+            switch (index)
+            {
+                case 0: return Tools.Global.uart.IsOpen();
+                case 1: return (tcpClientFrame?.Content as Pages.SocketClientPage)?.IsConnected == true;
+                case 2: return (udpLocalTestFrame?.Content as Pages.UdpLocalPage)?.IsConnected == true;
+                case 3: return (tcpLocalTestFrame?.Content as Pages.TcpLocalPage)?.IsConnected == true;
+                case 4: return (tcpTestFrame?.Content as Pages.tcpTest)?.IsConnected == true;
+                case 5: return (WinUSBFrame?.Content as Pages.WinUSBPage)?.IsConnected == true;
+                case 7: return (MqttTestFrame?.Content as Pages.MqttTestPage)?.MqttIsConnected == true;
+                default: return false;
             }
         }
 
-        private void recvScriptCombo_DropDownClosed(object sender, EventArgs e)
+        private List<int> GetQuickSendTargetIndices()
         {
-            ComboBox me = sender as ComboBox;
-            ToSendData data = me.Tag as ToSendData;
-            string newItem = me.SelectedItem as string;
-            if(data.recvScriptPath != newItem) data.recvScriptPath = newItem;
-            recvScriptPopup.IsOpen = false;
-            me.SelectedItem = null;
+            var opened = GetOpenedInterfaceItems().Where(x => x.IsOpened).Select(x => x.Index).ToHashSet();
+            return quickSendSelectedIndices.Where(i => opened.Contains(i)).ToList();
         }
 
-        [DllImport("user32")]
-        public static extern IntPtr SetFocus(IntPtr hWnd);
-        private async void ScriptParaIcon_Click(object sender, MouseButtonEventArgs e)
+        private IQuickSendTarget GetSendPageByIndex(int index)
         {
-            TextBlock icon = sender as TextBlock;
-            ToSendData data = icon.Tag as ToSendData;
-
-            recvScriptParaBox.Tag = data;
-            recvScriptParaBox.Text = data.recvScriptPara;
-            recvScriptParaBox.ScrollToEnd();
-            recvScriptParaPopup.PlacementTarget = icon;
-            recvScriptParaPopup.IsOpen = false;
-            await Task.Yield();
-            recvScriptParaPopup.IsOpen = true;
-            await Task.Yield();
-            var source = (HwndSource)PresentationSource.FromVisual(recvScriptParaPopup.Child);
-            SetFocus(source.Handle);
-            await Task.Yield();
-            Keyboard.Focus(recvScriptParaBox);
-        }
-        private void ScriptParaIcon_RightClick(object sender, MouseButtonEventArgs e)
-        {
-            TextBlock icon = sender as TextBlock;
-            ToSendData data = icon.Tag as ToSendData;
-
-            if (!string.IsNullOrEmpty(data.recvScriptPara))
+            switch (index)
             {
-                data.recvScriptPara = "";
-                //SaveSendList(null, EventArgs.Empty);
+                case 0: return SerialPortFrame?.Content as IQuickSendTarget;
+                case 1: return tcpClientFrame?.Content as IQuickSendTarget;
+                case 2: return udpLocalTestFrame?.Content as IQuickSendTarget;
+                case 3: return tcpLocalTestFrame?.Content as IQuickSendTarget;
+                case 4: return tcpTestFrame?.Content as IQuickSendTarget;
+                case 5: return WinUSBFrame?.Content as IQuickSendTarget;
+                case 7: return MqttTestFrame?.Content as IQuickSendTarget;
+                default: return null;
             }
         }
-        private void ScriptParaConfirm_Click(object sender, MouseButtonEventArgs e)
-        {
-            TextBlock icon = sender as TextBlock;
-            TextEditor t = icon.Tag as TextEditor;
-            ToSendData data = t.Tag as ToSendData;
 
-            data.recvScriptPara = t.Text;
-            //SaveSendList(null, EventArgs.Empty);
-            recvScriptParaPopup.IsOpen = false;
-        }
-        private void ScriptParaCancel_Click(object sender, MouseButtonEventArgs e)
+        private void SaveQuickSendTargetIndices()
         {
-            recvScriptParaPopup.IsOpen = false;
+            Tools.Global.setting.quickSendTargetIndices = quickSendSelectedIndices.ToList();
+        }
+
+        private void LoadQuickSendTargetIndices()
+        {
+            if (Tools.Global.setting.quickSendTargetIndices != null)
+            {
+                quickSendSelectedIndices = new HashSet<int>(Tools.Global.setting.quickSendTargetIndices);
+                UpdateQuickSendInterfaceButtonText();
+            }
         }
 
         private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
@@ -1332,5 +1325,13 @@ namespace llcom
                     yield return descendant;
             }
         }
+    }
+
+    public class QuickSendInterfaceItem
+    {
+        public int Index { get; set; }
+        public string Name { get; set; }
+        public bool IsOpened { get; set; }
+        public override string ToString() => IsOpened ? Name : $"{Name} (未连接)";
     }
 }

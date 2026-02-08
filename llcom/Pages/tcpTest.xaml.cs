@@ -28,7 +28,7 @@ namespace llcom.Pages
     /// tcpTest.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class tcpTest : Page
+    public partial class tcpTest : Page, IQuickSendTarget
     {
         public tcpTest()
         {
@@ -337,6 +337,16 @@ namespace llcom.Pages
             if (!IsConnected || ClientList.Text.Length == 0)
                 return;
             Send(toSendDataTextBox.Text,HexMode, ClientList.Text);
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (!IsConnected) return false;
+            var client = ClientList.Text;
+            if (string.IsNullOrEmpty(client) && clients.Count > 0)
+                client = clients[0];
+            if (string.IsNullOrEmpty(client)) return false;
+            return Send(text, isHex, client);
         }
 
         private bool Send(string data, bool isHex, string client)

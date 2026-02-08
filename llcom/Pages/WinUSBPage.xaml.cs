@@ -33,7 +33,7 @@ namespace llcom.Pages
     /// WinUSBPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class WinUSBPage : Page
+    public partial class WinUSBPage : Page, IQuickSendTarget
     {
         public WinUSBPage()
         {
@@ -41,7 +41,6 @@ namespace llcom.Pages
         }
 
         public bool IsConnected { get; set; }
-        public bool HexMode { get; set; } = false;
 
         private static bool loaded = false;
         private void ShowData(string title, byte[] data = null, bool send = false)
@@ -142,6 +141,7 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("WinUSB");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
+            SendWrapPanel.DataContext = displayProxy;
 
             //适配一下通用通道
             LuaApis.SendChannelsRegister("winusb", (data,_) =>
@@ -328,10 +328,17 @@ namespace llcom.Pages
             if (!IsConnected)
                 return;
             var text = Tools.Global.setting.GetDataToSendForInterface("WinUSB") ?? "";
-            var buff = HexMode ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            var isHex = Tools.Global.setting.GetHexForInterface("WinUSB");
+            PerformSendWithData(text, isHex);
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (!IsConnected) return false;
+            var buff = isHex ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            if (buff == null || buff.Length == 0) return false;
             var toSend = Tools.LuaConvertHelper.ApplySendConvert(buff, "WinUSB");
-            if (toSend == null)
-                return;
+            if (toSend == null) return false;
             lock (toSendBuffer)
                 toSendBuffer.Add(toSend);
             Tools.Global.setting.SentCount += toSend.Length;
@@ -344,6 +351,7 @@ namespace llcom.Pages
                 if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "WinUSB");
                 if (showConverted) Tools.Logger.ShowData(toSend, true, "WinUSB");
             }
+            return true;
         }
 
         private void UsbListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

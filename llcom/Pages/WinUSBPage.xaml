@@ -129,7 +129,7 @@
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             MinHeight="60" />
-        <DockPanel Grid.Row="5" Margin="0,5,0,0">
+        <DockPanel Name="SendDockPanel" Grid.Row="5" Margin="0,5,0,0">
             <Button
                 Name="SendDataButton"
                 DockPanel.Dock="Right"
@@ -137,16 +137,16 @@
                 Click="SendDataButton_Click"
                 Content="{DynamicResource NetSendDataButton}"
                 IsEnabled="{Binding IsConnected}" />
-            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <WrapPanel Name="SendWrapPanel" Orientation="Horizontal" VerticalAlignment="Center">
                 <controls:ScriptSelectorControl
                     x:Name="sendScriptSelector"
                     InterfaceKey="WinUSB"
                     IsSendScript="True" />
                 <CheckBox
-                    Content="Hex"
+                    Content="{DynamicResource QuickSendHex}"
                     Margin="4,0"
                     VerticalAlignment="Center"
-                    IsChecked="{Binding HexMode}" />
+                    IsChecked="{Binding HexMode, Mode=TwoWay}" />
             </WrapPanel>
         </DockPanel>
     </Grid>

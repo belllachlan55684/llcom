@@ -31,7 +31,7 @@ namespace llcom.Pages
     /// MqttTestPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class MqttTestPage : Page
+    public partial class MqttTestPage : Page, IQuickSendTarget
     {
         public MqttTestPage()
         {
@@ -289,16 +289,20 @@ namespace llcom.Pages
             }
             if (mqttClient.IsConnected)
             {
-                var topic = publishTopicTextBox.Text;
-                var payload = HexCheckBox.IsChecked ?? false ?
-                    Tools.Global.Hex2Byte(PublishTextBox.Text) :
-                    Tools.Global.GetEncoding().GetBytes(PublishTextBox.Text);
-                var qos = int.Parse(publishQOSComboBox.Text);
-                Task.Run(() =>
-                {
-                    Publish(topic, payload, qos);
-                });
+                Task.Run(() => PerformSendWithData(PublishTextBox.Text, HexCheckBox.IsChecked ?? false));
             }
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (!mqttClient.IsConnected) return false;
+            if (string.IsNullOrEmpty(publishTopicTextBox?.Text)) return false;
+            var topic = publishTopicTextBox.Text;
+            var payload = isHex ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            if (payload == null) payload = new byte[0];
+            var qos = 0;
+            int.TryParse(publishQOSComboBox?.Text ?? "0", out qos);
+            return Publish(topic, payload, qos);
         }
 
         private bool Publish(string topic, byte[] payload, int qos)

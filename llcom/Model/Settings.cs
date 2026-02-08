@@ -110,6 +110,11 @@ namespace llcom.Model
         }
 
         /// <summary>
+        /// 快捷发送选中的目标接口索引列表（持久化）
+        /// </summary>
+        public List<int> quickSendTargetIndices { get; set; } = new List<int>();
+
+        /// <summary>
         /// 当前选中的快速发送列表编号
         /// </summary>
         public int quickSendSelect
@@ -561,6 +566,11 @@ namespace llcom.Model
         public Dictionary<string, bool> disableLogByInterface { get => _disableLogByInterface ??= new Dictionary<string, bool>(); set => _disableLogByInterface = value ?? new Dictionary<string, bool>(); }
         public bool GetDisableLogForInterface(string key) { if (key != null && disableLogByInterface.TryGetValue(key, out var v)) return v; return DisableLog; }
         public void SetDisableLogForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; disableLogByInterface[key] = value; Save(); }
+
+        private Dictionary<string, bool> _hexModeByInterface = null;
+        public Dictionary<string, bool> hexModeByInterface { get => _hexModeByInterface ??= new Dictionary<string, bool>(); set => _hexModeByInterface = value ?? new Dictionary<string, bool>(); }
+        public bool GetHexForInterface(string key) { if (key != null && hexModeByInterface.TryGetValue(key, out var v)) return v; return false; }
+        public void SetHexForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; hexModeByInterface[key] = value; Save(); }
 
         public string runScript
         {

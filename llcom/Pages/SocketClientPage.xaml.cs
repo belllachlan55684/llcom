@@ -27,7 +27,7 @@ namespace llcom.Pages
     /// SocketClientPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class SocketClientPage : Page, IDataInterfaceStatusProvider
+    public partial class SocketClientPage : Page, IDataInterfaceStatusProvider, IQuickSendTarget
     {
         public SocketClientPage()
         {
@@ -58,6 +58,7 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("TcpClient");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
+            SendDockPanel.DataContext = displayProxy;
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, buff) =>
@@ -394,12 +395,18 @@ namespace llcom.Pages
             if (socketNow != null)
             {
                 var text = Tools.Global.setting.GetDataToSendForInterface("TcpClient") ?? "";
-                byte[] buff = Tools.Global.GetEncoding().GetBytes(text);
-                if (buff == null || buff.Length == 0)
-                    return;
-                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
-                Send(buff);
+                var isHex = Tools.Global.setting.GetHexForInterface("TcpClient");
+                PerformSendWithData(text, isHex);
             }
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (socketNow == null) return false;
+            byte[] buff = isHex ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            if (buff == null || buff.Length == 0) return false;
+            Tools.Global.recvPara = new byte[][] { new byte[0], buff };
+            return Send(buff);
         }
 
         private bool Send(byte[] buff)

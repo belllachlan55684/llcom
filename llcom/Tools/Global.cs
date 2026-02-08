@@ -228,10 +228,6 @@ namespace llcom.Tools
                         setting.sendScript = "Hex";
                     if (setting.recvScript == "default" || setting.recvScript == "原始数据" || setting.recvScript == "rawdata")
                         setting.recvScript = "RawData";
-                    foreach (var list in setting.quickSendList)
-                        foreach (var data in list)
-                            if (data.recvScriptPath == "default" || data.recvScriptPath == "原始数据" || data.recvScriptPath == "rawdata")
-                                data.recvScriptPath = "RawData";
                 }
                 catch
                 {

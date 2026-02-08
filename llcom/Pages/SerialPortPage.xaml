@@ -224,6 +224,7 @@
                     x:Name="sendScriptSelector"
                     InterfaceKey="Serial"
                     IsSendScript="True" />
+                <CheckBox Content="{DynamicResource QuickSendHex}" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Display.HexMode, Mode=TwoWay}"/>
                 <CheckBox Content="RTS" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Setting.Rts}"/>
                 <CheckBox Content="DTR" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding Setting.Dtr}"/>
             </WrapPanel>

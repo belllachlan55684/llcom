@@ -16,7 +16,7 @@ namespace llcom.Pages
     /// <summary>
     /// SerialPortPage.xaml 的交互逻辑
     /// </summary>
-    public partial class SerialPortPage : Page, IDataInterfaceStatusProvider
+    public partial class SerialPortPage : Page, IDataInterfaceStatusProvider, IQuickSendTarget
     {
         private bool forcusClosePort = true;
         private bool isOpeningPort = false;
@@ -331,9 +331,18 @@ namespace llcom.Pages
         /// </summary>
         public void PerformSend()
         {
-            var data = Global.GetEncoding().GetBytes(toSendDataTextBox.Text);
-            Global.recvPara = new byte[][] { new byte[0], data };
-            SendUartData(data);
+            var text = Tools.Global.setting.GetDataToSendForInterface("Serial") ?? toSendDataTextBox.Text;
+            var isHex = Tools.Global.setting.GetHexForInterface("Serial");
+            PerformSendWithData(text, isHex);
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            byte[] buff = isHex ? Tools.Global.Hex2Byte(text) : Global.GetEncoding().GetBytes(text);
+            if (buff == null || buff.Length == 0) return false;
+            Global.recvPara = new byte[][] { new byte[0], buff };
+            SendUartData(buff);
+            return true;
         }
 
         /// <summary>

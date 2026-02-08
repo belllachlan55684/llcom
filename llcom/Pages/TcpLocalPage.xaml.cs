@@ -28,7 +28,7 @@ namespace llcom.Pages
     /// TcpLocalPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class TcpLocalPage : Page, IDataInterfaceStatusProvider
+    public partial class TcpLocalPage : Page, IDataInterfaceStatusProvider, IQuickSendTarget
     {
         public TcpLocalPage()
         {
@@ -66,6 +66,7 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("TcpLocal");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
+            SendDockPanel.DataContext = displayProxy;
 
             //收到消息显示（与串口一致，recv_convert 在 DataShowPage 执行）
             DataRecived += (_, data) =>
@@ -327,10 +328,18 @@ namespace llcom.Pages
             if (Server != null)
             {
                 var text = Tools.Global.setting.GetDataToSendForInterface("TcpLocal") ?? "";
-                var buff = Tools.Global.GetEncoding().GetBytes(text);
-                Tools.Global.recvPara = new byte[][] { new byte[0], buff };
-                Broadcast(buff);
+                var isHex = Tools.Global.setting.GetHexForInterface("TcpLocal");
+                PerformSendWithData(text, isHex);
             }
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (Server == null) return false;
+            byte[] buff = isHex ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            if (buff == null || buff.Length == 0) return false;
+            Tools.Global.recvPara = new byte[][] { new byte[0], buff };
+            return Broadcast(buff);
         }
 
         private bool Broadcast(byte[] buff)

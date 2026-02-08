@@ -25,7 +25,7 @@ namespace llcom.Pages
     /// UdpLocalPage.xaml 的交互逻辑
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public partial class UdpLocalPage : Page, IDataInterfaceStatusProvider
+    public partial class UdpLocalPage : Page, IDataInterfaceStatusProvider, IQuickSendTarget
     {
         public UdpLocalPage()
         {
@@ -63,6 +63,7 @@ namespace llcom.Pages
             var displayProxy = new Model.InterfaceConfigProxy("UdpLocal");
             OptionsScrollViewer.DataContext = displayProxy;
             toSendDataTextBox.DataContext = displayProxy;
+            SendDockPanel.DataContext = displayProxy;
 
             LuaApis.SendChannelsRegister("udp-server", (data, _) =>
             {
@@ -224,9 +225,21 @@ namespace llcom.Pages
                 return;
             }
             var text = Tools.Global.setting.GetDataToSendForInterface("UdpLocal") ?? "";
-            var buff = Tools.Global.GetEncoding().GetBytes(text);
+            var isHex = Tools.Global.setting.GetHexForInterface("UdpLocal");
+            PerformSendWithData(text, isHex);
+        }
+
+        public bool PerformSendWithData(string text, bool isHex)
+        {
+            if (Server == null) return false;
+            IPEndPoint target;
+            lock (lastRemoteLock)
+                target = lastRemoteEndPoint;
+            if (target == null) return false;
+            byte[] buff = isHex ? Tools.Global.Hex2Byte(text) : Tools.Global.GetEncoding().GetBytes(text);
+            if (buff == null || buff.Length == 0) return false;
             Tools.Global.recvPara = new byte[][] { new byte[0], buff };
-            SendToClient(target, buff);
+            return SendToClient(target, buff);
         }
 
         private bool SendToClient(IPEndPoint target, byte[] buff)

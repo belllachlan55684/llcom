@@ -62,6 +62,8 @@
     <system:String x:Key="QuickSendChangeIdButton">输入你想改到哪个序号的位置（留空表示删除该项目）</system:String>
     <system:String x:Key="QuickSendChangeIdTitle">更改这个条目的序号</system:String>
     <system:String x:Key="QuickSendChangeList">切换到其他快捷发送数据列表</system:String>
+    <system:String x:Key="QuickSendInterfaceSelect">接口</system:String>
+    <system:String x:Key="QuickSendInterfaceSelectTip">选择要发送到的接口（可多选，仅显示已打开的接口）</system:String>
     <system:String x:Key="ScriptTab">脚本</system:String>
     <system:String x:Key="SendScriptTab">发送脚本</system:String>
     <system:String x:Key="RecvScriptTab">接收脚本</system:String>

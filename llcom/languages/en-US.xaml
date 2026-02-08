@@ -62,6 +62,8 @@
     <system:String x:Key="QuickSendChangeIdButton">Enter where you want to insert(empty means delete this line)</system:String>
     <system:String x:Key="QuickSendChangeIdTitle">Change index of this line</system:String>
     <system:String x:Key="QuickSendChangeList">Change to another quick send list</system:String>
+    <system:String x:Key="QuickSendInterfaceSelect">Interface</system:String>
+    <system:String x:Key="QuickSendInterfaceSelectTip">Select target interfaces for quick send (multi-select, only shows connected interfaces)</system:String>
     <system:String x:Key="ScriptTab">Scripts</system:String>
     <system:String x:Key="SendScriptTab">Send script</system:String>
     <system:String x:Key="RecvScriptTab">Receive script</system:String>

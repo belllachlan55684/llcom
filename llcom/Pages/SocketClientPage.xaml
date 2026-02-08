@@ -139,7 +139,7 @@
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             MinHeight="60" />
-        <DockPanel Grid.Row="5" Margin="0,5,0,0">
+        <DockPanel Name="SendDockPanel" Grid.Row="5" Margin="0,5,0,0">
             <Button
                 Name="SendButton"
                 DockPanel.Dock="Right"
@@ -151,6 +151,7 @@
                     x:Name="sendScriptSelector"
                     InterfaceKey="TcpClient"
                     IsSendScript="True" />
+                <CheckBox Content="{DynamicResource QuickSendHex}" Margin="4,0" VerticalAlignment="Center" IsChecked="{Binding HexMode, Mode=TwoWay}"/>
             </WrapPanel>
         </DockPanel>
     </Grid>

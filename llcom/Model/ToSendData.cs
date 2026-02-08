@@ -16,8 +16,6 @@ namespace llcom.Model
         private string _text;
         private bool _hex;
         private string _commit;
-        private string _recvScriptPath = "";
-        private string _recvScriptPara = "";
         public int id
         {
             get
@@ -67,24 +65,6 @@ namespace llcom.Model
                 DataChanged?.Invoke(0, EventArgs.Empty);
             }
         }
-
-        public string recvScriptPath
-        {
-            get
-            {
-                return _recvScriptPath;
-            }
-            set
-            {
-                _recvScriptPath = value;
-                DataChanged?.Invoke(0, EventArgs.Empty);
-                OnPropertyChanged(nameof(recvScriptPath));
-            }
-        }
-
-        public string recvScriptPara {
-            get { return _recvScriptPara; }
-            set { _recvScriptPara = value; DataChanged?.Invoke(0, EventArgs.Empty); OnPropertyChanged(nameof(recvScriptPara)); } }
 
         protected void OnPropertyChanged(string propertyName)
         {

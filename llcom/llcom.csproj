@@ -241,6 +241,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="IDataInterfaceStatusProvider.cs" />
+    <Compile Include="IQuickSendTarget.cs" />
     <Compile Include="LuaEnv\LuaEnv.cs" />
     <Compile Include="Model\LinePlotPoint.cs" />
     <Compile Include="Model\LuaFolding.cs" />
