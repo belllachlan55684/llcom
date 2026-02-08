@@ -51,12 +51,48 @@ namespace llcom.Pages
         }
 
         /// <summary>
+        /// 控制字符（将控制字符显示为可读符号，如 \r \n）
+        /// </summary>
+        public bool EnableSymbol
+        {
+            get => Tools.Global.setting?.EnableSymbol ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.EnableSymbol = value; }
+        }
+
+        /// <summary>
         /// 显示时间戳？
         /// </summary>
         public bool ShowTimestamp
         {
             get => Tools.Global.setting?.showTimestamp ?? true;
             set { if (Tools.Global.setting != null) Tools.Global.setting.showTimestamp = value; }
+        }
+
+        /// <summary>
+        /// 显示原始数据（脚本处理前的发送数据）
+        /// </summary>
+        public bool ShowSendRaw
+        {
+            get => Tools.Global.setting?.showSendRaw ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.showSendRaw = value; }
+        }
+
+        /// <summary>
+        /// 显示发送（脚本处理后的发送数据）
+        /// </summary>
+        public bool ShowSend
+        {
+            get => Tools.Global.setting?.showSend ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.showSend = value; }
+        }
+
+        /// <summary>
+        ///  Hex 显示格式（0=同时显示，1=只显示文本，2=只显示 Hex）
+        /// </summary>
+        public int ShowHexFormat
+        {
+            get => Tools.Global.setting?.showHexFormat ?? 0;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.showHexFormat = value; }
         }
 
         /// <summary>
@@ -92,6 +128,10 @@ namespace llcom.Pages
             };
             LockLogCheckBox.DataContext = this;
             DisableLogCheckBox.DataContext = this;
+            ShowSymbolCheckBox.DataContext = this;
+            ShowRawDataCheckBox.DataContext = this;
+            ShowSendCheckBox.DataContext = this;
+            ShowHexFormatCheckBox.DataContext = this;
             ShowTimestampCheckBox.DataContext = this;
 
             MainList.DataContext = Tools.Global.setting;

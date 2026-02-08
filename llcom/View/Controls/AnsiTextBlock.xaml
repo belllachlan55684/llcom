@@ -6,18 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <RichTextBox
-        x:Name="InnerRichTextBox"
+    <TextBlock
+        x:Name="InnerTextBlock"
         Background="Transparent"
-        BorderThickness="0"
-        Padding="0"
-        MinHeight="0"
         FontFamily="Consolas,Microsoft YaHei,微软雅黑"
         FontSize="12"
         Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
-        IsReadOnly="True">
-        <FlowDocument>
-            <Paragraph x:Name="ContentParagraph" Margin="0" />
-        </FlowDocument>
-    </RichTextBox>
+        TextWrapping="Wrap" />
 </UserControl>

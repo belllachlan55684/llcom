@@ -210,6 +210,12 @@
     <system:String x:Key="KickClientButton">Kick Client</system:String>
     <system:String x:Key="LockLogButton">Disable scroll</system:String>
     <system:String x:Key="ShowTimestampButton">Timestamp</system:String>
+    <system:String x:Key="RawData">Raw data</system:String>
+    <system:String x:Key="RawDataTip">Show raw sent data</system:String>
+    <system:String x:Key="ShowSend">Show send</system:String>
+    <system:String x:Key="ShowSendTip">Show data sent out</system:String>
+    <system:String x:Key="HexDisplay">Hex display</system:String>
+    <system:String x:Key="HexDisplayTip">modes: Only Hex/Only Text/Both Hex and Text</system:String>
     <system:String x:Key="LockLogText">Locked</system:String>
     <system:String x:Key="SaveLogButtonTip">Save log</system:String>
     <system:String x:Key="ShowHexFormat">Hex</system:String>

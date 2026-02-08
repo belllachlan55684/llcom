@@ -21,34 +21,10 @@ namespace llcom.Model
         protected void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        public bool ShowSend
-        {
-            get => Tools.Global.setting.GetShowSendForInterface(_interfaceKey);
-            set { Tools.Global.setting.SetShowSendForInterface(_interfaceKey, value); OnPropertyChanged(); }
-        }
-
-        public bool ShowSendRaw
-        {
-            get => Tools.Global.setting.GetShowSendRawForInterface(_interfaceKey);
-            set { Tools.Global.setting.SetShowSendRawForInterface(_interfaceKey, value); OnPropertyChanged(); }
-        }
-
         public string DataToSend
         {
             get => Tools.Global.setting.GetDataToSendForInterface(_interfaceKey);
             set { Tools.Global.setting.SetDataToSendForInterface(_interfaceKey, value); OnPropertyChanged(); }
-        }
-
-        public int ShowHexFormat
-        {
-            get => Tools.Global.setting.GetShowHexFormatForInterface(_interfaceKey);
-            set { Tools.Global.setting.SetShowHexFormatForInterface(_interfaceKey, value); OnPropertyChanged(); }
-        }
-
-        public bool EnableSymbol
-        {
-            get => Tools.Global.setting.GetEnableSymbolForInterface(_interfaceKey);
-            set { Tools.Global.setting.SetEnableSymbolForInterface(_interfaceKey, value); OnPropertyChanged(); }
         }
 
         public bool HexMode
@@ -62,11 +38,7 @@ namespace llcom.Model
         /// </summary>
         public void Refresh()
         {
-            OnPropertyChanged(nameof(ShowSend));
-            OnPropertyChanged(nameof(ShowSendRaw));
             OnPropertyChanged(nameof(DataToSend));
-            OnPropertyChanged(nameof(ShowHexFormat));
-            OnPropertyChanged(nameof(EnableSymbol));
             OnPropertyChanged(nameof(HexMode));
         }
     }

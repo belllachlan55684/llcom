@@ -71,28 +71,7 @@
                     x:Name="recvScriptSelector"
                     InterfaceKey="UdpLocal"
                     IsSendScript="False" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingShowSendData}"
-                    ToolTip="{DynamicResource SettingShowSendDataTip}"
-                    IsChecked="{Binding ShowSend, Mode=TwoWay}" />
                 <controls:TxRxColorBlocks InterfaceKey="UdpLocal" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingShowRawData}"
-                    ToolTip="{DynamicResource SettingShowRawDataTip}"
-                    IsChecked="{Binding ShowSendRaw, Mode=TwoWay}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource ShowHexFormat}"
-                    IsChecked="{Binding ShowHexFormat, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
-                    IsThreeState="True"
-                    ToolTip="{DynamicResource ShowHexFormatTip}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource ShowSymbol}"
-                    IsChecked="{Binding EnableSymbol, Mode=TwoWay}"
-                    ToolTip="{DynamicResource ShowSymbolTooltip}" />
             </WrapPanel>
         </ScrollViewer>
         <TextBox

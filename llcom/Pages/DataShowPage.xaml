@@ -159,7 +159,7 @@
             </ItemsControl>
         </ScrollViewer>
         <Grid Grid.Row="1" Margin="10,0,10,3">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
                 <CheckBox
                     Name="LockLogCheckBox"
                     Margin="5,0,0,0"
@@ -215,7 +215,7 @@
                     Content="{DynamicResource ShowTimestampButton}"
                     IsChecked="{Binding ShowTimestamp, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource ShowTimestampButton}" />
-            </StackPanel>
+            </WrapPanel>
         </Grid>
         <Button
             Name="OpenLogFolderButton"

@@ -146,28 +146,7 @@
                     x:Name="recvScriptSelector"
                     InterfaceKey="Serial"
                     IsSendScript="False" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingShowSendData}"
-                    ToolTip="{DynamicResource SettingShowSendDataTip}"
-                    IsChecked="{Binding Display.ShowSend, Mode=TwoWay}" />
                 <controls:TxRxColorBlocks InterfaceKey="Serial" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingShowRawData}"
-                    ToolTip="{DynamicResource SettingShowRawDataTip}"
-                    IsChecked="{Binding Display.ShowSendRaw, Mode=TwoWay}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource ShowHexFormat}"
-                    IsChecked="{Binding Display.ShowHexFormat, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
-                    IsThreeState="True"
-                    ToolTip="{DynamicResource ShowHexFormatTip}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource ShowSymbol}"
-                    IsChecked="{Binding Display.EnableSymbol, Mode=TwoWay}"
-                    ToolTip="{DynamicResource ShowSymbolTooltip}" />
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <CheckBox
                         Margin="0,0,10,0"

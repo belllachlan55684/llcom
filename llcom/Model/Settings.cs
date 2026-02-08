@@ -701,12 +701,12 @@ namespace llcom.Model
 
         private Dictionary<string, bool> _showSendByInterface = null;
         public Dictionary<string, bool> showSendByInterface { get => _showSendByInterface ??= new Dictionary<string, bool>(); set => _showSendByInterface = value ?? new Dictionary<string, bool>(); }
-        public bool GetShowSendForInterface(string key) { if (key != null && showSendByInterface.TryGetValue(key, out var v)) return v; return showSend; }
+        public bool GetShowSendForInterface(string key) { return showSend; }
         public void SetShowSendForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendByInterface[key] = value; Save(); }
 
         private Dictionary<string, bool> _showSendRawByInterface = null;
         public Dictionary<string, bool> showSendRawByInterface { get => _showSendRawByInterface ??= new Dictionary<string, bool>(); set => _showSendRawByInterface = value ?? new Dictionary<string, bool>(); }
-        public bool GetShowSendRawForInterface(string key) { if (key != null && showSendRawByInterface.TryGetValue(key, out var v)) return v; return showSendRaw; }
+        public bool GetShowSendRawForInterface(string key) { return showSendRaw; }
         public void SetShowSendRawForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendRawByInterface[key] = value; Save(); }
 
         private Dictionary<string, string> _dataToSendByInterface = null;
@@ -716,12 +716,12 @@ namespace llcom.Model
 
         private Dictionary<string, int> _showHexFormatByInterface = null;
         public Dictionary<string, int> showHexFormatByInterface { get => _showHexFormatByInterface ??= new Dictionary<string, int>(); set => _showHexFormatByInterface = value ?? new Dictionary<string, int>(); }
-        public int GetShowHexFormatForInterface(string key) { if (key != null && showHexFormatByInterface.TryGetValue(key, out var v)) return v; return showHexFormat; }
+        public int GetShowHexFormatForInterface(string key) { return showHexFormat; }
         public void SetShowHexFormatForInterface(string key, int value) { if (string.IsNullOrEmpty(key)) return; showHexFormatByInterface[key] = value; Save(); }
 
         private Dictionary<string, bool> _enableSymbolByInterface = null;
         public Dictionary<string, bool> enableSymbolByInterface { get => _enableSymbolByInterface ??= new Dictionary<string, bool>(); set => _enableSymbolByInterface = value ?? new Dictionary<string, bool>(); }
-        public bool GetEnableSymbolForInterface(string key) { if (key != null && enableSymbolByInterface.TryGetValue(key, out var v)) return v; return EnableSymbol; }
+        public bool GetEnableSymbolForInterface(string key) { return EnableSymbol; }
         public void SetEnableSymbolForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; enableSymbolByInterface[key] = value; Save(); }
 
         private Dictionary<string, bool> _hexModeByInterface = null;

@@ -72,16 +72,16 @@ namespace llcom.View.Controls
         private static void OnContentFontSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var ctrl = (AnsiTextBlock)d;
-            if (ctrl.InnerRichTextBox != null)
-                ctrl.InnerRichTextBox.FontSize = (double)e.NewValue;
+            if (ctrl.InnerTextBlock != null)
+                ctrl.InnerTextBlock.FontSize = (double)e.NewValue;
         }
 
         private void UpdateContent()
         {
-            if (ContentParagraph == null)
+            if (InnerTextBlock == null)
                 return;
 
-            ContentParagraph.Inlines.Clear();
+            InnerTextBlock.Inlines.Clear();
             var text = Text ?? "";
             var defaultBrush = DefaultForeground ?? Brushes.Lime;
 
@@ -94,7 +94,7 @@ namespace llcom.View.Controls
             {
                 if (!string.IsNullOrEmpty(text))
                 {
-                    ContentParagraph.Inlines.Add(new Run(text) { Foreground = frozenDefault });
+                    InnerTextBlock.Inlines.Add(new Run(text) { Foreground = frozenDefault });
                 }
                 return;
             }
@@ -107,7 +107,7 @@ namespace llcom.View.Controls
                 var brush = seg.Color.HasValue
                     ? GetFrozenBrushFromColor(seg.Color.Value)
                     : frozenDefault;
-                ContentParagraph.Inlines.Add(new Run(seg.Text) { Foreground = brush });
+                InnerTextBlock.Inlines.Add(new Run(seg.Text) { Foreground = brush });
             }
         }
 
@@ -127,8 +127,8 @@ namespace llcom.View.Controls
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            if (InnerRichTextBox != null)
-                InnerRichTextBox.FontSize = ContentFontSize;
+            if (InnerTextBlock != null)
+                InnerTextBlock.FontSize = ContentFontSize;
             UpdateContent();
         }
     }
