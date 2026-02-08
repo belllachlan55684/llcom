@@ -64,7 +64,10 @@ namespace llcom.Pages
                 return "";
             var addr = ServerTextBox?.Text?.Trim() ?? "";
             var port = PortTextBox?.Text?.Trim() ?? "";
-            return string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port) ? $"UDP：{port}" : $"UDP {addr}：{port}";
+            if (string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port))
+                return $"UDP:{port}";
+            var addrPart = addr.Contains(":") ? $"[{addr}]:{port}" : $"{addr}:{port}";
+            return $"UDP {addrPart}";
         }
 
         private void NotifyStatusChanged()

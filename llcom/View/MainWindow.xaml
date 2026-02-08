@@ -520,65 +520,86 @@
                             <ListBox Name="QuickSendInterfaceListBox" SelectionMode="Multiple" DisplayMemberPath="Name" SelectionChanged="QuickSendInterfaceListBox_SelectionChanged" />
                         </Border>
                     </Popup>
-                    <StackPanel Grid.Row="2">
-                        <Grid Margin="0,10,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                Name="addSendListButton"
-                                Margin="3"
-                                Click="AddSendListButton_Click"
-                                Content="{DynamicResource QuickSendAdd}" />
-                            <Button
-                                Name="deleteSendListButton"
-                                Grid.Column="1"
-                                Margin="3"
-                                Click="DeleteSendListButton_Click"
-                                Content="{DynamicResource QuickSendRemoveLast}" />
-                        </Grid>
-                        <TextBlock
-                            FontWeight="Bold"
-                            Text="{DynamicResource QuickSendTip}"
-                            TextWrapping="Wrap" />
-                        <Grid Margin="0,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                Name="QuickSendImportButton"
-                                Margin="3"
-                                Click="QuickSendImportButton_Click"
-                                Content="{DynamicResource QuickSendImport}" />
-                            <Button
-                                Name="QuickSendExportButton"
-                                Grid.Column="1"
-                                Margin="3"
-                                Click="QuickSendExportButton_Click"
-                                Content="{DynamicResource QuickSendExport}" />
-                        </Grid>
-                        <Grid Margin="0,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                Name="removeAllButton"
-                                Grid.Column="0"
-                                Margin="3"
-                                Click="removeAllButton_Click"
-                                Content="{DynamicResource QuickSendRemoveAll}" />
-                            <Button
-                                Name="importSSCOMButton"
-                                Grid.Column="1"
-                                Margin="3"
-                                Click="ImportSSCOMButton_Click"
-                                Content="{DynamicResource QuickSendImportSSCOM}" />
-                        </Grid>
-
-                    </StackPanel>
+                    <WrapPanel Grid.Row="2" Margin="0,10,0,0" Orientation="Horizontal">
+                        <Button
+                            Name="addSendListButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="AddSendListButton_Click"
+                            ToolTip="{DynamicResource QuickSendAdd}">
+                            <fa:FontAwesome Icon="Plus" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+                        </Button>
+                        <Button
+                            Name="deleteSendListButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="DeleteSendListButton_Click"
+                            ToolTip="{DynamicResource QuickSendRemoveLast}">
+                            <fa:FontAwesome Icon="Minus" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+                        </Button>
+                        <Button
+                            Name="QuickSendImportButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="QuickSendImportButton_Click"
+                            ToolTip="{DynamicResource QuickSendImport}">
+                            <Viewbox Width="12" Height="12" Stretch="Uniform">
+                                <Path Data="M128 64c0-35.3 28.7-64 64-64L352 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64l-256 0c-35.3 0-64-28.7-64-64l0-112 174.1 0-39 39c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l39 39L128 288l0-224zm0 224l0 48L24 336c-13.3 0-24-10.7-24-24s10.7-24 24-24l104 0zM512 128l-128 0L384 0 512 128z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </Viewbox>
+                        </Button>
+                        <Button
+                            Name="QuickSendExportButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="QuickSendExportButton_Click"
+                            ToolTip="{DynamicResource QuickSendExport}">
+                            <Viewbox Width="12" Height="12" Stretch="Uniform">
+                                <Path Data="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 128-168 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l168 0 0 112c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM384 336l0-48 110.1 0-39-39c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l80 80c9.4 9.4 9.4 24.6 0 33.9l-80 80c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l39-39L384 336zm0-208l-128 0L256 0 384 128z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </Viewbox>
+                        </Button>
+                        <Button
+                            Name="removeAllButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="removeAllButton_Click"
+                            ToolTip="{DynamicResource QuickSendRemoveAll}">
+                            <fa:FontAwesome Icon="Trash" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+                        </Button>
+                        <Button
+                            Name="importSSCOMButton"
+                            Width="32"
+                            Height="32"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Padding="0"
+                            Click="ImportSSCOMButton_Click"
+                            ToolTip="{DynamicResource QuickSendImportSSCOM}">
+                            <Viewbox Width="12" Height="12" Stretch="Uniform">
+                                <Path Data="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM216 408c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-102.1-31 31c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l72-72c9.4-9.4 24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-31-31L216 408z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </Viewbox>
+                        </Button>
+                    </WrapPanel>
                 </Grid>
             </TabItem>
             <TabItem Header="{DynamicResource ScriptTab}">

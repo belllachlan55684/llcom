@@ -403,7 +403,7 @@ namespace llcom.Pages
         {
             if (!Tools.Global.uart.IsOpen())
                 return "";
-            return $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}";
+            return $"{Tools.Global.uart.GetName()}:{Tools.Global.setting.baudRate}";
         }
 
         private void NotifyStatusChanged()

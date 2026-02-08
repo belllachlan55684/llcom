@@ -65,7 +65,10 @@ namespace llcom.Pages
                 return "";
             var addr = ServerTextBox?.Text?.Trim() ?? "";
             var port = PortTextBox?.Text?.Trim() ?? "";
-            return string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port) ? $"TCP SSL：{port}" : $"TCP SSL {addr}：{port}";
+            if (string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port))
+                return $"TCP SSL:{port}";
+            var addrPart = addr.Contains(":") ? $"[{addr}]:{port}" : $"{addr}:{port}";
+            return $"TCP SSL {addrPart}";
         }
 
         private void NotifyStatusChanged()

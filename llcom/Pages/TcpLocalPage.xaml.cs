@@ -43,8 +43,11 @@ namespace llcom.Pages
         {
             if (!IsConnected)
                 return "";
-            var title = TryFindResource("TcpLocalTabTitle") as string ?? "TCP Server";
-            return $"{title}：{IpPortTextBox.Text}";
+            var ip = IpListComboBox?.Text?.Trim() ?? "";
+            var port = IpPortTextBox?.Text?.Trim() ?? "";
+            if (string.IsNullOrEmpty(port)) return "";
+            var addr = ip.Contains(":") ? $"[{ip}]:{port}" : $"{ip}:{port}";
+            return $"TCP {addr}";
         }
 
         private void NotifyStatusChanged()

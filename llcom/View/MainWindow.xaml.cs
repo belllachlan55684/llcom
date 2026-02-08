@@ -492,7 +492,7 @@ namespace llcom
                 return;
 
             var frames = new[] { SerialPortFrame, udpClientFrame, tcpClientFrame, tcpSslClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
-            var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
+            var txRx = $"Tx:{Tools.Global.setting.SentCount} Rx:{Tools.Global.setting.ReceivedCount}";
 
             statusBarContentPanel.Children.Clear();
 
@@ -513,7 +513,7 @@ namespace llcom
 #endif
             if (uartOpen)
             {
-                AddInterfaceBlockToStatusBar(0, StatusBarInterfaceKeys[0], $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}");
+                AddInterfaceBlockToStatusBar(0, StatusBarInterfaceKeys[0], $"{Tools.Global.uart.GetName()}:{Tools.Global.setting.baudRate}");
             }
 
             for (int i = 1; i < frames.Length; i++)
