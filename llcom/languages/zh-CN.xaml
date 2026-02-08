@@ -205,6 +205,7 @@
     <system:String x:Key="NetSendDataButton">发送</system:String>
     <system:String x:Key="KickClientButton">断开客户端</system:String>
     <system:String x:Key="LockLogButton">禁止滚屏</system:String>
+    <system:String x:Key="ShowTimestampButton">显示时间戳</system:String>
     <system:String x:Key="LockLogText">已锁定</system:String>
     <system:String x:Key="SaveLogButtonTip">保存日志</system:String>
     <system:String x:Key="ShowHexFormat">Hex</system:String>

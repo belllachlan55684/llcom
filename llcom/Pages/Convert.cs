@@ -46,6 +46,25 @@ namespace llcom.Pages
     }
 
     /// <summary>
+    /// 根据 ShowTimestamp 控制是否显示时间戳：value[0]=TimeText, value[1]=ShowTimestamp
+    /// </summary>
+    public class ShowTimestampConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length < 2) return "";
+            var timeText = values[0] as string ?? "";
+            var showTimestamp = values[1] is bool b && b;
+            return showTimestamp ? timeText : "";
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
     /// 根据recvScript切换Tooltip
     /// </summary>
     [ValueConversion(typeof(string[]), typeof(string))]

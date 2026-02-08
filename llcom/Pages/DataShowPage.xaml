@@ -19,6 +19,7 @@
     <Page.Resources>
         <local:boolVisibe x:Key="boolVisibeConverter" />
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
+        <local:ShowTimestampConverter x:Key="ShowTimestampConverter" />
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -33,7 +34,14 @@
                             IsReadOnly="True">
                             <FlowDocument>
                                 <Paragraph Margin="0">
-                                    <Run Text="{Binding TimeText}" />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                                <Binding Path="TimeText" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
                                     <Run Text="{Binding ArrowText}" />
                                     <Run
                                         FontSize="15"
@@ -104,7 +112,14 @@
                             IsReadOnly="True">
                             <FlowDocument>
                                 <Paragraph Margin="0">
-                                    <Run Text="{Binding TimeText}" />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                                <Binding Path="TimeText" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
                                     <Run Text="{Binding ArrowText}" />
                                     <Run
                                         FontSize="15"
@@ -137,6 +152,12 @@
                     Content="{DynamicResource LockLogButton}"
                     IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource LockLogButton}" />
+                <CheckBox
+                    Name="ShowTimestampCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource ShowTimestampButton}"
+                    IsChecked="{Binding ShowTimestamp, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource ShowTimestampButton}" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button

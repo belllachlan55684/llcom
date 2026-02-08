@@ -39,6 +39,11 @@ namespace llcom.Pages
         /// 禁止自动滚动？
         /// </summary>
         public bool LockLog { get; set; } = false;
+
+        /// <summary>
+        /// 显示时间戳？
+        /// </summary>
+        public bool ShowTimestamp { get; set; } = true;
         private bool loaded = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -53,6 +58,7 @@ namespace llcom.Pages
                 MainTextBox.Clear();
             };
             LockLogCheckBox.DataContext = this;
+            ShowTimestampCheckBox.DataContext = this;
 
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
