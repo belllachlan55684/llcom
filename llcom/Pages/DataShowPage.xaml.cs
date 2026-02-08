@@ -109,20 +109,25 @@ namespace llcom.Pages
                         MainTextBox.ScrollToEnd();
                 });
             }
-            else//分包模式
+            else//分包模式：必须在 UI 线程创建 DataShow，否则 GetSendDisplayBrush/GetRecvDisplayBrush 创建的 SolidColorBrush 会导致跨线程 DependencySource 异常
             {
-                var data = e is DataShowRaw ? 
-                    new DataShow((e as DataShowRaw).title, e.data, e.time, (e as DataShowRaw).color) :
-                    new DataShow(e.data, e.time, (e as DataShowPara).send, (e as DataShowPara).interfaceKey);
-                if (data != null)
+                var isRaw = e is DataShowRaw;
+                var raw = e as DataShowRaw;
+                var showPara = e as DataShowPara;
+                var dataCopy = e.data;
+                var timeCopy = e.time;
+                DoInvoke(() =>
                 {
-                    DoInvoke(() =>
+                    var data = isRaw
+                        ? new DataShow(raw.title, dataCopy, timeCopy, raw.color)
+                        : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey);
+                    if (data != null)
                     {
                         MainList.Items.Add(data);
                         if (!LockLog)
                             MainListScrollViewer.ScrollToEnd();
-                    });
-                }
+                    }
+                });
             }
         }
 
@@ -220,9 +225,8 @@ namespace llcom.Pages
 
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
                 ArrowText = sent ? " ← " : " → ";
-                var dark = Tools.Global.setting.darkMode;
-                DataTextColor = sent ? (dark ? Brushes.IndianRed : Brushes.DarkRed) : (dark ? Brushes.Lime : Brushes.DarkGreen);
-                HexTextColor = sent ? (dark ? Brushes.LightCoral : Brushes.IndianRed) : (dark ? Brushes.LightGreen : Brushes.ForestGreen);
+                DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrush() : Tools.Global.setting.GetRecvDisplayBrush();
+                HexTextColor = DataTextColor;
 
                 var len = temp.Length;
                 var fmt = Tools.Global.setting.GetShowHexFormatForInterface(interfaceKey ?? "Serial");

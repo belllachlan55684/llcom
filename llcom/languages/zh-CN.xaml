@@ -30,6 +30,8 @@
     <system:String x:Key="SentCount">已发送字节：</system:String>
     <system:String x:Key="ReceivedCount">已接收字节：</system:String>
     <system:String x:Key="ClearCountTip">右键可清空此计数</system:String>
+    <system:String x:Key="SendColorTip">发送颜色（点击选择）</system:String>
+    <system:String x:Key="RecvColorTip">接收颜色（点击选择）</system:String>
     <system:String x:Key="QuickSendLoadError">待发送列表，数据损坏，全部清空</system:String>
     <system:String x:Key="QuickSendCard">快捷发送</system:String>
     <system:String x:Key="QuickSendId">编号</system:String>

@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace llcom.Model
 {
@@ -42,6 +43,9 @@ namespace llcom.Model
         private bool _enableSymbol = true;
         private bool _darkMode = false;
 
+        private string _sendDisplayColor = "#CD5C5C";
+        private string _recvDisplayColor = "#32CD32";
+
         //窗口大小与位置
         private double _windowTop = 0;
         public double windowTop { get { return _windowTop; } set { _windowTop = value; Save(); } }
@@ -54,6 +58,50 @@ namespace llcom.Model
 
         public int SentCount { get; set; } = 0;
         public int ReceivedCount { get; set; } = 0;
+
+        /// <summary>
+        /// 发送数据显示颜色（#RRGGBB 或 #AARRGGBB）
+        /// </summary>
+        public string sendDisplayColor
+        {
+            get => _sendDisplayColor;
+            set { _sendDisplayColor = value ?? "#CD5C5C"; Save(); }
+        }
+
+        /// <summary>
+        /// 接收数据显示颜色（#RRGGBB 或 #AARRGGBB）
+        /// </summary>
+        public string recvDisplayColor
+        {
+            get => _recvDisplayColor;
+            set { _recvDisplayColor = value ?? "#32CD32"; Save(); }
+        }
+
+        /// <summary>
+        /// 获取发送显示的 SolidColorBrush
+        /// </summary>
+        public SolidColorBrush GetSendDisplayBrush()
+        {
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(_sendDisplayColor);
+                return new SolidColorBrush(color);
+            }
+            catch { return new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C)); }
+        }
+
+        /// <summary>
+        /// 获取接收显示的 SolidColorBrush
+        /// </summary>
+        public SolidColorBrush GetRecvDisplayBrush()
+        {
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(_recvDisplayColor);
+                return new SolidColorBrush(color);
+            }
+            catch { return new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
+        }
 
         /// <summary>
         /// 保存配置

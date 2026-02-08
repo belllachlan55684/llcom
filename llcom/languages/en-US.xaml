@@ -30,6 +30,8 @@
     <system:String x:Key="SentCount">Data sent:</system:String>
     <system:String x:Key="ReceivedCount">Data received:</system:String>
     <system:String x:Key="ClearCountTip">Right click to clear this</system:String>
+    <system:String x:Key="SendColorTip">Send color (click to select)</system:String>
+    <system:String x:Key="RecvColorTip">Receive color (click to select)</system:String>
     <system:String x:Key="QuickSendLoadError">Quick send List error, return to default data.</system:String>
     <system:String x:Key="QuickSendCard">Quick send</system:String>
     <system:String x:Key="QuickSendId">ID</system:String>

@@ -33,6 +33,7 @@ using RestSharp;
 using System.Threading;
 using System.Windows.Interop;
 using System.Drawing;
+using WinForms = System.Windows.Forms;
 using ICSharpCode.AvalonEdit;
 using System.Runtime.InteropServices;
 using System.Windows.Controls.Primitives;
@@ -416,6 +417,10 @@ namespace llcom
                     parts.Add(text);
             }
             statusTextBlock.Text = parts.Count > 0 ? $"{txRx} | {string.Join(" | ", parts)}" : txRx;
+            if (sendColorBlock != null)
+                sendColorBlock.Background = Tools.Global.setting.GetSendDisplayBrush();
+            if (recvColorBlock != null)
+                recvColorBlock.Background = Tools.Global.setting.GetRecvDisplayBrush();
         }
 
         private void DataInterfaceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -436,6 +441,38 @@ namespace llcom
                 Tools.Global.setting.SentCount = 0;
                 Tools.Global.setting.ReceivedCount = 0;
                 RefreshDataInterfaceStatus();
+            }
+        }
+
+        private void SendColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            using (var dlg = new WinForms.ColorDialog())
+            {
+                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.sendDisplayColor); }
+                catch { }
+                dlg.FullOpen = true;
+                if (dlg.ShowDialog() == WinForms.DialogResult.OK)
+                {
+                    Tools.Global.setting.sendDisplayColor = $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+                    RefreshDataInterfaceStatus();
+                }
+            }
+        }
+
+        private void RecvColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            using (var dlg = new WinForms.ColorDialog())
+            {
+                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.recvDisplayColor); }
+                catch { }
+                dlg.FullOpen = true;
+                if (dlg.ShowDialog() == WinForms.DialogResult.OK)
+                {
+                    Tools.Global.setting.recvDisplayColor = $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+                    RefreshDataInterfaceStatus();
+                }
             }
         }
 
