@@ -728,7 +728,7 @@ namespace llcom
         {
             settingsContentPanel.DataContext = Tools.Global.setting;
             languageComboBox.SelectedIndex = Tools.Global.setting.language == "en-US" ? 1 : 0;
-            modeComboBox.SelectedIndex = Tools.Global.setting.darkMode ? 1 : 0;
+            modeComboBox.SelectedIndex = Tools.Global.setting.displayMode;
         }
 
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -743,7 +743,7 @@ namespace llcom
         {
             if (modeComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
             {
-                Tools.Global.setting.darkMode = item.Tag.ToString() == "1";
+                Tools.Global.setting.displayMode = int.Parse(item.Tag.ToString());
             }
         }
 

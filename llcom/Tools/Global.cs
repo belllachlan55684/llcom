@@ -1,6 +1,7 @@
 using LibUsbDotNet.Info;
 using LibUsbDotNet.LibUsb;
 using llcom.Model;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -312,6 +313,25 @@ namespace llcom.Tools
         /// 主题切换事件（供脚本编辑区等更新语法高亮）
         /// </summary>
         public static event EventHandler<bool> ThemeChanged;
+
+        /// <summary>
+        /// 检测 Windows 系统是否为暗黑模式（Registry AppsUseLightTheme：1=浅色，0=暗黑）
+        /// </summary>
+        public static bool IsSystemDarkMode()
+        {
+            try
+            {
+                using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    var value = key?.GetValue("AppsUseLightTheme");
+                    return value is int i ? i <= 0 : true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// 更换主题（浅色/暗黑）

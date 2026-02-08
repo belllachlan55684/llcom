@@ -67,7 +67,7 @@
     <system:String x:Key="QuickSendChangeList">切换到其他快捷发送数据列表</system:String>
     <system:String x:Key="QuickSendInterfaceSelect">接口</system:String>
     <system:String x:Key="QuickSendInterfaceSelectTip">选择要发送到的接口（可多选，仅显示已打开的接口）</system:String>
-    <system:String x:Key="ScriptTab">脚本</system:String>
+    <system:String x:Key="ScriptTab">脚本管理</system:String>
     <system:String x:Key="SendScriptTab">发送脚本</system:String>
     <system:String x:Key="RecvScriptTab">接收脚本</system:String>
     <system:String x:Key="SendScriptLabel">发送脚本</system:String>
@@ -118,11 +118,12 @@
     <system:String x:Key="InputDialogTitle">提示</system:String>
     <system:String x:Key="SettingTitle">更多串口设置</system:String>
     <system:String x:Key="SettingBasic">串口基本设置</system:String>
-    <system:String x:Key="SettingCard">设置</system:String>
+    <system:String x:Key="SettingCard">关于</system:String>
     <system:String x:Key="SettingSystem">系统设置</system:String>
     <system:String x:Key="SettingLanguage">语言选择</system:String>
     <system:String x:Key="SettingDisplayMode">显示模式选择</system:String>
     <system:String x:Key="SettingAutoSaveLog">自动保存日志</system:String>
+    <system:String x:Key="FollowSystemMode">跟随系统</system:String>
     <system:String x:Key="LightMode">浅色模式</system:String>
     <system:String x:Key="SettingAutoReconnect">自动恢复被断开的串口连接</system:String>
     <system:String x:Key="SettingOpenLogFolder">日志目录</system:String>
@@ -225,7 +226,7 @@
     <system:String x:Key="HexSendMode">发Hex</system:String>
     <system:String x:Key="SerialPortTabTitle">串口</system:String>
     <system:String x:Key="DataInterfaceTab">数据接口</system:String>
-    <system:String x:Key="ToolsTab">小工具</system:String>
+    <system:String x:Key="ToolsTab">实用工具</system:String>
     <system:String x:Key="EncodingToolsTab">编码转换工具</system:String>
     <system:String x:Key="EncodingToolsJobs">转换任务</system:String>
     <system:String x:Key="EncodingToolsAddJob">添加任务</system:String>

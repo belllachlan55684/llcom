@@ -67,7 +67,7 @@
     <system:String x:Key="QuickSendChangeList">Change to another quick send list</system:String>
     <system:String x:Key="QuickSendInterfaceSelect">Interface</system:String>
     <system:String x:Key="QuickSendInterfaceSelectTip">Select target interfaces for quick send (multi-select, only shows connected interfaces)</system:String>
-    <system:String x:Key="ScriptTab">Scripts</system:String>
+    <system:String x:Key="ScriptTab">Script management</system:String>
     <system:String x:Key="SendScriptTab">Send script</system:String>
     <system:String x:Key="RecvScriptTab">Receive script</system:String>
     <system:String x:Key="SendScriptLabel">Send script</system:String>
@@ -118,11 +118,12 @@
     <system:String x:Key="InputDialogTitle">Notice</system:String>
     <system:String x:Key="SettingTitle">More serial port settings</system:String>
     <system:String x:Key="SettingBasic">Basic</system:String>
-    <system:String x:Key="SettingCard">Settings</system:String>
+    <system:String x:Key="SettingCard">About</system:String>
     <system:String x:Key="SettingSystem">System Settings</system:String>
     <system:String x:Key="SettingLanguage">Language selection</system:String>
     <system:String x:Key="SettingDisplayMode">Display mode selection</system:String>
     <system:String x:Key="SettingAutoSaveLog">Auto save log</system:String>
+    <system:String x:Key="FollowSystemMode">Follow system</system:String>
     <system:String x:Key="LightMode">Light mode</system:String>
     <system:String x:Key="SettingAutoReconnect">Auto reconnect after disconnect</system:String>
     <system:String x:Key="SettingOpenLogFolder">Log Folder</system:String>
@@ -225,7 +226,7 @@
     <system:String x:Key="HexSendMode">Send Hex</system:String>
     <system:String x:Key="SerialPortTabTitle">Serial Port</system:String>
     <system:String x:Key="DataInterfaceTab">Data Interface</system:String>
-    <system:String x:Key="ToolsTab">Tools</system:String>
+    <system:String x:Key="ToolsTab">Utilities</system:String>
     <system:String x:Key="EncodingToolsTab">Encoding Converter</system:String>
     <system:String x:Key="EncodingToolsJobs">Jobs</system:String>
     <system:String x:Key="EncodingToolsAddJob">Add a job</system:String>

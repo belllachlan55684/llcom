@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Microsoft.Win32;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -41,7 +42,7 @@ namespace llcom.Model
         private int _encoding = 65001;
         private bool _terminal = true;
         private bool _enableSymbol = true;
-        private bool _darkMode = false;
+        private int _displayMode = 0;
 
         private string _sendDisplayColor = "#CD5C5C";
         private string _recvDisplayColor = "#32CD32";
@@ -831,16 +832,51 @@ namespace llcom.Model
         }
 
         /// <summary>
-        /// 暗黑模式
+        /// 显示模式：0=跟随系统，1=浅色，2=暗黑。序列化用 darkMode 兼容旧配置。
         /// </summary>
-        public bool darkMode
+        [JsonProperty("darkMode", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [JsonConverter(typeof(DisplayModeJsonConverter))]
+        public int displayMode
         {
-            get => _darkMode;
+            get => _displayMode;
             set
             {
-                _darkMode = value;
-                Tools.Global.LoadTheme(value);
+                _displayMode = value < 0 || value > 2 ? 0 : value;
+                Tools.Global.LoadTheme(GetEffectiveDarkMode());
                 Save();
+            }
+        }
+
+        /// <summary>
+        /// 当前生效的暗黑模式（供脚本编辑区、颜色等使用）
+        /// </summary>
+        [JsonIgnore]
+        public bool darkMode => GetEffectiveDarkMode();
+
+        /// <summary>
+        /// 根据 displayMode 获取实际暗黑状态：0=读系统，1=false，2=true
+        /// </summary>
+        public bool GetEffectiveDarkMode()
+        {
+            return _displayMode == 0 ? Tools.Global.IsSystemDarkMode() : _displayMode == 2;
+        }
+
+        private class DisplayModeJsonConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(int);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (reader.TokenType == JsonToken.Boolean)
+                    return (bool)reader.Value ? 2 : 1;
+                if (reader.TokenType == JsonToken.Integer)
+                    return Convert.ToInt32(reader.Value);
+                return 0;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                writer.WriteValue(Convert.ToInt32(value));
             }
         }
 
