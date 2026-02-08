@@ -120,6 +120,7 @@
     <system:String x:Key="SettingSystem">系统设置</system:String>
     <system:String x:Key="SettingLanguage">语言选择</system:String>
     <system:String x:Key="SettingDisplayMode">显示模式选择</system:String>
+    <system:String x:Key="SettingAutoSaveLog">自动保存日志</system:String>
     <system:String x:Key="LightMode">浅色模式</system:String>
     <system:String x:Key="SettingAutoReconnect">自动恢复被断开的串口连接</system:String>
     <system:String x:Key="SettingOpenLogFolder">日志目录</system:String>

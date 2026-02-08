@@ -787,6 +787,11 @@
                                     <ComboBoxItem Content="{DynamicResource LightMode}" Tag="0" />
                                     <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="1" />
                                 </ComboBox>
+                                <CheckBox
+                                    Content="{DynamicResource SettingAutoSaveLog}"
+                                    Margin="5"
+                                    VerticalAlignment="Center"
+                                    IsChecked="{Binding autoSaveLog, Mode=TwoWay}" />
                             </WrapPanel>
                         </ScrollViewer>
                     </TabItem>

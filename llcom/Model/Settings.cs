@@ -18,6 +18,7 @@ namespace llcom.Model
         private string _dataToSend = "uart data";
         private int _baudRate = 115200;
         private bool _autoReconnect = true;
+        private bool _autoSaveLog = false;
         private int _showHexFormat = 0;
         private bool _showSend = true;
         private bool _showSendRaw = true;
@@ -325,6 +326,15 @@ namespace llcom.Model
                 _autoReconnect = value;
                 Save();
             }
+        }
+
+        /// <summary>
+        /// 自动保存日志（界面显示的收发数据定期写入文件）
+        /// </summary>
+        public bool autoSaveLog
+        {
+            get => _autoSaveLog;
+            set { _autoSaveLog = value; Save(); }
         }
 
         /// <summary>
