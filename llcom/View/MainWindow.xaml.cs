@@ -106,6 +106,23 @@ namespace llcom
                     //串口选项卡（波特率初始化、刷新设备列表在 SerialPortPage.Page_Loaded 中）
                     SerialPortFrame.Navigate(new Uri("Pages/SerialPortPage.xaml", UriKind.Relative));
 
+                    // Frame 加载完成后刷新状态栏，解决串口已打开但状态栏有时不显示的问题（异步加载时 Content 可能尚未就绪）
+                    void OnDataInterfaceFrameLoadCompleted(object s, System.Windows.Navigation.NavigationEventArgs ev)
+                    {
+                        Dispatcher.BeginInvoke(new Action(RefreshDataInterfaceStatus));
+                    }
+                    SerialPortFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+                    tcpClientFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+                    udpLocalTestFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+                    tcpLocalTestFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+
+                    // 切回「数据接口」Tab 时刷新状态栏
+                    RightTabControl.SelectionChanged += (s, ev) =>
+                    {
+                        if (RightTabControl.SelectedIndex == 0)
+                            RefreshDataInterfaceStatus();
+                    };
+
                     // 绑定事件监听,用于监听HID设备插拔
                     (PresentationSource.FromVisual(this) as HwndSource)?.AddHook(WndProc);
 
@@ -404,8 +421,12 @@ namespace llcom
         /// </summary>
         public void RefreshDataInterfaceStatus()
         {
-            if (statusBarContentPanel == null || DataInterfaceComboBox == null)
+            if (statusBarContentPanel == null || DataInterfaceComboBox == null || RightTabControl == null)
                 return;
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"[RefreshDataInterfaceStatus] uart.IsOpen={Tools.Global.uart.IsOpen()}, ComboBox.SelectedIndex={DataInterfaceComboBox.SelectedIndex}");
+#endif
 
             var frames = new[] { SerialPortFrame, tcpClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
             var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
@@ -424,14 +445,34 @@ namespace llcom
 
             for (int i = 0; i < frames.Length; i++)
             {
-                var content = frames[i]?.Content as IDataInterfaceStatusProvider;
-                var text = content?.GetStatusBarText();
-                if (string.IsNullOrEmpty(text)) continue;
+                string text;
+                if (i == 0)
+                {
+                    // 串口：始终从全局 uart 获取状态，避免 Frame 因 Tab 切换被卸载后 Content 不可用导致状态栏消失
+                    if (!Tools.Global.uart.IsOpen())
+                        continue;
+                    text = $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}";
+                }
+                else
+                {
+                    var content = frames[i]?.Content as IDataInterfaceStatusProvider;
+                    text = content?.GetStatusBarText();
+                    if (string.IsNullOrEmpty(text)) continue;
+                }
 
                 var key = StatusBarInterfaceKeys[i];
 
                 statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = " | ", VerticalAlignment = VerticalAlignment.Center });
-                statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = text, VerticalAlignment = VerticalAlignment.Center });
+                var interfaceTextBlock = new System.Windows.Controls.TextBlock
+                {
+                    Text = text,
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    ToolTip = TryFindResource("StatusBarInterfaceClickTip"),
+                    Tag = i,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                interfaceTextBlock.MouseLeftButtonDown += StatusBarInterfaceText_MouseLeftButtonDown;
+                statusBarContentPanel.Children.Add(interfaceTextBlock);
 
                 var sendBlock = new System.Windows.Controls.Border
                 {
@@ -480,6 +521,15 @@ namespace llcom
                 ctrl.RefreshSelectionForCurrentInterface();
             foreach (var ctrl in FindVisualChildren<View.Controls.RecvScriptControl>(this))
                 ctrl.RefreshSelectionForCurrentInterface();
+
+            // 切换到串口 Tab 时延迟聚焦到串口区域，避免第一次点击被用于激活内容导致关闭串口按钮需点两次
+            if (DataInterfaceComboBox.SelectedIndex == 0)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    (SerialPortFrame.Content as System.Windows.FrameworkElement)?.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         private void statusTextBlock_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -489,6 +539,22 @@ namespace llcom
                 Tools.Global.setting.SentCount = 0;
                 Tools.Global.setting.ReceivedCount = 0;
                 RefreshDataInterfaceStatus();
+            }
+        }
+
+        private void StatusBarInterfaceText_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var tag = (sender as System.Windows.FrameworkElement)?.Tag;
+            if (tag is int interfaceIndex)
+            {
+                e.Handled = true;
+                var idx = interfaceIndex;
+                // 延迟执行，避免在鼠标事件处理中立即修改状态栏（会清除被点击的元素）导致串口信息消失
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    RightTabControl.SelectedIndex = 0;
+                    DataInterfaceComboBox.SelectedIndex = idx;
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
 

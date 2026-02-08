@@ -65,6 +65,27 @@ namespace llcom.Pages
     }
 
     /// <summary>
+    /// 根据 ShowTimestamp 控制是否显示时间戳+箭头前缀：value[0]=TimeText, value[1]=ArrowText, value[2]=ShowTimestamp
+    /// 合并为单一 Run 避免 XAML 标签间空白被保留导致多余空格
+    /// </summary>
+    public class ShowTimestampPrefixConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length < 3) return "";
+            var timeText = values[0] as string ?? "";
+            var arrowText = values[1] as string ?? "";
+            var showTimestamp = values[2] is bool b && b;
+            return showTimestamp ? (timeText + arrowText) : "";
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
     /// 根据recvScript切换Tooltip
     /// </summary>
     [ValueConversion(typeof(string[]), typeof(string))]

@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "调试 llcom (F5)",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/llcom/bin/x64/Debug/llcom.exe",
+            "cwd": "${workspaceFolder}/llcom/bin/x64/Debug",
+            "console": "internalConsole"
+        },
+        {
+            "name": "附加到 llcom 进程",
+            "type": "clr",
+            "request": "attach",
+            "processName": "llcom"
+        }
+    ]
+}

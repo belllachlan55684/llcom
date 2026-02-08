@@ -278,7 +278,7 @@
             HorizontalAlignment="Stretch" />
 
         <!--  右侧脚本、快捷发送  -->
-        <TabControl Grid.Row="1" Grid.RowSpan="2" Grid.Column="3">
+        <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.RowSpan="2" Grid.Column="3">
             <TabItem Header="{DynamicResource DataInterfaceTab}">
                 <Grid>
                     <Grid.RowDefinitions>

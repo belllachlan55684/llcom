@@ -20,6 +20,7 @@
         <local:boolVisibe x:Key="boolVisibeConverter" />
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
         <local:ShowTimestampConverter x:Key="ShowTimestampConverter" />
+        <local:ShowTimestampPrefixConverter x:Key="ShowTimestampPrefixConverter" />
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -36,15 +37,8 @@
                                 <Paragraph Margin="0">
                                     <Run>
                                         <Run.Text>
-                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                            <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
                                                 <Binding Path="TimeText" />
-                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
-                                            </MultiBinding>
-                                        </Run.Text>
-                                    </Run>
-                                    <Run>
-                                        <Run.Text>
-                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
                                                 <Binding Path="ArrowText" />
                                                 <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
                                             </MultiBinding>
@@ -121,15 +115,8 @@
                                 <Paragraph Margin="0">
                                     <Run>
                                         <Run.Text>
-                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                            <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
                                                 <Binding Path="TimeText" />
-                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
-                                            </MultiBinding>
-                                        </Run.Text>
-                                    </Run>
-                                    <Run>
-                                        <Run.Text>
-                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
                                                 <Binding Path="ArrowText" />
                                                 <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
                                             </MultiBinding>
