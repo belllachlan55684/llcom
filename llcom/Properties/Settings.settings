@@ -11,9 +11,6 @@
     <Setting Name="autoReconnect" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="autoSaveLog" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="showHex" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>

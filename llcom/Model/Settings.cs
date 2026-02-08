@@ -18,7 +18,6 @@ namespace llcom.Model
         private string _dataToSend = "uart data";
         private int _baudRate = 115200;
         private bool _autoReconnect = true;
-        private bool _autoSaveLog = true;
         private int _showHexFormat = 0;
         private bool _showSend = true;
         private bool _showSendRaw = true;
@@ -324,19 +323,6 @@ namespace llcom.Model
             set
             {
                 _autoReconnect = value;
-                Save();
-            }
-        }
-
-        public bool autoSaveLog
-        {
-            get
-            {
-                return _autoSaveLog;
-            }
-            set
-            {
-                _autoSaveLog = value;
                 Save();
             }
         }

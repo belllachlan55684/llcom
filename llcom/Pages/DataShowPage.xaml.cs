@@ -286,6 +286,7 @@ namespace llcom.Pages
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Log files(*.log)|*.log";
             saveFileDialog.InitialDirectory = Tools.Global.GetTrueProfilePath() + "logs";
+            saveFileDialog.FileName = DateTime.Now.ToString("yyMMddHHmmss") + ".log";
             if(saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string saveFilePath = saveFileDialog.FileName;
