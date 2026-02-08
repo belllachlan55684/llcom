@@ -16,6 +16,7 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -45,8 +46,6 @@ namespace llcom.Tools
                     uart.WaitUartReceive.Set();
                     Logger.CloseUartLog();
                     Logger.CloseLuaLog();
-                    if (File.Exists(ProfilePath + "lock"))
-                        File.Delete(ProfilePath + "lock");
                     ProgramClosedEvent?.Invoke(null,EventArgs.Empty);
                 }
             }
@@ -54,6 +53,11 @@ namespace llcom.Tools
         //给全局使用的设置参数项
         public static Model.Settings setting;
         public static Model.Uart uart = new Model.Uart();
+
+        /// <summary>
+        /// 当前实例 ID（用于同文件夹多开时的资源隔离）
+        /// </summary>
+        public static int InstanceId { get; } = Process.GetCurrentProcess().Id;
 
         //软件文件名
         private static string _fileName = "";
@@ -104,6 +108,56 @@ namespace llcom.Tools
         public static string GetTrueProfilePath()
         {
             return ProfilePath;
+        }
+
+        /// <summary>
+        /// 在脚本写 Mutex 下执行操作，避免多实例同时写脚本文件冲突。超时返回 false。
+        /// </summary>
+        public static bool TryRunWithScriptMutex(Action action, int timeoutMs = 3000)
+        {
+            var mutexName = "Global\\llcom_script_" + Math.Abs(ProfilePath.GetHashCode()).ToString("X");
+            try
+            {
+                using var mutex = new Mutex(false, mutexName);
+                if (!mutex.WaitOne(timeoutMs))
+                {
+                    Tools.MessageBox.Show("其他实例可能正在编辑脚本，请稍后重试");
+                    return false;
+                }
+                try
+                {
+                    action();
+                    return true;
+                }
+                finally
+                {
+                    mutex.ReleaseMutex();
+                }
+            }
+            catch (AbandonedMutexException) { action(); return true; }
+        }
+
+        /// <summary>
+        /// 在 core_script 创建 Mutex 下执行操作，避免多实例首次启动时竞争创建。
+        /// </summary>
+        public static void RunWithCoreScriptMutex(Action action, int timeoutMs = 10000)
+        {
+            var mutexName = "Global\\llcom_core_script_" + Math.Abs(ProfilePath.GetHashCode()).ToString("X");
+            try
+            {
+                using var mutex = new Mutex(false, mutexName);
+                if (!mutex.WaitOne(timeoutMs))
+                    return;
+                try
+                {
+                    action();
+                }
+                finally
+                {
+                    mutex.ReleaseMutex();
+                }
+            }
+            catch (AbandonedMutexException) { action(); }
         }
 
         /// <summary>
@@ -325,27 +379,20 @@ namespace llcom.Tools
                     Directory.Delete(ProfilePath + "core_script", true);
             }
 
-            //检测多开
-            string processName = Process.GetCurrentProcess().ProcessName;
-            Process[] processes = Process.GetProcessesByName(processName);
-            //如果该数组长度大于1，说明多次运行
-            if (processes.Length > 1 && File.Exists(ProfilePath + "lock"))
-            {
-                Tools.MessageBox.Show("不支持同文件夹多开！\r\n如需多开，请在多个文件夹分别存放llcom.exe后，分别运行。");
-                Environment.Exit(1);
-            }
-            File.Create(ProfilePath + "lock").Close();
             try
             {
-                if (!Directory.Exists(ProfilePath + "core_script"))
+                RunWithCoreScriptMutex(() =>
                 {
-                    Directory.CreateDirectory(ProfilePath + "core_script");
-                }
-                CreateFile("DefaultFiles/core_script/head.lua", ProfilePath + "core_script/head.lua", true);
-                CreateFile("DefaultFiles/core_script/JSON.lua", ProfilePath + "core_script/JSON.lua", false);
-                CreateFile("DefaultFiles/core_script/log.lua", ProfilePath + "core_script/log.lua", false);
-                CreateFile("DefaultFiles/core_script/strings.lua", ProfilePath + "core_script/strings.lua", false);
-                CreateFile("DefaultFiles/core_script/sys.lua", ProfilePath + "core_script/sys.lua", true);
+                    if (!Directory.Exists(ProfilePath + "core_script"))
+                    {
+                        Directory.CreateDirectory(ProfilePath + "core_script");
+                    }
+                    CreateFile("DefaultFiles/core_script/head.lua", ProfilePath + "core_script/head.lua", true);
+                    CreateFile("DefaultFiles/core_script/JSON.lua", ProfilePath + "core_script/JSON.lua", false);
+                    CreateFile("DefaultFiles/core_script/log.lua", ProfilePath + "core_script/log.lua", false);
+                    CreateFile("DefaultFiles/core_script/strings.lua", ProfilePath + "core_script/strings.lua", false);
+                    CreateFile("DefaultFiles/core_script/sys.lua", ProfilePath + "core_script/sys.lua", true);
+                });
 
                 if (!Directory.Exists(ProfilePath + "logs"))
                     Directory.CreateDirectory(ProfilePath + "logs");

@@ -66,8 +66,9 @@ namespace llcom.View.Controls
 
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{fileName}.lua"))
             {
-                if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua"))
-                    File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua").Close();
+            if (!File.Exists(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua"))
+                Tools.Global.TryRunWithScriptMutex(() =>
+                    File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{defaultScript}.lua").Close());
                 fileName = defaultScript;
                 if (!string.IsNullOrEmpty(key))
                     Tools.Global.setting.SetSendScriptForInterface(key, fileName);
@@ -107,7 +108,9 @@ namespace llcom.View.Controls
 
         private void saveLuaFile(string fileName)
         {
-            File.WriteAllText(Tools.Global.ProfilePath + $"user_script_send_convert/{fileName}.lua", textEditor.Text);
+            if (!Tools.Global.TryRunWithScriptMutex(() =>
+                File.WriteAllText(Tools.Global.ProfilePath + $"user_script_send_convert/{fileName}.lua", textEditor.Text)))
+                return;
             LuaEnv.LuaLoader.ClearRun();
         }
 
@@ -174,7 +177,9 @@ namespace llcom.View.Controls
             }
             try
             {
-                File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{newLuaFileNameTextBox.Text}.lua").Close();
+                if (!Tools.Global.TryRunWithScriptMutex(() =>
+                    File.Create(Tools.Global.ProfilePath + $"user_script_send_convert/{newLuaFileNameTextBox.Text}.lua").Close()))
+                    return;
                 loadLuaFile(newLuaFileNameTextBox.Text);
             }
             catch

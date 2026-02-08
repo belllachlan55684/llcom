@@ -179,11 +179,26 @@ namespace llcom.Model
         }
 
         /// <summary>
-        /// 保存配置
+        /// 保存配置到临时文件（运行期，避免多实例互相覆盖）
         /// </summary>
         private void Save()
         {
-            File.WriteAllText(Tools.Global.ProfilePath+"settings.json", JsonConvert.SerializeObject(this));
+            var path = Tools.Global.ProfilePath + $"settings_{Tools.Global.InstanceId}.json";
+            File.WriteAllText(path, JsonConvert.SerializeObject(this));
+        }
+
+        /// <summary>
+        /// 关闭时回写主配置到 settings.json
+        /// </summary>
+        public void SaveToMainConfig()
+        {
+            var mainPath = Tools.Global.ProfilePath + "settings.json";
+            var backupPath = Tools.Global.ProfilePath + "settings.json.bakup";
+            if (File.Exists(mainPath) && File.Exists(backupPath))
+                File.Delete(backupPath);
+            if (File.Exists(mainPath))
+                File.Copy(mainPath, backupPath);
+            File.WriteAllText(mainPath, JsonConvert.SerializeObject(this));
         }
 
         /// <summary>

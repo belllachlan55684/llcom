@@ -700,6 +700,10 @@ namespace llcom
             Tools.Global.setting.windowTop = this.Top;
             Tools.Global.setting.windowWidth = this.Width;
             Tools.Global.setting.windowHeight = this.Height;
+            Tools.Global.setting.SaveToMainConfig();
+            var tempPath = Tools.Global.ProfilePath + $"settings_{Tools.Global.InstanceId}.json";
+            if (System.IO.File.Exists(tempPath))
+                System.IO.File.Delete(tempPath);
             //自动保存脚本
             if (lastLuaFile != "")
                 saveLuaFile(lastLuaFile);
@@ -882,7 +886,9 @@ namespace llcom
 
             try
             {
-                File.Create(Tools.Global.ProfilePath + $"user_script_run/{newLuaFileNameTextBox.Text}.lua").Close();
+                if (!Tools.Global.TryRunWithScriptMutex(() =>
+                    File.Create(Tools.Global.ProfilePath + $"user_script_run/{newLuaFileNameTextBox.Text}.lua").Close()))
+                    return;
                 loadLuaFile(newLuaFileNameTextBox.Text);
             }
             catch
@@ -917,9 +923,8 @@ namespace llcom
             {
                 Tools.Global.setting.runScript = "example";
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_run/{Tools.Global.setting.runScript}.lua"))
-                {
-                    File.Create(Tools.Global.ProfilePath + $"user_script_run/{Tools.Global.setting.runScript}.lua").Close();
-                }
+                    Tools.Global.TryRunWithScriptMutex(() =>
+                        File.Create(Tools.Global.ProfilePath + $"user_script_run/{Tools.Global.setting.runScript}.lua").Close());
             }
             else
             {
@@ -954,13 +959,13 @@ namespace llcom
         {
             try
             {
-                //如果修改时间大于文件时间才执行保存操作
-                if (lastLuaChangeTime > lastLuaFileTime)
+                if (lastLuaChangeTime <= lastLuaFileTime) return;
+                if (!Tools.Global.TryRunWithScriptMutex(() =>
                 {
                     File.WriteAllText(Tools.Global.ProfilePath + $"user_script_run/{fileName}.lua", textEditor.Text);
-                    //记录最后时间
                     lastLuaFileTime = File.GetLastWriteTime(Tools.Global.ProfilePath + $"user_script_run/{fileName}.lua");
-                }
+                }))
+                    return;
             }
             catch { }
         }

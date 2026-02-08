@@ -153,7 +153,11 @@ namespace llcom.Pages
 
                 try
                 {
-                    File.WriteAllText($"{Tools.Global.ProfilePath}user_script_run/{fileName}.lua", ScriptNow.Script);
+                    if (!Tools.Global.TryRunWithScriptMutex(() =>
+                        File.WriteAllText($"{Tools.Global.ProfilePath}user_script_run/{fileName}.lua", ScriptNow.Script)))
+                    {
+                        continue;
+                    }
                     Tools.Global.RefreshLuaScriptList();
                     Tools.MessageBox.Show(TryFindResource("SaveSucceed") as string ?? "?!");
                 }

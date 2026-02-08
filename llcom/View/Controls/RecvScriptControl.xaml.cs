@@ -67,7 +67,8 @@ namespace llcom.View.Controls
             if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{fileName}.lua"))
             {
                 if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{defaultScript}.lua"))
-                    File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{defaultScript}.lua").Close();
+                    Tools.Global.TryRunWithScriptMutex(() =>
+                        File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{defaultScript}.lua").Close());
                 fileName = defaultScript;
                 if (!string.IsNullOrEmpty(key))
                     Tools.Global.setting.SetRecvScriptForInterface(key, fileName);
@@ -107,7 +108,9 @@ namespace llcom.View.Controls
 
         private void saveLuaFileRev(string fileName)
         {
-            File.WriteAllText(Tools.Global.ProfilePath + $"user_script_recv_convert/{fileName}.lua", textEditorRev.Text);
+            if (!Tools.Global.TryRunWithScriptMutex(() =>
+                File.WriteAllText(Tools.Global.ProfilePath + $"user_script_recv_convert/{fileName}.lua", textEditorRev.Text)))
+                return;
             LuaEnv.LuaLoader.ClearRun();
         }
 
@@ -171,7 +174,9 @@ namespace llcom.View.Controls
             }
             try
             {
-                File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{newLuaFileNameTextBoxRev.Text}.lua").Close();
+                if (!Tools.Global.TryRunWithScriptMutex(() =>
+                    File.Create(Tools.Global.ProfilePath + $"user_script_recv_convert/{newLuaFileNameTextBoxRev.Text}.lua").Close()))
+                    return;
                 loadLuaFileRev(newLuaFileNameTextBoxRev.Text);
             }
             catch

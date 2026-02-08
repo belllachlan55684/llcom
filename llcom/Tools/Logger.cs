@@ -47,14 +47,15 @@ namespace llcom.Tools
         private static Serilog.Core.Logger luaLogFile = null;
 
         /// <summary>
-        /// 初始化串口日志文件
+        /// 初始化串口日志文件（按实例隔离，避免多开冲突）
         /// </summary>
         public static void InitUartLog()
         {
+            var logPath = Tools.Global.ProfilePath + $"logs/log_{Tools.Global.InstanceId}.txt";
             uartLogFile = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.File(Tools.Global.ProfilePath + "logs/log.txt",
+                .WriteTo.File(logPath,
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 30,
                     encoding: Encoding.UTF8,
@@ -97,14 +98,15 @@ namespace llcom.Tools
         }
 
         /// <summary>
-        /// 初始化lua日志文件
+        /// 初始化lua日志文件（按实例隔离，避免多开冲突）
         /// </summary>
         public static void InitLuaLog()
         {
+            var logPath = Tools.Global.ProfilePath + $"user_script_run/logs/log_{Tools.Global.InstanceId}.txt";
             luaLogFile = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.File(Tools.Global.ProfilePath + "user_script_run/logs/log.txt",
+                .WriteTo.File(logPath,
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 30,
                     encoding: Encoding.UTF8,
