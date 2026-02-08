@@ -195,11 +195,6 @@
                     Content="{DynamicResource SettingTimeoutMode}"
                     ToolTip="{DynamicResource SettingTimeoutModeTip}"
                     IsChecked="{Binding Setting.bitDelay}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingTerminalMode}"
-                    ToolTip="{DynamicResource SettingTerminalModeTip}"
-                    IsChecked="{Binding Setting.terminal}" />
             </WrapPanel>
         </ScrollViewer>
         <TextBox

@@ -58,6 +58,16 @@ namespace llcom.Pages
             get => Tools.Global.setting?.enableAnsiColor ?? true;
             set { if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value; }
         }
+
+        /// <summary>
+        /// 键盘输入（选中数据区可直接使用键盘输入到串口）
+        /// </summary>
+        public bool Terminal
+        {
+            get => Tools.Global.setting?.terminal ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.terminal = value; }
+        }
+
         private bool loaded = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {

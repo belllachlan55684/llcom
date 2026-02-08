@@ -150,7 +150,7 @@
     <system:String x:Key="SettingShowRawDataTip">Show raw sent data</system:String>
     <system:String x:Key="SettingTimeoutMode">Timeout mode</system:String>
     <system:String x:Key="SettingTimeoutModeTip">Unchecked means timeout starts from first byte</system:String>
-    <system:String x:Key="SettingTerminalMode">Terminal mode</system:String>
+    <system:String x:Key="SettingTerminalMode">Keyboard input</system:String>
     <system:String x:Key="SettingTerminalModeTip">Selected data area allows direct keyboard input</system:String>
     <system:String x:Key="SettingSplitByEmpty">Split by no data time(or split by time from first time)</system:String>
     <system:String x:Key="SettingTerminal">Terminal (select data space and send key datas)</system:String>

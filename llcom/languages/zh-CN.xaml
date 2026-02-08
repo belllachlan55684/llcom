@@ -150,7 +150,7 @@
     <system:String x:Key="SettingShowRawDataTip">显示原始发送数据</system:String>
     <system:String x:Key="SettingTimeoutMode">超时模式</system:String>
     <system:String x:Key="SettingTimeoutModeTip">不勾选表示从第一个字节开始计算超时时间</system:String>
-    <system:String x:Key="SettingTerminalMode">终端模式</system:String>
+    <system:String x:Key="SettingTerminalMode">键盘输入</system:String>
     <system:String x:Key="SettingTerminalModeTip">选中数据区可直接使用键盘输入</system:String>
     <system:String x:Key="SettingSplitByEmpty">超时时间表示空白间隔（不勾选表示从第一个字节开始算超时时间）</system:String>
     <system:String x:Key="SettingTerminal">终端模式（选中数据区域可直接敲键盘输出串口数据）</system:String>
