@@ -147,29 +147,21 @@
                     InterfaceKey="Serial"
                     IsSendScript="False" />
                 <controls:TxRxColorBlocks InterfaceKey="Serial" />
-                <StackPanel Margin="5" Orientation="Horizontal">
+                <StackPanel Margin="5" Orientation="Horizontal" ToolTip="{DynamicResource SettingPackTimeoutTip}">
                     <CheckBox
-                        Margin="0,0,10,0"
+                        Margin="0,0,2,0"
                         VerticalAlignment="Center"
-                        Content="{DynamicResource SettingPackTimeout}"
-                        IsChecked="{Binding Setting.packEnabled, Mode=TwoWay}"
-                        ToolTip="{DynamicResource SettingPackTimeoutTip}" />
+                        IsChecked="{Binding Setting.packByTimeout, Mode=TwoWay}" />
+                    <TextBlock Margin="0,0,2,0" VerticalAlignment="Center" Text="{DynamicResource SettingPackTimeout}" />
                     <TextBox
                         MinWidth="50"
                         Margin="0,0,2,0"
-                        Text="{Binding Setting.packTimeoutValue, UpdateSourceTrigger=PropertyChanged}"
-                        Visibility="{Binding Setting.packEnabled, Converter={StaticResource boolVisibeConverter}}" />
+                        Text="{Binding Setting.packSize, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock
                         Margin="0,0,0,0"
                         VerticalAlignment="Center"
-                        Text="{DynamicResource SettingPackTimeoutMs}"
-                        Visibility="{Binding Setting.packEnabled, Converter={StaticResource boolVisibeConverter}}" />
+                        Text="{DynamicResource SettingPackTimeoutMs}" />
                 </StackPanel>
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource SettingTimeoutMode}"
-                    ToolTip="{DynamicResource SettingTimeoutModeTip}"
-                    IsChecked="{Binding Setting.bitDelay}" />
             </WrapPanel>
         </ScrollViewer>
         <TextBox

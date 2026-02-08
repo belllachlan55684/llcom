@@ -239,6 +239,18 @@ namespace llcom.Model
             WaitUartReceive.Set();
         }
 
+        private void EmitPacket(byte[] data)
+        {
+            if (data == null || data.Length == 0) return;
+            Tools.Global.setting.ReceivedCount += data.Length;
+            try
+            {
+                UartDataRecived(data, EventArgs.Empty);
+                LuaApis.SendChannelsReceived("uart", data);
+            }
+            catch { }
+        }
+
         /// <summary>
         /// 单独开个线程接收数据
         /// </summary>
@@ -250,48 +262,78 @@ namespace llcom.Model
                 WaitUartReceive.WaitOne();
                 if (Tools.Global.isMainWindowsClosed)
                     return;
-                if (Tools.Global.setting.timeout > 0)
-                    System.Threading.Thread.Sleep(Tools.Global.setting.timeout);//等待时间
-                else
-                    System.Threading.Thread.Sleep(10);//等待时间默认给个10ms吧，防止中文被分割
-                List<byte> result = new List<byte>();
-                while (true)//循环读
-                {
-                    if (serial == null || !serial.IsOpen)//串口被关了，不读了
-                        break;
-                    try
-                    {
-                        int length = serial.BytesToRead;
-                        if (length == 0)//没数据，退出去
-                            break;
-                        byte[] rev = new byte[length];
-                        serial.Read(rev, 0, length);//读数据
-                        if (rev.Length == 0)
-                            break;
-                        result.AddRange(rev);//加到list末尾
-                    }
-                    catch { break; }//崩了？
+                var packSize = Tools.Global.setting.packSize;
+                var packByTimeout = Tools.Global.setting.packByTimeout;
+                var baudRate = Tools.Global.setting.baudRate;
+                var maxLength = Tools.Global.setting.maxLength;
+                var timeoutMs = Math.Max(1, packSize * 10 * 1000 / baudRate);
 
-                    if (result.Count > Tools.Global.setting.maxLength)//长度超了
-                        break;
-                    if (Tools.Global.setting.bitDelay && Tools.Global.setting.timeout > 0)//如果是设置了等待间隔时间
+                if (packByTimeout)
+                {
+                    System.Threading.Thread.Sleep(timeoutMs);
+                    List<byte> result = new List<byte>();
+                    while (true)
                     {
-                        System.Threading.Thread.Sleep(Tools.Global.setting.timeout);//等待时间
+                        if (serial == null || !serial.IsOpen)
+                            break;
+                        try
+                        {
+                            int length = serial.BytesToRead;
+                            if (length == 0)
+                                break;
+                            byte[] rev = new byte[length];
+                            serial.Read(rev, 0, length);
+                            if (rev.Length == 0)
+                                break;
+                            result.AddRange(rev);
+                        }
+                        catch { break; }
+
+                        if (result.Count > maxLength)
+                            break;
+                        System.Threading.Thread.Sleep(timeoutMs);
                     }
-                    else if (Tools.Global.setting.timeout < 0)//如果是设置了等待间隔时间
+                    if (result.Count > 0)
+                        EmitPacket(result.ToArray());
+                }
+                else
+                {
+                    List<byte> result = new List<byte>();
+                    while (true)
                     {
-                        System.Threading.Thread.Sleep(10);//等待时间默认给个10ms吧，防止中文被分割
+                        if (serial == null || !serial.IsOpen)
+                            break;
+                        try
+                        {
+                            int length = serial.BytesToRead;
+                            if (length == 0)
+                            {
+                                if (result.Count > 0)
+                                    EmitPacket(result.ToArray());
+                                break;
+                            }
+                            byte[] rev = new byte[length];
+                            serial.Read(rev, 0, length);
+                            if (rev.Length == 0)
+                                break;
+                            result.AddRange(rev);
+                        }
+                        catch { break; }
+
+                        while (result.Count >= packSize)
+                        {
+                            var toEmit = result.GetRange(0, packSize).ToArray();
+                            result.RemoveRange(0, packSize);
+                            EmitPacket(toEmit);
+                        }
+                        if (result.Count > maxLength)
+                        {
+                            EmitPacket(result.ToArray());
+                            result.Clear();
+                            break;
+                        }
                     }
                 }
-                Tools.Global.setting.ReceivedCount += result.Count;
-                if (result.Count > 0)
-                    try
-                    {
-                        var r = result.ToArray();
-                        UartDataRecived(r, EventArgs.Empty);//回调事件
-                        LuaApis.SendChannelsReceived("uart", r);
-                    }
-                    catch { }
             }
         }
     }

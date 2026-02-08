@@ -268,10 +268,27 @@ namespace llcom.Tools
                 try
                 {
                     //cost 309ms
-                    setting = JsonConvert.DeserializeObject<Model.Settings>(File.ReadAllText(ProfilePath + "settings.json"));
+                    var jsonText = File.ReadAllText(ProfilePath + "settings.json");
+                    setting = JsonConvert.DeserializeObject<Model.Settings>(jsonText);
                     setting.SentCount = 0;
                     setting.ReceivedCount = 0;
                     setting.DisableLog = false;
+                    // 迁移：timeout/packTimeoutValue/bitDelay -> packSize/packByTimeout
+                    try
+                    {
+                        var j = Newtonsoft.Json.Linq.JObject.Parse(jsonText);
+                        if (j["timeout"] != null || j["packTimeoutValue"] != null || j["bitDelay"] != null)
+                        {
+                            var oldTimeout = j["timeout"]?.Value<int?>() ?? j["packTimeoutValue"]?.Value<int?>();
+                            if (oldTimeout.HasValue && oldTimeout.Value > 0)
+                                setting.packSize = oldTimeout.Value;
+                            else if (oldTimeout.HasValue && oldTimeout.Value < 0)
+                                setting.packSize = 50; // 原不分包模式
+                            if (j["bitDelay"] != null)
+                                setting.packByTimeout = j["bitDelay"].Value<bool>();
+                        }
+                    }
+                    catch { }
                     // 迁移：default 或 原始数据 或 rawdata -> RawData；加上换行回车 -> CRLF
                     if (setting.sendScript == "default" || setting.sendScript == "原始数据" || setting.sendScript == "rawdata")
                         setting.sendScript = "RawData";

@@ -24,8 +24,8 @@ namespace llcom.Model
         private bool _showSend = true;
         private bool _showSendRaw = true;
         private int _parity = 0;
-        private int _timeout = 50;
-        private int _packTimeoutValue = 50;
+        private int _packSize = 50;
+        private bool _packByTimeout = true;
         private int _dataBits = 8;
         private int _stopBit = 1;
         private string _sendScript = "RawData";
@@ -35,7 +35,6 @@ namespace llcom.Model
         private bool _topmost = false;
         public List<List<ToSendData>> quickSendList = new List<List<ToSendData>>();
         private int _quickSendSelect = -1;
-        private bool _bitDelay = true;
         private bool _autoUpdate = true;
         private uint _maxLength = 10240;
         private string _language = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
@@ -285,19 +284,6 @@ namespace llcom.Model
             }
         }
 
-        public bool bitDelay
-        {
-            get
-            {
-                return _bitDelay;
-            }
-            set
-            {
-                _bitDelay = value;
-                Save();
-            }
-        }
-
         public string dataToSend
         {
             get
@@ -459,50 +445,29 @@ namespace llcom.Model
             }
         }
 
-        public int timeout
+        /// <summary>
+        /// 分包尺寸（字节数），>0，默认 50
+        /// </summary>
+        public int packSize
         {
-            get
-            {
-                return _timeout;
-            }
+            get => _packSize;
             set
             {
-                _timeout = value;
-                if (value >= 0)
-                    _packTimeoutValue = value;
+                _packSize = value > 0 ? value : 50;
                 Save();
             }
         }
 
         /// <summary>
-        /// 分包模式下的超时值（毫秒），仅当 packEnabled 为 true 时生效
+        /// 勾选=按 n 字节时间超时分包，不勾选=按 n 字节分包
         /// </summary>
-        public int packTimeoutValue
+        public bool packByTimeout
         {
-            get => _packTimeoutValue;
+            get => _packByTimeout;
             set
             {
-                _packTimeoutValue = value > 0 ? value : 50;
-                if (_timeout >= 0)
-                    timeout = _packTimeoutValue;
-                else
-                    Save();
-            }
-        }
-
-        /// <summary>
-        /// 分包模式：选中=分包，不选中=不分包
-        /// </summary>
-        [PropertyChanged.DependsOn(nameof(timeout))]
-        public bool packEnabled
-        {
-            get => _timeout >= 0;
-            set
-            {
-                if (value)
-                    timeout = _packTimeoutValue;
-                else
-                    timeout = -1;
+                _packByTimeout = value;
+                Save();
             }
         }
 

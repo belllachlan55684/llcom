@@ -141,22 +141,17 @@
     <system:String x:Key="WindowClose">Close</system:String>
     <system:String x:Key="PinTopTip">Pin</system:String>
     <system:String x:Key="UnpinTopTip">Unpin</system:String>
-    <system:String x:Key="SettingUartTimeout">Data pack time:</system:String>
-    <system:String x:Key="SettingMs">Ms(minus means Not Pack Mode)</system:String>
-    <system:String x:Key="SettingPackTimeout">Pack timeout</system:String>
-    <system:String x:Key="SettingPackTimeoutMs">ms</system:String>
-    <system:String x:Key="SettingPackTimeoutTip">Checked = pack mode, unchecked = no pack</system:String>
+    <system:String x:Key="SettingPackTimeout">Pack</system:String>
+    <system:String x:Key="SettingPackTimeoutMs">Byte(s)</system:String>
+    <system:String x:Key="SettingPackTimeoutTip">Checked = split when no data for n-byte time; unchecked = split by n bytes</system:String>
     <system:String x:Key="SettingAutoConnect">Auto connect</system:String>
     <system:String x:Key="SettingAutoConnectTip">Auto restore disconnected connection</system:String>
     <system:String x:Key="SettingShowSendData">Show send data</system:String>
     <system:String x:Key="SettingShowSendDataTip">Show data sent out</system:String>
     <system:String x:Key="SettingShowRawData">Show raw data</system:String>
     <system:String x:Key="SettingShowRawDataTip">Show raw sent data</system:String>
-    <system:String x:Key="SettingTimeoutMode">Timeout mode</system:String>
-    <system:String x:Key="SettingTimeoutModeTip">Unchecked means timeout starts from first byte</system:String>
     <system:String x:Key="SettingTerminalMode">Keyboard input</system:String>
     <system:String x:Key="SettingTerminalModeTip">Selected data area allows direct keyboard input</system:String>
-    <system:String x:Key="SettingSplitByEmpty">Split by no data time(or split by time from first time)</system:String>
     <system:String x:Key="SettingTerminal">Terminal (select data space and send key datas)</system:String>
     <system:String x:Key="EnterTerminalMode">Forced entry into terminal mode</system:String>
     <system:String x:Key="SettingMaxPack">Max length per packet</system:String>

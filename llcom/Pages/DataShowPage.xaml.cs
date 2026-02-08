@@ -137,67 +137,19 @@ namespace llcom.Pages
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
 
-            lastPackShowMode = Tools.Global.setting.timeout >= 0;
-            MainListScrollViewer.Visibility = lastPackShowMode ? Visibility.Visible : Visibility.Collapsed;
-            MainTextBox.Visibility = lastPackShowMode ? Visibility.Collapsed : Visibility.Visible;
-            if (!lastPackShowMode)
-            {
-                MainTextBox.Document.Blocks.Clear();
-                MainTextBox.Document.Blocks.Add(new Paragraph { Margin = new Thickness(0) });
-            }
+            MainListScrollViewer.Visibility = Visibility.Visible;
+            MainTextBox.Visibility = Visibility.Collapsed;
         }
 
-        //记录一下上次是不是分包显示的
-        bool lastPackShowMode = false;
         private void Logger_DataShowTask(object sender, Tools.DataShow e)
         {
-            //先判断下要不要清空
-            var needPack = Tools.Global.setting.timeout >= 0;
-            if (lastPackShowMode != needPack)
-            {
-                lastPackShowMode = needPack;
-                DoInvoke(() =>
-                {
-                    MainList.Items.Clear();
-                    MainTextBox.Document.Blocks.Clear();
-                    MainListScrollViewer.Visibility = needPack ? Visibility.Visible : Visibility.Collapsed;
-                    MainTextBox.Visibility = needPack ? Visibility.Collapsed : Visibility.Visible;
-                    if (!needPack)
-                    {
-                        MainTextBox.Document.Blocks.Add(new Paragraph { Margin = new Thickness(0) });
-                    }
-                });
-            }
-
             //如果不开回显，就别打印
             var para = e as DataShowPara;
             var ifKey = para?.interfaceKey ?? "Serial";
             if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && !Tools.Global.setting.GetShowSendRawForInterface(ifKey) && para != null && para.send)
                 return;
 
-            //显示到列表
-            if (!needPack && e is not DataShowRaw)//不分包模式
-            {
-                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
-                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);
-                var enableAnsi = Tools.Global.setting.enableAnsiColor;
-                var rawDataText = (fmt switch
-                {
-                    2 => Tools.Global.Byte2Hex(e.data, " ", e.data.Length) + " ",
-                    _ => Tools.Global.Byte2Readable(e.data, e.data.Length, enableSym),
-                }) ?? "";
-                var DataText = enableAnsi ? NormalizeDisplayText(rawDataText) : rawDataText.TrimEnd('\r', '\n');
-                var defaultBrush = para != null && para.send
-                    ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey)
-                    : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
-                DoInvoke(() =>
-                {
-                    AppendAnsiToRichTextBox(MainTextBox, DataText, enableAnsi, defaultBrush);
-                    if (!LockLog)
-                        MainTextBox.ScrollToEnd();
-                });
-            }
-            else//分包模式：必须在 UI 线程创建 DataShow，否则 GetSendDisplayBrush/GetRecvDisplayBrush 创建的 SolidColorBrush 会导致跨线程 DependencySource 异常
+            //分包模式：必须在 UI 线程创建 DataShow，否则 GetSendDisplayBrush/GetRecvDisplayBrush 创建的 SolidColorBrush 会导致跨线程 DependencySource 异常
             {
                 var isRaw = e is DataShowRaw;
                 var raw = e as DataShowRaw;
@@ -436,15 +388,8 @@ namespace llcom.Pages
             if(saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string saveFilePath = saveFileDialog.FileName;
-                var needPack = Tools.Global.setting.timeout >= 0;
                 FileStream fs = new FileStream(saveFilePath, FileMode.Create);
                 StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-                if (!needPack)
-                {
-                    var range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
-                    sw.Write(range.Text);
-                }
-                else
                 {
                     int iCount = MainList.Items.Count - 1;
                     for (int i = 0; i <= iCount; i++)
