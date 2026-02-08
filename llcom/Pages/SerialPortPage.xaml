@@ -168,10 +168,6 @@
                     Content="{DynamicResource ShowSymbol}"
                     IsChecked="{Binding Display.EnableSymbol, Mode=TwoWay}"
                     ToolTip="{DynamicResource ShowSymbolTooltip}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource DisableLog}"
-                    IsChecked="{Binding Display.DisableLog, Mode=TwoWay}" />
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <CheckBox
                         Margin="0,0,10,0"

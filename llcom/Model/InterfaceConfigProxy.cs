@@ -51,12 +51,6 @@ namespace llcom.Model
             set { Tools.Global.setting.SetEnableSymbolForInterface(_interfaceKey, value); OnPropertyChanged(); }
         }
 
-        public bool DisableLog
-        {
-            get => Tools.Global.setting.GetDisableLogForInterface(_interfaceKey);
-            set { Tools.Global.setting.SetDisableLogForInterface(_interfaceKey, value); OnPropertyChanged(); }
-        }
-
         public bool HexMode
         {
             get => Tools.Global.setting.GetHexForInterface(_interfaceKey);
@@ -73,7 +67,6 @@ namespace llcom.Model
             OnPropertyChanged(nameof(DataToSend));
             OnPropertyChanged(nameof(ShowHexFormat));
             OnPropertyChanged(nameof(EnableSymbol));
-            OnPropertyChanged(nameof(DisableLog));
             OnPropertyChanged(nameof(HexMode));
         }
     }

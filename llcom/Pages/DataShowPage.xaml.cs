@@ -42,6 +42,15 @@ namespace llcom.Pages
         public bool LockLog { get; set; } = false;
 
         /// <summary>
+        /// 停止打印（全局）
+        /// </summary>
+        public bool DisableLog
+        {
+            get => Tools.Global.setting?.DisableLog ?? false;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.DisableLog = value; }
+        }
+
+        /// <summary>
         /// 显示时间戳？
         /// </summary>
         public bool ShowTimestamp
@@ -82,6 +91,7 @@ namespace llcom.Pages
                 MainTextBox.Document.Blocks.Clear();
             };
             LockLogCheckBox.DataContext = this;
+            DisableLogCheckBox.DataContext = this;
             ShowTimestampCheckBox.DataContext = this;
 
             MainList.DataContext = Tools.Global.setting;

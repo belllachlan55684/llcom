@@ -113,10 +113,6 @@
                     Content="{DynamicResource ShowSymbol}"
                     IsChecked="{Binding EnableSymbol, Mode=TwoWay}"
                     ToolTip="{DynamicResource ShowSymbolTooltip}" />
-                <CheckBox
-                    Margin="5"
-                    Content="{DynamicResource DisableLog}"
-                    IsChecked="{Binding DisableLog, Mode=TwoWay}" />
             </WrapPanel>
         </ScrollViewer>
         <TextBox

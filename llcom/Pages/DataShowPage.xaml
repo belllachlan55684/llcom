@@ -170,6 +170,12 @@
                     IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource LockLogButton}" />
                 <CheckBox
+                    Name="DisableLogCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource DisableLog}"
+                    IsChecked="{Binding DisableLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource DisableLog}" />
+                <CheckBox
                     Name="EnableAnsiColorCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource EnableAnsiColor}"

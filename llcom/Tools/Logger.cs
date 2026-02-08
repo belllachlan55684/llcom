@@ -23,8 +23,8 @@ namespace llcom.Tools
         //显示日志数据
         public static void ShowData(byte[] data, bool send, string interfaceKey = null)
         {
-            //不刷新日志（按接口过滤）
-            if (Tools.Global.setting.GetDisableLogForInterface(interfaceKey))
+            //不刷新日志（全局）
+            if (Tools.Global.setting.DisableLog)
                 return;
             DataShowTask?.Invoke(null, new DataShowPara
             {

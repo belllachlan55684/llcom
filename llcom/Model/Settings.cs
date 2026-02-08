@@ -724,11 +724,6 @@ namespace llcom.Model
         public bool GetEnableSymbolForInterface(string key) { if (key != null && enableSymbolByInterface.TryGetValue(key, out var v)) return v; return EnableSymbol; }
         public void SetEnableSymbolForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; enableSymbolByInterface[key] = value; Save(); }
 
-        private Dictionary<string, bool> _disableLogByInterface = null;
-        public Dictionary<string, bool> disableLogByInterface { get => _disableLogByInterface ??= new Dictionary<string, bool>(); set => _disableLogByInterface = value ?? new Dictionary<string, bool>(); }
-        public bool GetDisableLogForInterface(string key) { if (key != null && disableLogByInterface.TryGetValue(key, out var v)) return v; return DisableLog; }
-        public void SetDisableLogForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; disableLogByInterface[key] = value; Save(); }
-
         private Dictionary<string, bool> _hexModeByInterface = null;
         public Dictionary<string, bool> hexModeByInterface { get => _hexModeByInterface ??= new Dictionary<string, bool>(); set => _hexModeByInterface = value ?? new Dictionary<string, bool>(); }
         public bool GetHexForInterface(string key) { if (key != null && hexModeByInterface.TryGetValue(key, out var v)) return v; return false; }
@@ -819,7 +814,11 @@ namespace llcom.Model
             }
         }
 
-        public bool DisableLog { get; set; } = false;
+        private bool _disableLog = false;
+        /// <summary>
+        /// 停止打印（全局）
+        /// </summary>
+        public bool DisableLog { get => _disableLog; set { _disableLog = value; Save(); } }
 
         public bool EnableSymbol
         {
