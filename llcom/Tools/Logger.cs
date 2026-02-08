@@ -72,21 +72,25 @@ namespace llcom.Tools
         }
 
         /// <summary>
-        /// 写入一条串口日志
+        /// 写入一条串口日志（仅当 autoSaveLog 为 true 时写入文件）
         /// </summary>
         /// <param name="l"></param>
         public static void AddUartLogInfo(string l)
         {
+            if (Tools.Global.setting?.autoSaveLog != true)
+                return;
             if (uartLogFile == null)
                 InitUartLog();
             uartLogFile.Information(l);
         }
         /// <summary>
-        /// 写入一条串口日志
+        /// 写入一条串口调试日志（仅当 autoSaveLog 为 true 时写入文件）
         /// </summary>
         /// <param name="l"></param>
         public static void AddUartLogDebug(string l)
         {
+            if (Tools.Global.setting?.autoSaveLog != true)
+                return;
             if (uartLogFile == null)
                 InitUartLog();
             uartLogFile.Debug(l);
@@ -117,11 +121,13 @@ namespace llcom.Tools
         }
 
         /// <summary>
-        /// 写入一条lua日志
+        /// 写入一条lua日志（仅当 autoSaveLog 为 true 时写入文件）
         /// </summary>
         /// <param name="l"></param>
         public static void AddLuaLog(string l)
         {
+            if (Tools.Global.setting?.autoSaveLog != true)
+                return;
             if (luaLogFile == null)
                 InitLuaLog();
             luaLogFile.Information(l);

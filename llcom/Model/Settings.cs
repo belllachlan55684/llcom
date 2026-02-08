@@ -329,12 +329,21 @@ namespace llcom.Model
         }
 
         /// <summary>
-        /// 自动保存日志（界面显示的收发数据定期写入文件）
+        /// 自动保存日志（串口/Lua 日志写入 logs/log.txt 等）
         /// </summary>
         public bool autoSaveLog
         {
             get => _autoSaveLog;
-            set { _autoSaveLog = value; Save(); }
+            set
+            {
+                _autoSaveLog = value;
+                if (!value)
+                {
+                    Tools.Logger.CloseUartLog();
+                    Tools.Logger.CloseLuaLog();
+                }
+                Save();
+            }
         }
 
         /// <summary>
