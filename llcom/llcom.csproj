@@ -310,6 +310,9 @@
     <Compile Include="View\Controls\ScriptSelectorControl.xaml.cs">
       <DependentUpon>ScriptSelectorControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\TxRxColorBlocks.xaml.cs">
+      <DependentUpon>TxRxColorBlocks.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Global.cs" />
     <Compile Include="Tools\LuaConvertHelper.cs" />
     <Compile Include="Tools\Logger.cs" />
@@ -402,6 +405,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\ScriptSelectorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\TxRxColorBlocks.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

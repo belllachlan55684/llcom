@@ -103,6 +103,69 @@ namespace llcom.Model
             catch { return new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
         }
 
+        private Dictionary<string, string> _sendDisplayColorByInterface = null;
+        private Dictionary<string, string> _recvDisplayColorByInterface = null;
+
+        /// <summary>
+        /// 各接口的发送显示颜色，键为接口名（Serial/TcpClient/UdpLocal/TcpLocal/WinUSB）
+        /// </summary>
+        public Dictionary<string, string> sendDisplayColorByInterface { get => _sendDisplayColorByInterface ??= new Dictionary<string, string>(); set => _sendDisplayColorByInterface = value ?? new Dictionary<string, string>(); }
+
+        /// <summary>
+        /// 各接口的接收显示颜色
+        /// </summary>
+        public Dictionary<string, string> recvDisplayColorByInterface { get => _recvDisplayColorByInterface ??= new Dictionary<string, string>(); set => _recvDisplayColorByInterface = value ?? new Dictionary<string, string>(); }
+
+        public string GetSendDisplayColorForInterface(string key)
+        {
+            if (key != null && sendDisplayColorByInterface.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
+            return _sendDisplayColor;
+        }
+
+        public string GetRecvDisplayColorForInterface(string key)
+        {
+            if (key != null && recvDisplayColorByInterface.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
+            return _recvDisplayColor;
+        }
+
+        public void SetSendDisplayColorForInterface(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            sendDisplayColorByInterface[key] = value ?? _sendDisplayColor;
+            Save();
+        }
+
+        public void SetRecvDisplayColorForInterface(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            recvDisplayColorByInterface[key] = value ?? _recvDisplayColor;
+            Save();
+        }
+
+        public SolidColorBrush GetSendDisplayBrushForInterface(string key)
+        {
+            var hex = GetSendDisplayColorForInterface(key);
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(hex);
+                return new SolidColorBrush(color);
+            }
+            catch { return new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C)); }
+        }
+
+        public SolidColorBrush GetRecvDisplayBrushForInterface(string key)
+        {
+            var hex = GetRecvDisplayColorForInterface(key);
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(hex);
+                return new SolidColorBrush(color);
+            }
+            catch { return new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
+        }
+
         /// <summary>
         /// 保存配置
         /// </summary>

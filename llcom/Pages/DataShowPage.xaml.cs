@@ -225,7 +225,8 @@ namespace llcom.Pages
 
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
                 ArrowText = sent ? " ← " : " → ";
-                DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrush() : Tools.Global.setting.GetRecvDisplayBrush();
+                var ifKey = interfaceKey ?? "Serial";
+                DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey) : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
                 HexTextColor = DataTextColor;
 
                 var len = temp.Length;

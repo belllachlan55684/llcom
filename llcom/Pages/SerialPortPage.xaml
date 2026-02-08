@@ -150,6 +150,7 @@
                     Content="{DynamicResource SettingShowSendData}"
                     ToolTip="{DynamicResource SettingShowSendDataTip}"
                     IsChecked="{Binding Display.ShowSend, Mode=TwoWay}" />
+                <controls:TxRxColorBlocks InterfaceKey="Serial" />
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowRawData}"

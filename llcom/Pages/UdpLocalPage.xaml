@@ -76,6 +76,7 @@
                     Content="{DynamicResource SettingShowSendData}"
                     ToolTip="{DynamicResource SettingShowSendDataTip}"
                     IsChecked="{Binding ShowSend, Mode=TwoWay}" />
+                <controls:TxRxColorBlocks InterfaceKey="UdpLocal" />
                 <CheckBox
                     Margin="5"
                     Content="{DynamicResource SettingShowRawData}"

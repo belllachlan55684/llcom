@@ -40,6 +40,7 @@ using System.Windows.Controls.Primitives;
 using llcom.LuaEnv;
 using System.Web.UI.WebControls.WebParts;
 using Color = System.Windows.Media.Color;
+using AdonisUI;
 
 namespace llcom
 {
@@ -393,34 +394,81 @@ namespace llcom
         /// </summary>
         public void SetDataInterfaceStatus(string text)
         {
-            if (statusTextBlock != null)
-                statusTextBlock.Text = text ?? "";
+            RefreshDataInterfaceStatus();
         }
 
+        private static readonly string[] StatusBarInterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal" };
+
         /// <summary>
-        /// 根据所有数据接口的打开状态刷新状态栏，显示所有已打开的接口
+        /// 根据所有数据接口的打开状态刷新状态栏，显示所有已打开的接口，仅当有已连接接口时显示色块
         /// </summary>
         public void RefreshDataInterfaceStatus()
         {
-            if (statusTextBlock == null || DataInterfaceComboBox == null)
+            if (statusBarContentPanel == null || DataInterfaceComboBox == null)
                 return;
+
+            var frames = new[] { SerialPortFrame, tcpClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
             var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
-            var parts = new List<string>();
-            foreach (var content in new[] {
-                SerialPortFrame?.Content,
-                tcpClientFrame?.Content,
-                udpLocalTestFrame?.Content,
-                tcpLocalTestFrame?.Content })
+
+            statusBarContentPanel.Children.Clear();
+
+            var txRxBlock = new System.Windows.Controls.TextBlock
             {
-                var text = (content as IDataInterfaceStatusProvider)?.GetStatusBarText();
-                if (!string.IsNullOrEmpty(text))
-                    parts.Add(text);
+                Text = txRx,
+                Cursor = System.Windows.Input.Cursors.Cross,
+                ToolTip = TryFindResource("ClearCountTip"),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            txRxBlock.MouseRightButtonDown += statusTextBlock_MouseRightButtonDown;
+            statusBarContentPanel.Children.Add(txRxBlock);
+
+            for (int i = 0; i < frames.Length; i++)
+            {
+                var content = frames[i]?.Content as IDataInterfaceStatusProvider;
+                var text = content?.GetStatusBarText();
+                if (string.IsNullOrEmpty(text)) continue;
+
+                var key = StatusBarInterfaceKeys[i];
+
+                statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = " | ", VerticalAlignment = VerticalAlignment.Center });
+                statusBarContentPanel.Children.Add(new System.Windows.Controls.TextBlock { Text = text, VerticalAlignment = VerticalAlignment.Center });
+
+                var sendBlock = new System.Windows.Controls.Border
+                {
+                    Width = 12,
+                    Height = 12,
+                    Margin = new Thickness(4, 0, 2, 0),
+                    Background = Tools.Global.setting.GetSendDisplayBrushForInterface(key),
+                    BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
+                    BorderThickness = new Thickness(1),
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    ToolTip = TryFindResource("SendColorTip"),
+                    Tag = key,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                sendBlock.MouseLeftButtonDown += StatusBarSendColorBlock_MouseLeftButtonDown;
+
+                var recvBlock = new System.Windows.Controls.Border
+                {
+                    Width = 12,
+                    Height = 12,
+                    Margin = new Thickness(2, 0, 0, 0),
+                    Background = Tools.Global.setting.GetRecvDisplayBrushForInterface(key),
+                    BorderBrush = TryFindResource(AdonisUI.Brushes.Layer2BorderBrush) as System.Windows.Media.Brush,
+                    BorderThickness = new Thickness(1),
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    ToolTip = TryFindResource("RecvColorTip"),
+                    Tag = key,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                recvBlock.MouseLeftButtonDown += StatusBarRecvColorBlock_MouseLeftButtonDown;
+
+                statusBarContentPanel.Children.Add(sendBlock);
+                statusBarContentPanel.Children.Add(recvBlock);
             }
-            statusTextBlock.Text = parts.Count > 0 ? $"{txRx} | {string.Join(" | ", parts)}" : txRx;
-            if (sendColorBlock != null)
-                sendColorBlock.Background = Tools.Global.setting.GetSendDisplayBrush();
-            if (recvColorBlock != null)
-                recvColorBlock.Background = Tools.Global.setting.GetRecvDisplayBrush();
+
+            foreach (var ctrl in FindVisualChildren<View.Controls.TxRxColorBlocks>(this))
+                ctrl.RefreshColors();
         }
 
         private void DataInterfaceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -444,33 +492,37 @@ namespace llcom
             }
         }
 
-        private void SendColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void StatusBarSendColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
+            var key = (sender as System.Windows.FrameworkElement)?.Tag as string;
+            if (string.IsNullOrEmpty(key)) return;
             using (var dlg = new WinForms.ColorDialog())
             {
-                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.sendDisplayColor); }
+                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.GetSendDisplayColorForInterface(key)); }
                 catch { }
                 dlg.FullOpen = true;
                 if (dlg.ShowDialog() == WinForms.DialogResult.OK)
                 {
-                    Tools.Global.setting.sendDisplayColor = $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+                    Tools.Global.setting.SetSendDisplayColorForInterface(key, $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}");
                     RefreshDataInterfaceStatus();
                 }
             }
         }
 
-        private void RecvColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void StatusBarRecvColorBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
+            var key = (sender as System.Windows.FrameworkElement)?.Tag as string;
+            if (string.IsNullOrEmpty(key)) return;
             using (var dlg = new WinForms.ColorDialog())
             {
-                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.recvDisplayColor); }
+                try { dlg.Color = ColorTranslator.FromHtml(Tools.Global.setting.GetRecvDisplayColorForInterface(key)); }
                 catch { }
                 dlg.FullOpen = true;
                 if (dlg.ShowDialog() == WinForms.DialogResult.OK)
                 {
-                    Tools.Global.setting.recvDisplayColor = $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+                    Tools.Global.setting.SetRecvDisplayColorForInterface(key, $"#{dlg.Color.A:X2}{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}");
                     RefreshDataInterfaceStatus();
                 }
             }

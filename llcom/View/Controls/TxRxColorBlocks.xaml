@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="llcom.View.Controls.TxRxColorBlocks"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <TextBlock Margin="5,0,2,0" VerticalAlignment="Center" Text="Tx" />
+        <Border
+            x:Name="sendColorBlock"
+            Width="12"
+            Height="12"
+            Margin="0,0,4,0"
+            Background="#CD5C5C"
+            BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer2BorderBrush}}"
+            BorderThickness="1"
+            Cursor="Hand"
+            ToolTip="{DynamicResource SendColorTip}"
+            MouseLeftButtonDown="SendColorBlock_MouseLeftButtonDown" />
+        <TextBlock Margin="4,0,2,0" VerticalAlignment="Center" Text="Rx" />
+        <Border
+            x:Name="recvColorBlock"
+            Width="12"
+            Height="12"
+            Margin="0,0,0,0"
+            Background="#32CD32"
+            BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer2BorderBrush}}"
+            BorderThickness="1"
+            Cursor="Hand"
+            ToolTip="{DynamicResource RecvColorTip}"
+            MouseLeftButtonDown="RecvColorBlock_MouseLeftButtonDown" />
+    </StackPanel>
+</UserControl>
