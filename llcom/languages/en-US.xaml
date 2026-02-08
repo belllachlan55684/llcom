@@ -193,7 +193,9 @@
     <system:String x:Key="TcpLocalTabTitle">TCP Server</system:String>
     <system:String x:Key="UdpLocalTabTitle">UDP Server</system:String>
     <system:String x:Key="UdpNoClientTip">No client has sent data yet. Send data to the server first.</system:String>
-    <system:String x:Key="TcpClientTitle">Socket Client</system:String>
+    <system:String x:Key="UdpClientTitle">UDP Client</system:String>
+    <system:String x:Key="TcpClientTitle">TCP Client</system:String>
+    <system:String x:Key="TcpSslClientTitle">TCP SSL Client</system:String>
     <system:String x:Key="CreateTcpButton">Tset TCP</system:String>
     <system:String x:Key="CreateTcpSSLButton">Tset TCP SSL</system:String>
     <system:String x:Key="CreateUdpButton">Test UDP</system:String>

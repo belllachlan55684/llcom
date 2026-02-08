@@ -112,7 +112,9 @@ namespace llcom
                         Dispatcher.BeginInvoke(new Action(RefreshDataInterfaceStatus));
                     }
                     SerialPortFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+                    udpClientFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
                     tcpClientFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
+                    tcpSslClientFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
                     udpLocalTestFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
                     tcpLocalTestFrame.LoadCompleted += OnDataInterfaceFrameLoadCompleted;
 
@@ -209,8 +211,14 @@ namespace llcom
                     //tcp测试页面
                     tcpTestFrame.Navigate(new Uri("Pages/tcpTest.xaml", UriKind.Relative));
 
+                    //udp客户端页面
+                    udpClientFrame.Navigate(new Uri("Pages/UdpClientPage.xaml", UriKind.Relative));
+
                     //tcp客户端页面
-                    tcpClientFrame.Navigate(new Uri("Pages/SocketClientPage.xaml", UriKind.Relative));
+                    tcpClientFrame.Navigate(new Uri("Pages/TcpClientPage.xaml", UriKind.Relative));
+
+                    //tcp ssl客户端页面
+                    tcpSslClientFrame.Navigate(new Uri("Pages/TcpSslClientPage.xaml", UriKind.Relative));
 
                     //本地tcp服务器
                     tcpLocalTestFrame.Navigate(new Uri("Pages/TcpLocalPage.xaml", UriKind.Relative));
@@ -422,7 +430,7 @@ namespace llcom
             RefreshDataInterfaceStatus();
         }
 
-        private static readonly string[] StatusBarInterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal" };
+        private static readonly string[] StatusBarInterfaceKeys = { "Serial", "UdpClient", "TcpClient", "TcpSslClient", "UdpLocal", "TcpLocal" };
 
         /// <summary>
         /// 向状态栏添加单个接口块（分隔符 + 文本 + 收发色块）
@@ -483,7 +491,7 @@ namespace llcom
             if (statusBarContentPanel == null || DataInterfaceComboBox == null || RightTabControl == null)
                 return;
 
-            var frames = new[] { SerialPortFrame, tcpClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
+            var frames = new[] { SerialPortFrame, udpClientFrame, tcpClientFrame, tcpSslClientFrame, udpLocalTestFrame, tcpLocalTestFrame };
             var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
 
             statusBarContentPanel.Children.Clear();
@@ -1432,12 +1440,14 @@ namespace llcom
             var list = new List<QuickSendInterfaceItem>();
             var names = new[] {
                 (0, TryFindResource("SerialPortTabTitle") as string ?? "串口"),
-                (1, TryFindResource("TcpClientTitle") as string ?? "TCP客户端"),
-                (2, TryFindResource("UdpLocalTabTitle") as string ?? "UDP本地"),
-                (3, TryFindResource("TcpLocalTabTitle") as string ?? "TCP本地"),
-                (4, TryFindResource("TcpTabTitle") as string ?? "TCP服务端"),
-                (5, "WinUSB"),
-                (7, "MQTT")
+                (1, TryFindResource("UdpClientTitle") as string ?? "UDP客户端"),
+                (2, TryFindResource("TcpClientTitle") as string ?? "TCP客户端"),
+                (3, TryFindResource("TcpSslClientTitle") as string ?? "TCP SSL客户端"),
+                (4, TryFindResource("UdpLocalTabTitle") as string ?? "UDP本地"),
+                (5, TryFindResource("TcpLocalTabTitle") as string ?? "TCP本地"),
+                (6, TryFindResource("TcpTabTitle") as string ?? "TCP服务端"),
+                (7, "WinUSB"),
+                (9, "MQTT")
             };
             foreach (var (idx, name) in names)
             {
@@ -1452,12 +1462,14 @@ namespace llcom
             switch (index)
             {
                 case 0: return Tools.Global.uart.IsOpen();
-                case 1: return (tcpClientFrame?.Content as Pages.SocketClientPage)?.IsConnected == true;
-                case 2: return (udpLocalTestFrame?.Content as Pages.UdpLocalPage)?.IsConnected == true;
-                case 3: return (tcpLocalTestFrame?.Content as Pages.TcpLocalPage)?.IsConnected == true;
-                case 4: return (tcpTestFrame?.Content as Pages.tcpTest)?.IsConnected == true;
-                case 5: return (WinUSBFrame?.Content as Pages.WinUSBPage)?.IsConnected == true;
-                case 7: return (MqttTestFrame?.Content as Pages.MqttTestPage)?.MqttIsConnected == true;
+                case 1: return (udpClientFrame?.Content as Pages.UdpClientPage)?.IsConnected == true;
+                case 2: return (tcpClientFrame?.Content as Pages.TcpClientPage)?.IsConnected == true;
+                case 3: return (tcpSslClientFrame?.Content as Pages.TcpSslClientPage)?.IsConnected == true;
+                case 4: return (udpLocalTestFrame?.Content as Pages.UdpLocalPage)?.IsConnected == true;
+                case 5: return (tcpLocalTestFrame?.Content as Pages.TcpLocalPage)?.IsConnected == true;
+                case 6: return (tcpTestFrame?.Content as Pages.tcpTest)?.IsConnected == true;
+                case 7: return (WinUSBFrame?.Content as Pages.WinUSBPage)?.IsConnected == true;
+                case 9: return (MqttTestFrame?.Content as Pages.MqttTestPage)?.MqttIsConnected == true;
                 default: return false;
             }
         }
@@ -1473,12 +1485,14 @@ namespace llcom
             switch (index)
             {
                 case 0: return SerialPortFrame?.Content as IQuickSendTarget;
-                case 1: return tcpClientFrame?.Content as IQuickSendTarget;
-                case 2: return udpLocalTestFrame?.Content as IQuickSendTarget;
-                case 3: return tcpLocalTestFrame?.Content as IQuickSendTarget;
-                case 4: return tcpTestFrame?.Content as IQuickSendTarget;
-                case 5: return WinUSBFrame?.Content as IQuickSendTarget;
-                case 7: return MqttTestFrame?.Content as IQuickSendTarget;
+                case 1: return udpClientFrame?.Content as IQuickSendTarget;
+                case 2: return tcpClientFrame?.Content as IQuickSendTarget;
+                case 3: return tcpSslClientFrame?.Content as IQuickSendTarget;
+                case 4: return udpLocalTestFrame?.Content as IQuickSendTarget;
+                case 5: return tcpLocalTestFrame?.Content as IQuickSendTarget;
+                case 6: return tcpTestFrame?.Content as IQuickSendTarget;
+                case 7: return WinUSBFrame?.Content as IQuickSendTarget;
+                case 9: return MqttTestFrame?.Content as IQuickSendTarget;
                 default: return null;
             }
         }
@@ -1492,7 +1506,27 @@ namespace llcom
         {
             if (Tools.Global.setting.quickSendTargetIndices != null)
             {
-                quickSendSelectedIndices = new HashSet<int>(Tools.Global.setting.quickSendTargetIndices);
+                var raw = Tools.Global.setting.quickSendTargetIndices;
+                var migrated = new List<int>();
+                foreach (var idx in raw)
+                {
+                    var newIdx = idx switch
+                    {
+                        0 => 0,
+                        1 => 2,
+                        2 => 4,
+                        3 => 5,
+                        4 => 6,
+                        5 => 7,
+                        7 => 9,
+                        _ => -1
+                    };
+                    if (newIdx >= 0 && !migrated.Contains(newIdx))
+                        migrated.Add(newIdx);
+                }
+                quickSendSelectedIndices = new HashSet<int>(migrated);
+                if (migrated.Count != raw.Count)
+                    SaveQuickSendTargetIndices();
                 UpdateQuickSendInterfaceButtonText();
             }
         }

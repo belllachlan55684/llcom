@@ -268,8 +268,14 @@
     <Compile Include="Pages\SerialPortPage.xaml.cs">
       <DependentUpon>SerialPortPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\SocketClientPage.xaml.cs">
-      <DependentUpon>SocketClientPage.xaml</DependentUpon>
+    <Compile Include="Pages\UdpClientPage.xaml.cs">
+      <DependentUpon>UdpClientPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\TcpClientPage.xaml.cs">
+      <DependentUpon>TcpClientPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\TcpSslClientPage.xaml.cs">
+      <DependentUpon>TcpSslClientPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\TcpLocalPage.xaml.cs">
       <DependentUpon>TcpLocalPage.xaml</DependentUpon>
@@ -292,6 +298,7 @@
     <Compile Include="LuaEnv\LuaLoader.cs" />
     <Compile Include="LuaEnv\LuaRunEnv.cs" />
     <Compile Include="Model\InterfaceConfigProxy.cs" />
+    <Compile Include="Model\SocketClientHelper.cs" />
     <Compile Include="Model\Settings.cs" />
     <Compile Include="Model\ToSendData.cs" />
     <Compile Include="Model\Uart.cs" />
@@ -356,7 +363,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\SocketClientPage.xaml">
+    <Page Include="Pages\UdpClientPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\TcpClientPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\TcpSslClientPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1010,6 +1010,28 @@ namespace llcom.Model
         public int tcpClientPort { get { return _tcpClientPort; } set { _tcpClientPort = value; Save(); } }
         public int tcpClientProtocolType { get { return _tcpClientProtocolType; } set { _tcpClientProtocolType = value; Save(); } }
 
+        private bool _tcpClientReconnect = false;
+        private int _tcpClientReconnectInterval = 5;
+        public bool tcpClientReconnect { get { return _tcpClientReconnect; } set { _tcpClientReconnect = value; Save(); } }
+        public int tcpClientReconnectInterval { get { return _tcpClientReconnectInterval; } set { _tcpClientReconnectInterval = value; Save(); } }
+
+        private string _udpClientServer = "127.0.0.1";
+        private int _udpClientPort = 8080;
+        private bool _udpClientReconnect = false;
+        private int _udpClientReconnectInterval = 5;
+        public string udpClientServer { get { return _udpClientServer; } set { _udpClientServer = value; Save(); } }
+        public int udpClientPort { get { return _udpClientPort; } set { _udpClientPort = value; Save(); } }
+        public bool udpClientReconnect { get { return _udpClientReconnect; } set { _udpClientReconnect = value; Save(); } }
+        public int udpClientReconnectInterval { get { return _udpClientReconnectInterval; } set { _udpClientReconnectInterval = value; Save(); } }
+
+        private string _tcpSslClientServer = "127.0.0.1";
+        private int _tcpSslClientPort = 443;
+        private bool _tcpSslClientReconnect = false;
+        private int _tcpSslClientReconnectInterval = 5;
+        public string tcpSslClientServer { get { return _tcpSslClientServer; } set { _tcpSslClientServer = value; Save(); } }
+        public int tcpSslClientPort { get { return _tcpSslClientPort; } set { _tcpSslClientPort = value; Save(); } }
+        public bool tcpSslClientReconnect { get { return _tcpSslClientReconnect; } set { _tcpSslClientReconnect = value; Save(); } }
+        public int tcpSslClientReconnectInterval { get { return _tcpSslClientReconnectInterval; } set { _tcpSslClientReconnectInterval = value; Save(); } }
 
         private int _tcpServerPort = 2333;
         public int tcpServerPort { get { return _tcpServerPort; } set { _tcpServerPort = value; Save(); } }

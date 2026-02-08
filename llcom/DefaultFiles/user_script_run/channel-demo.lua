@@ -37,11 +37,23 @@ apiSetCb("tcp-server",function (data)
 end)
 local sendResult = apiSend("tcp-server","broadcast message!")
 
--- socket-client，对应 socket客户端 选项卡
-apiSetCb("socket-client",function (data)
-  log.info("socket-client received", data)
+-- udp-client，对应 UDP客户端 选项卡
+apiSetCb("udp-client",function (data)
+  log.info("udp-client received", data)
 end)
-local sendResult = apiSend("socket-client","send message by lua!")
+local sendResult = apiSend("udp-client","send message by lua!")
+
+-- tcp-client，对应 TCP客户端 选项卡
+apiSetCb("tcp-client",function (data)
+  log.info("tcp-client received", data)
+end)
+local sendResult = apiSend("tcp-client","send message by lua!")
+
+-- tcp-ssl-client，对应 TCP SSL客户端 选项卡
+apiSetCb("tcp-ssl-client",function (data)
+  log.info("tcp-ssl-client received", data)
+end)
+local sendResult = apiSend("tcp-ssl-client","send message by lua!")
 
 -- netlab，对应 socket公共服务端 选项卡
 apiSetCb("netlab",function (data)

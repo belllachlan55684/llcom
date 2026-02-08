@@ -400,8 +400,8 @@ namespace llcom.Pages
                 var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                 var ifKey = (mw?.DataInterfaceComboBox?.SelectedIndex ?? 0) switch
                 {
-                    0 => "Serial", 1 => "TcpClient", 2 => "UdpLocal", 3 => "TcpLocal", 4 => "Tcp", 5 => "WinUSB",
-                    6 => "SerialMonitor", 7 => "MQTT", _ => "Serial"
+                    0 => "Serial", 1 => "UdpClient", 2 => "TcpClient", 3 => "TcpSslClient", 4 => "UdpLocal", 5 => "TcpLocal",
+                    6 => "Tcp", 7 => "WinUSB", 8 => "SerialMonitor", 9 => "MQTT", _ => "Serial"
                 };
                 var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
                 var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);

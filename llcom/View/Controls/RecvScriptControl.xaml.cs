@@ -14,7 +14,7 @@ namespace llcom.View.Controls
         private static bool fileLoadingRev;
         private static string lastLuaFileRev = "";
 
-        private static readonly string[] InterfaceKeys = { "Serial", "TcpClient", "UdpLocal", "TcpLocal", "Tcp", "WinUSB", "SerialMonitor", "MQTT" };
+        private static readonly string[] InterfaceKeys = { "Serial", "UdpClient", "TcpClient", "TcpSslClient", "UdpLocal", "TcpLocal", "Tcp", "WinUSB", "SerialMonitor", "MQTT" };
 
         public RecvScriptControl()
         {

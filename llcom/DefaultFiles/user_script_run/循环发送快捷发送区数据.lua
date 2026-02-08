@@ -1,6 +1,6 @@
 --循环发送快捷发送区数据
 
---发送目标通道："uart"=串口 "socket-client"=socket客户端(TCP/UDP) "tcp-server"=TCP服务端
+--发送目标通道："uart"=串口 "udp-client"=UDP客户端 "tcp-client"=TCP客户端 "tcp-ssl-client"=TCP SSL客户端 "tcp-server"=TCP服务端
 local sendChannel = "uart"
 
 ---例子一

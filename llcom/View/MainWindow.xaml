@@ -134,6 +134,9 @@
                                             <Trigger Property="IsChecked" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}" />
                                             </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="PinButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
@@ -158,12 +161,18 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="Button">
                                         <Border
+                                            x:Name="MinButtonBorder"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                             <ContentPresenter
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="MinButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -188,12 +197,18 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="Button">
                                         <Border
+                                            x:Name="MaxButtonBorder"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                             <ContentPresenter
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="MaxButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -217,12 +232,19 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="Button">
                                         <Border
+                                            x:Name="CloseButtonBorder"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                             <ContentPresenter
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center" />
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CloseButtonBorder" Property="Background" Value="#E81123" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -287,7 +309,9 @@
                     </Grid.RowDefinitions>
                     <ComboBox Name="DataInterfaceComboBox" SelectedIndex="0" Margin="2" SelectionChanged="DataInterfaceComboBox_SelectionChanged">
                         <ComboBoxItem Content="{DynamicResource SerialPortTabTitle}" />
+                        <ComboBoxItem Content="{DynamicResource UdpClientTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpClientTitle}" />
+                        <ComboBoxItem Content="{DynamicResource TcpSslClientTitle}" />
                         <ComboBoxItem Content="{DynamicResource UdpLocalTabTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpLocalTabTitle}" />
                         <ComboBoxItem Content="{DynamicResource TcpTabTitle}" />
@@ -304,8 +328,14 @@
                         <TabItem Header="{DynamicResource SerialPortTabTitle}">
                             <Frame Name="SerialPortFrame" NavigationUIVisibility="Hidden" />
                         </TabItem>
+                        <TabItem Header="{DynamicResource UdpClientTitle}">
+                            <Frame Name="udpClientFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
                         <TabItem Header="{DynamicResource TcpClientTitle}">
                             <Frame Name="tcpClientFrame" NavigationUIVisibility="Hidden" />
+                        </TabItem>
+                        <TabItem Header="{DynamicResource TcpSslClientTitle}">
+                            <Frame Name="tcpSslClientFrame" NavigationUIVisibility="Hidden" />
                         </TabItem>
                         <TabItem Header="{DynamicResource UdpLocalTabTitle}">
                             <Frame Name="udpLocalTestFrame" NavigationUIVisibility="Hidden" />

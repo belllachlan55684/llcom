@@ -4,7 +4,7 @@
 ]]
 
 -- ========== 配置项（修改此处） ==========
--- 发送目标通道："uart"=串口 "socket-client"=socket客户端 "tcp-server"=TCP服务端
+-- 发送目标通道："uart"=串口 "udp-client"=UDP客户端 "tcp-client"=TCP客户端 "tcp-ssl-client"=TCP SSL客户端 "tcp-server"=TCP服务端
 local channel = "uart"
 
 -- 发送模式："string"=随机字符串 "hex"=随机十六进制

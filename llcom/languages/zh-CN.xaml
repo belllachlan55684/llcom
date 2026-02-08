@@ -193,7 +193,9 @@
     <system:String x:Key="TcpLocalTabTitle">TCP服务端</system:String>
     <system:String x:Key="UdpLocalTabTitle">UDP服务端</system:String>
     <system:String x:Key="UdpNoClientTip">暂无客户端发送过数据，请先让客户端向服务端发送数据。</system:String>
-    <system:String x:Key="TcpClientTitle">socket客户端</system:String>
+    <system:String x:Key="UdpClientTitle">UDP客户端</system:String>
+    <system:String x:Key="TcpClientTitle">TCP客户端</system:String>
+    <system:String x:Key="TcpSslClientTitle">TCP SSL客户端</system:String>
     <system:String x:Key="CreateTcpButton">测试TCP</system:String>
     <system:String x:Key="CreateTcpSSLButton">测试TCPSSL</system:String>
     <system:String x:Key="CreateUdpButton">测试UDP</system:String>

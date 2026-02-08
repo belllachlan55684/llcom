@@ -18,7 +18,7 @@ using System.Windows.Shapes;
 using System.Threading;
 using CoAP.Server;
 using System.Diagnostics;
-using static llcom.Pages.SocketClientPage;
+using llcom.Model;
 using llcom.LuaEnv;
 using System.Xml.Linq;
 
