@@ -80,6 +80,114 @@
                 Orientation="Horizontal"
                 HorizontalAlignment="Right"
                 DockPanel.Dock="Right">
+                <Button
+                    Name="LanguageButton"
+                    Width="46"
+                    Height="32"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    ToolTip="{DynamicResource SettingLanguage}"
+                    Click="LanguageButton_Click"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Content>
+                        <fa:FontAwesome Icon="Language" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            x:Name="LangButtonBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="LangButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button
+                    Name="ModeButton"
+                    Width="46"
+                    Height="32"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    ToolTip="{DynamicResource SettingThemeSelection}"
+                    Click="ModeButton_Click"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Content>
+                        <fa:FontAwesome Icon="Adjust" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            x:Name="ModeButtonBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ModeButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button
+                    Name="AutoSaveLogButton"
+                    Width="46"
+                    Height="32"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    ToolTip="{DynamicResource SettingAutoSaveLog}"
+                    Click="AutoSaveLogButton_Click"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Content>
+                        <fa:FontAwesome Icon="ListAlt" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            x:Name="AutoSaveButtonBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="AutoSaveButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <ToggleButton
                     Name="PinTopmostButton"
                     Width="46"
@@ -812,49 +920,68 @@
                     </TabItem>
                 </TabControl>
             </TabItem>
-            <TabItem Name="settingsTabItem">
-                <TabItem.Header>
-                    <TextBlock Text="{DynamicResource SettingCard}" />
-                </TabItem.Header>
-                <TabControl>
-                    <TabItem Header="{DynamicResource SettingSystem}">
-                        <ScrollViewer>
-                            <WrapPanel Name="settingsContentPanel" Margin="15,10" Orientation="Horizontal" Loaded="SystemSettingsPanel_Loaded">
-                                <ComboBox
-                                    Name="languageComboBox"
-                                    Width="120"
-                                    Margin="5"
-                                    ToolTip="{DynamicResource SettingLanguage}"
-                                    SelectionChanged="LanguageComboBox_SelectionChanged">
-                                    <ComboBoxItem Content="简体中文" Tag="zh-CN" />
-                                    <ComboBoxItem Content="English" Tag="en-US" />
-                                </ComboBox>
-                                <ComboBox
-                                    Name="modeComboBox"
-                                    Width="120"
-                                    Margin="5"
-                                    ToolTip="{DynamicResource SettingDisplayMode}"
-                                    SelectionChanged="ModeComboBox_SelectionChanged">
-                                    <ComboBoxItem Content="{DynamicResource FollowSystemMode}" Tag="0" />
-                                    <ComboBoxItem Content="{DynamicResource LightMode}" Tag="1" />
-                                    <ComboBoxItem Content="{DynamicResource DarkMode}" Tag="2" />
-                                </ComboBox>
-                                <CheckBox
-                                    Content="{DynamicResource SettingAutoSaveLog}"
-                                    Margin="5"
-                                    VerticalAlignment="Center"
-                                    IsChecked="{Binding autoSaveLog, Mode=TwoWay}" />
-                            </WrapPanel>
-                        </ScrollViewer>
-                    </TabItem>
-                    <TabItem Header="{DynamicResource AboutCard}">
-                        <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                </TabControl>
+            <TabItem Header="{DynamicResource AboutCard}">
+                <Frame Name="aboutFrame" NavigationUIVisibility="Hidden" />
             </TabItem>
         </TabControl>
 
         <!--  统计  -->
         <WebBrowser Name="TongjiWebBrowser" Visibility="Collapsed" />
+
+        <!--  标题栏系统设置 Popup  -->
+        <Popup
+            Name="LanguagePopup"
+            PlacementTarget="{Binding ElementName=LanguageButton}"
+            Placement="Bottom"
+            StaysOpen="False"
+            Opened="LanguagePopup_Opened">
+            <Border
+                Padding="4"
+                MinWidth="120"
+                Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
+                BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                BorderThickness="1">
+                <StackPanel>
+                    <MenuItem Name="LanguageMenuItemZhCN" Header="简体中文" Tag="zh-CN" IsCheckable="True" Click="LanguageMenuItem_Click" />
+                    <MenuItem Name="LanguageMenuItemEnUS" Header="English" Tag="en-US" IsCheckable="True" Click="LanguageMenuItem_Click" />
+                </StackPanel>
+            </Border>
+        </Popup>
+        <Popup
+            Name="ModePopup"
+            PlacementTarget="{Binding ElementName=ModeButton}"
+            Placement="Bottom"
+            StaysOpen="False"
+            Opened="ModePopup_Opened">
+            <Border
+                Padding="4"
+                MinWidth="120"
+                Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
+                BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                BorderThickness="1">
+                <StackPanel>
+                    <MenuItem Name="ModeMenuItemFollow" Header="{DynamicResource FollowSystemMode}" Tag="0" IsCheckable="True" Click="ModeMenuItem_Click" />
+                    <MenuItem Name="ModeMenuItemLight" Header="{DynamicResource LightMode}" Tag="1" IsCheckable="True" Click="ModeMenuItem_Click" />
+                    <MenuItem Name="ModeMenuItemDark" Header="{DynamicResource DarkMode}" Tag="2" IsCheckable="True" Click="ModeMenuItem_Click" />
+                </StackPanel>
+            </Border>
+        </Popup>
+        <Popup
+            Name="AutoSaveLogPopup"
+            PlacementTarget="{Binding ElementName=AutoSaveLogButton}"
+            Placement="Bottom"
+            StaysOpen="False">
+            <Border
+                Padding="4"
+                MinWidth="140"
+                Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
+                BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
+                BorderThickness="1">
+                <MenuItem
+                    Header="{DynamicResource SettingAutoSaveLog}"
+                    IsCheckable="True"
+                    IsChecked="{Binding autoSaveLog, Source={x:Static local_tool:Global.setting}, Mode=TwoWay}" />
+            </Border>
+        </Popup>
     </Grid>
 </Window>

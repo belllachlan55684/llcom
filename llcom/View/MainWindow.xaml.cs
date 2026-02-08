@@ -732,27 +732,50 @@ namespace llcom
 
 
 
-        private void SystemSettingsPanel_Loaded(object sender, RoutedEventArgs e)
+        private void LanguageButton_Click(object sender, RoutedEventArgs e)
         {
-            settingsContentPanel.DataContext = Tools.Global.setting;
-            languageComboBox.SelectedIndex = Tools.Global.setting.language == "en-US" ? 1 : 0;
-            modeComboBox.SelectedIndex = Tools.Global.setting.displayMode;
+            LanguagePopup.IsOpen = !LanguagePopup.IsOpen;
         }
 
-        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (languageComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+            ModePopup.IsOpen = !ModePopup.IsOpen;
+        }
+
+        private void AutoSaveLogButton_Click(object sender, RoutedEventArgs e)
+        {
+            AutoSaveLogPopup.IsOpen = !AutoSaveLogPopup.IsOpen;
+        }
+
+        private void LanguageMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem item && item.Tag != null)
             {
                 Tools.Global.setting.language = item.Tag.ToString();
             }
         }
 
-        private void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModeMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (modeComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+            if (sender is MenuItem item && item.Tag != null)
             {
                 Tools.Global.setting.displayMode = int.Parse(item.Tag.ToString());
             }
+        }
+
+        private void LanguagePopup_Opened(object sender, EventArgs e)
+        {
+            var lang = Tools.Global.setting.language;
+            LanguageMenuItemZhCN.IsChecked = lang == "zh-CN";
+            LanguageMenuItemEnUS.IsChecked = lang == "en-US";
+        }
+
+        private void ModePopup_Opened(object sender, EventArgs e)
+        {
+            var mode = Tools.Global.setting.displayMode;
+            ModeMenuItemFollow.IsChecked = mode == 0;
+            ModeMenuItemLight.IsChecked = mode == 1;
+            ModeMenuItemDark.IsChecked = mode == 2;
         }
 
         private void ApiDocumentButton_Click(object sender, RoutedEventArgs e)

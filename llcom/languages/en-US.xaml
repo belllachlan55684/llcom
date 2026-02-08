@@ -122,6 +122,7 @@
     <system:String x:Key="SettingSystem">System Settings</system:String>
     <system:String x:Key="SettingLanguage">Language selection</system:String>
     <system:String x:Key="SettingDisplayMode">Display mode selection</system:String>
+    <system:String x:Key="SettingThemeSelection">Theme selection</system:String>
     <system:String x:Key="SettingAutoSaveLog">Auto save log</system:String>
     <system:String x:Key="FollowSystemMode">Follow system</system:String>
     <system:String x:Key="LightMode">Light mode</system:String>
