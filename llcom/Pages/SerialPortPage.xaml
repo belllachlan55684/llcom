@@ -35,7 +35,8 @@
             </Grid.ColumnDefinitions>
             <ComboBox
                 Name="serialPortsListComboBox"
-                MinWidth="150" />
+                MinWidth="150"
+                SelectionChanged="SerialPortsListComboBox_SelectionChanged" />
             <Button
                 Name="refreshPortButton"
                 Grid.Column="1"

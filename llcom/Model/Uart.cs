@@ -57,8 +57,8 @@ namespace llcom.Model
         {
             //声明接收到事件
             serial.DataReceived += Serial_DataReceived;
-            serial.RtsEnable = Rts;
-            serial.DtrEnable = Dtr;
+            serial.RtsEnable = Tools.Global.setting != null ? Tools.Global.setting.Rts : Rts;
+            serial.DtrEnable = Tools.Global.setting != null ? Tools.Global.setting.Dtr : Dtr;
             new Thread(ReadData).Start();
 
             //适配一下通用通道
@@ -137,8 +137,8 @@ namespace llcom.Model
             serial.Parity = (Parity)Tools.Global.setting.parity;
             serial.DataBits = Tools.Global.setting.dataBits;
             serial.StopBits = (StopBits)Tools.Global.setting.stopBit;
-            serial.RtsEnable = Rts;
-            serial.DtrEnable = Dtr;
+            serial.RtsEnable = Tools.Global.setting != null ? Tools.Global.setting.Rts : Rts;
+            serial.DtrEnable = Tools.Global.setting != null ? Tools.Global.setting.Dtr : Dtr;
             Tools.Logger.AddUartLogDebug($"[refreshSerialDevice]done");
         }
 

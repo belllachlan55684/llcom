@@ -58,9 +58,9 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="11*" />
+            <ColumnDefinition x:Name="LeftColumnDef" Width="11*" />
             <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="7*" />
+            <ColumnDefinition x:Name="RightColumnDef" Width="7*" />
         </Grid.ColumnDefinitions>
 
         <!--  自定义标题栏：Pin | 最小化 | 最大化 | 关闭  -->
@@ -269,11 +269,13 @@
 
         <!--  中间改变分割大小的东西  -->
         <GridSplitter
+            x:Name="MainGridSplitter"
             Grid.Row="1"
             Grid.RowSpan="2"
             Grid.Column="1"
             Width="5"
-            HorizontalAlignment="Stretch" />
+            HorizontalAlignment="Stretch"
+            DragCompleted="MainGridSplitter_DragCompleted" />
 
         <!--  右侧脚本、快捷发送  -->
         <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.RowSpan="2" Grid.Column="3">

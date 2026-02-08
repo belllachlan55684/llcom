@@ -63,7 +63,17 @@ namespace llcom.Pages
                     encodingComboBox.SelectedIndex = index;
             }
 
-            RefreshPortList();
+            RefreshPortList(Tools.Global.setting.serialPortName);
+        }
+
+        private void SerialPortsListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (serialPortsListComboBox.SelectedItem is string sel && !string.IsNullOrEmpty(sel))
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(sel, @"\(COM\d+\)");
+                if (m.Success)
+                    Tools.Global.setting.serialPortName = m.Value.Trim('(', ')');
+            }
         }
 
         private void DataBitsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

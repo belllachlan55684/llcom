@@ -60,6 +60,18 @@ namespace llcom.Model
         public int ReceivedCount { get; set; } = 0;
 
         /// <summary>
+        /// 主界面左右分割比例（左侧列 Star 值，默认 11，与右侧 7 对应 11*:7*）
+        /// </summary>
+        private double _leftColumnStar = 11;
+        public double leftColumnStar { get => _leftColumnStar; set { _leftColumnStar = value; Save(); } }
+
+        /// <summary>
+        /// 上次选中的串口名（如 COM3），若不存在则重新选择
+        /// </summary>
+        private string _serialPortName = "";
+        public string serialPortName { get => _serialPortName; set { _serialPortName = value ?? ""; Save(); } }
+
+        /// <summary>
         /// 发送数据显示颜色（#RRGGBB 或 #AARRGGBB）
         /// </summary>
         public string sendDisplayColor
@@ -348,17 +360,36 @@ namespace llcom.Model
             }
         }
 
-        /// <summary>
-        /// RTS 透传至 uart（不持久化）
-        /// </summary>
-        [JsonIgnore]
-        public bool Rts { get => Tools.Global.uart.Rts; set => Tools.Global.uart.Rts = value; }
+        private bool _rts = false;
+        private bool _dtr = true;
 
         /// <summary>
-        /// DTR 透传至 uart（不持久化）
+        /// RTS（持久化），透传至 uart 时同步
         /// </summary>
-        [JsonIgnore]
-        public bool Dtr { get => Tools.Global.uart.Dtr; set => Tools.Global.uart.Dtr = value; }
+        public bool Rts
+        {
+            get => _rts;
+            set
+            {
+                _rts = value;
+                try { if (Tools.Global.uart.IsOpen()) Tools.Global.uart.serial.RtsEnable = value; } catch { }
+                Save();
+            }
+        }
+
+        /// <summary>
+        /// DTR（持久化），透传至 uart 时同步
+        /// </summary>
+        public bool Dtr
+        {
+            get => _dtr;
+            set
+            {
+                _dtr = value;
+                try { if (Tools.Global.uart.IsOpen()) Tools.Global.uart.serial.DtrEnable = value; } catch { }
+                Save();
+            }
+        }
 
         public bool showSend
         {

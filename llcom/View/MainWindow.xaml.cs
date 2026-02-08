@@ -126,6 +126,14 @@ namespace llcom
                     // 绑定事件监听,用于监听HID设备插拔
                     (PresentationSource.FromVisual(this) as HwndSource)?.AddHook(WndProc);
 
+                    // 应用保存的左右分割比例
+                    var leftStar = Tools.Global.setting.leftColumnStar;
+                    if (leftStar > 0 && leftStar < 18)
+                    {
+                        LeftColumnDef.Width = new GridLength(leftStar, GridUnitType.Star);
+                        RightColumnDef.Width = new GridLength(18 - leftStar, GridUnitType.Star);
+                    }
+
                     // 订阅 SentCount/ReceivedCount 变化以刷新串口状态栏（PropertyChanged 在后台线程触发，必须通过 Dispatcher 切回 UI 线程）
                     if (Tools.Global.setting is System.ComponentModel.INotifyPropertyChanged inpc)
                     {
@@ -672,8 +680,22 @@ namespace llcom
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        private void MainGridSplitter_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            // 拖拽后 WPF 通常保持 Star 单位，仅 Value 变化；Pixel 时亦然。统一用 Value 计算比例
+            var left = LeftColumnDef.Width;
+            var right = RightColumnDef.Width;
+            double total = left.Value + right.Value;
+            if (total <= 0) return;
+            double ratio = left.Value / total;
+            Tools.Global.setting.leftColumnStar = Math.Max(1, Math.Min(17, ratio * 18));
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // 尽早删除 lock，避免关闭后快速 reopen 时误判为同文件夹多开
+            Tools.Global.isMainWindowsClosed = true;
+
             Tools.Global.setting.windowLeft = this.Left;
             Tools.Global.setting.windowTop = this.Top;
             Tools.Global.setting.windowWidth = this.Width;
@@ -686,7 +708,6 @@ namespace llcom
                 ctrl.SaveOnUnload();
             foreach (var ctrl in FindVisualChildren<View.Controls.RecvScriptControl>(this))
                 ctrl.SaveOnUnload();
-            Tools.Global.isMainWindowsClosed = true;
             foreach (Window win in App.Current.Windows)
             {
                 if (win != this)
