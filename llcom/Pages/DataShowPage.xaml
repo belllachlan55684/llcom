@@ -42,7 +42,14 @@
                                             </MultiBinding>
                                         </Run.Text>
                                     </Run>
-                                    <Run Text="{Binding ArrowText}" />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                                <Binding Path="ArrowText" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
                                     <Run
                                         FontSize="15"
                                         Foreground="{Binding DataTextColor}"
@@ -120,7 +127,14 @@
                                             </MultiBinding>
                                         </Run.Text>
                                     </Run>
-                                    <Run Text="{Binding ArrowText}" />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource ShowTimestampConverter}">
+                                                <Binding Path="ArrowText" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
                                     <Run
                                         FontSize="15"
                                         Foreground="{Binding DataTextColor}"
