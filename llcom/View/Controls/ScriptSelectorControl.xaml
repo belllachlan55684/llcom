@@ -8,8 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Grid>
-        <Button
-            Name="scriptButton"
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Name="scriptLabelText" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <Button
+                Name="scriptButton"
             MinWidth="120"
             Margin="4,0"
             VerticalAlignment="Center"
@@ -20,6 +22,7 @@
                 <TextBlock Name="scriptSummaryText" VerticalAlignment="Center" />
             </StackPanel>
         </Button>
+        </StackPanel>
         <Popup
             Name="scriptPopup"
             PlacementTarget="{Binding ElementName=scriptButton}"

@@ -70,6 +70,8 @@
     <system:String x:Key="ScriptTab">脚本</system:String>
     <system:String x:Key="SendScriptTab">发送脚本</system:String>
     <system:String x:Key="RecvScriptTab">接收脚本</system:String>
+    <system:String x:Key="SendScriptLabel">发送脚本</system:String>
+    <system:String x:Key="RecvScriptLabel">接收脚本</system:String>
     <system:String x:Key="ScriptSelectorTooltip">点击选择多个脚本并指定执行顺序</system:String>
     <system:String x:Key="ScriptSelectorSelectedLabel">左侧：可用脚本 | 右侧：已选脚本（按顺序执行）</system:String>
     <system:String x:Key="ScriptSelectorAdd">添加到已选</system:String>

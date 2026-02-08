@@ -70,6 +70,8 @@
     <system:String x:Key="ScriptTab">Scripts</system:String>
     <system:String x:Key="SendScriptTab">Send script</system:String>
     <system:String x:Key="RecvScriptTab">Receive script</system:String>
+    <system:String x:Key="SendScriptLabel">Send script</system:String>
+    <system:String x:Key="RecvScriptLabel">Receive script</system:String>
     <system:String x:Key="ScriptSelectorTooltip">Click to select multiple scripts and set execution order</system:String>
     <system:String x:Key="ScriptSelectorSelectedLabel">Left: Available scripts | Right: Selected scripts (executed in order)</system:String>
     <system:String x:Key="ScriptSelectorAdd">Add to selected</system:String>

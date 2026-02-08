@@ -52,6 +52,9 @@ namespace llcom.View.Controls
 
         private void RefreshDisplay()
         {
+            scriptLabelText.Text = IsSendScript
+                ? (Application.Current.TryFindResource("SendScriptLabel") as string ?? "Send script")
+                : (Application.Current.TryFindResource("RecvScriptLabel") as string ?? "Receive script");
             var list = IsSendScript
                 ? Tools.Global.setting.GetSendScriptListForInterface(InterfaceKey)
                 : Tools.Global.setting.GetRecvScriptListForInterface(InterfaceKey);
