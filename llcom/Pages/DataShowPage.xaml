@@ -20,6 +20,7 @@
     <Page.Resources>
         <local:boolVisibe x:Key="boolVisibeConverter" />
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
+        <local:showHexFormat x:Key="showHexFormatConverter" />
         <local:ShowTimestampConverter x:Key="ShowTimestampConverter" />
         <local:ShowTimestampPrefixConverter x:Key="ShowTimestampPrefixConverter" />
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
@@ -187,6 +188,31 @@
                     Content="{DynamicResource SettingTerminalMode}"
                     ToolTip="{DynamicResource SettingTerminalModeTip}"
                     IsChecked="{Binding Terminal, ElementName=DataShowPageRoot, Mode=TwoWay}" />
+                <CheckBox
+                    Name="ShowSymbolCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource ShowSymbol}"
+                    IsChecked="{Binding EnableSymbol, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource ShowSymbolTooltip}" />
+                <CheckBox
+                    Name="ShowRawDataCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource RawData}"
+                    IsChecked="{Binding ShowSendRaw, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource RawDataTip}" />
+                <CheckBox
+                    Name="ShowSendCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource ShowSend}"
+                    IsChecked="{Binding ShowSend, ElementName=DataShowPageRoot, Mode=TwoWay}"
+                    ToolTip="{DynamicResource ShowSendTip}" />
+                <CheckBox
+                    Name="ShowHexFormatCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource HexDisplay}"
+                    IsChecked="{Binding ShowHexFormat, ElementName=DataShowPageRoot, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
+                    IsThreeState="True"
+                    ToolTip="{DynamicResource HexDisplayTip}" />
                 <CheckBox
                     Name="ShowTimestampCheckBox"
                     Margin="5,0,0,0"
