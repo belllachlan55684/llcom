@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fa="http://schemas.fontawesome.io/icons/"
     xmlns:local="clr-namespace:llcom.Pages"
+    xmlns:controls="clr-namespace:llcom.View.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="DataShowPage"
     adonisExtensions:RippleExtension.FadeInDuration="0"
@@ -44,17 +45,19 @@
                                             </MultiBinding>
                                         </Run.Text>
                                     </Run>
-                                    <Run
-                                        FontSize="15"
-                                        Foreground="{Binding DataTextColor}"
-                                        Text="{Binding DataText}" />
-                                    <Run
-                                        FontWeight="Bold"
-                                        Text="{Binding RawTitle}" />
-                                    <Run
-                                        FontSize="15"
-                                        Foreground="{Binding RawTextColor}"
-                                        Text="{Binding RawText}" />
+                                    <InlineUIContainer>
+                                        <Grid>
+                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer>
+                                    <Run FontWeight="Bold" Text="{Binding RawTitle}" />
+                                    <InlineUIContainer>
+                                        <Grid>
+                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer>
                                     <Run Foreground="{Binding HexTextColor}" Text="{Binding HexText}" />
                                 </Paragraph>
                             </FlowDocument>
@@ -77,8 +80,9 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBox
+        <RichTextBox
             Name="MainTextBox"
+            Grid.Row="0"
             VerticalContentAlignment="Top"
             Background="Transparent"
             BorderThickness="0"
@@ -86,9 +90,10 @@
             FontSize="15"
             Foreground="Lime"
             IsReadOnly="True"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            TextWrapping="Wrap" />
-        <ScrollViewer Name="MainListScrollViewer" VerticalScrollBarVisibility="Auto">
+            ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <FlowDocument />
+        </RichTextBox>
+        <ScrollViewer Name="MainListScrollViewer" Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <ItemsControl
                 Name="MainList"
                 Background="Transparent"
@@ -97,6 +102,11 @@
                 VirtualizingStackPanel.CacheLength="2,2"
                 VirtualizingStackPanel.IsVirtualizing="True"
                 VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Margin" Value="0" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel />
@@ -105,14 +115,18 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <RichTextBox
+                            MinHeight="0"
+                            VerticalContentAlignment="Top"
                             Background="Transparent"
                             BorderThickness="0"
+                            Padding="0"
+                            Margin="0"
                             FontFamily="Consolas,Microsoft YaHei,微软雅黑"
                             FontSize="12"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
                             IsReadOnly="True">
-                            <FlowDocument>
-                                <Paragraph Margin="0">
+                            <FlowDocument PagePadding="0">
+                                <Paragraph Margin="0" Padding="0" LineHeight="14">
                                     <Run>
                                         <Run.Text>
                                             <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
@@ -122,17 +136,19 @@
                                             </MultiBinding>
                                         </Run.Text>
                                     </Run>
-                                    <Run
-                                        FontSize="15"
-                                        Foreground="{Binding DataTextColor}"
-                                        Text="{Binding DataText}" />
-                                    <Run
-                                        FontWeight="Bold"
-                                        Text="{Binding RawTitle}" />
-                                    <Run
-                                        FontSize="15"
-                                        Foreground="{Binding RawTextColor}"
-                                        Text="{Binding RawText}" />
+                                    <InlineUIContainer>
+                                        <Grid>
+                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer>
+                                    <Run FontWeight="Bold" Text="{Binding RawTitle}" />
+                                    <InlineUIContainer>
+                                        <Grid>
+                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer>
                                     <Run Foreground="{Binding HexTextColor}" Text="{Binding HexText}" />
                                 </Paragraph>
                             </FlowDocument>
@@ -153,6 +169,12 @@
                     Content="{DynamicResource LockLogButton}"
                     IsChecked="{Binding LockLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource LockLogButton}" />
+                <CheckBox
+                    Name="EnableAnsiColorCheckBox"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource EnableAnsiColor}"
+                    ToolTip="{DynamicResource EnableAnsiColorTip}"
+                    IsChecked="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Mode=TwoWay}" />
                 <CheckBox
                     Name="ShowTimestampCheckBox"
                     Margin="5,0,0,0"

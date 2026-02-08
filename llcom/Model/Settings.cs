@@ -734,6 +734,15 @@ namespace llcom.Model
         public bool GetHexForInterface(string key) { if (key != null && hexModeByInterface.TryGetValue(key, out var v)) return v; return false; }
         public void SetHexForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; hexModeByInterface[key] = value; Save(); }
 
+        private bool _enableAnsiColor = true;
+        public bool enableAnsiColor { get => _enableAnsiColor; set { _enableAnsiColor = value; Save(); } }
+
+        private bool _showTimestamp = true;
+        /// <summary>
+        /// 显示时间戳（持久化）
+        /// </summary>
+        public bool showTimestamp { get => _showTimestamp; set { _showTimestamp = value; Save(); } }
+
         public string runScript
         {
             get

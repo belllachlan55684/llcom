@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -43,7 +44,20 @@ namespace llcom.Pages
         /// <summary>
         /// 显示时间戳？
         /// </summary>
-        public bool ShowTimestamp { get; set; } = true;
+        public bool ShowTimestamp
+        {
+            get => Tools.Global.setting?.showTimestamp ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.showTimestamp = value; }
+        }
+
+        /// <summary>
+        /// ANSI 终端（选中时解析 ANSI 转义序列，不选中时按纯文本显示）
+        /// </summary>
+        public bool EnableAnsiColor
+        {
+            get => Tools.Global.setting?.enableAnsiColor ?? true;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value; }
+        }
         private bool loaded = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -55,7 +69,7 @@ namespace llcom.Pages
             Tools.Logger.DataClearEvent += (xx,x) =>
             {
                 MainList.Items.Clear();
-                MainTextBox.Clear();
+                MainTextBox.Document.Blocks.Clear();
             };
             LockLogCheckBox.DataContext = this;
             ShowTimestampCheckBox.DataContext = this;
@@ -66,6 +80,11 @@ namespace llcom.Pages
             lastPackShowMode = Tools.Global.setting.timeout >= 0;
             MainListScrollViewer.Visibility = lastPackShowMode ? Visibility.Visible : Visibility.Collapsed;
             MainTextBox.Visibility = lastPackShowMode ? Visibility.Collapsed : Visibility.Visible;
+            if (!lastPackShowMode)
+            {
+                MainTextBox.Document.Blocks.Clear();
+                MainTextBox.Document.Blocks.Add(new Paragraph { Margin = new Thickness(0) });
+            }
         }
 
         //记录一下上次是不是分包显示的
@@ -80,9 +99,13 @@ namespace llcom.Pages
                 DoInvoke(() =>
                 {
                     MainList.Items.Clear();
-                    MainTextBox.Clear();
+                    MainTextBox.Document.Blocks.Clear();
                     MainListScrollViewer.Visibility = needPack ? Visibility.Visible : Visibility.Collapsed;
                     MainTextBox.Visibility = needPack ? Visibility.Collapsed : Visibility.Visible;
+                    if (!needPack)
+                    {
+                        MainTextBox.Document.Blocks.Add(new Paragraph { Margin = new Thickness(0) });
+                    }
                 });
             }
 
@@ -97,14 +120,19 @@ namespace llcom.Pages
             {
                 var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
                 var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);
-                var DataText = fmt switch
+                var enableAnsi = Tools.Global.setting.enableAnsiColor;
+                var rawDataText = (fmt switch
                 {
                     2 => Tools.Global.Byte2Hex(e.data, " ", e.data.Length) + " ",
                     _ => Tools.Global.Byte2Readable(e.data, e.data.Length, enableSym),
-                };
+                }) ?? "";
+                var DataText = enableAnsi ? NormalizeDisplayText(rawDataText) : rawDataText.TrimEnd('\r', '\n');
+                var defaultBrush = para != null && para.send
+                    ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey)
+                    : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
                 DoInvoke(() =>
                 {
-                    MainTextBox.AppendText(DataText);
+                    AppendAnsiToRichTextBox(MainTextBox, DataText, enableAnsi, defaultBrush);
                     if (!LockLog)
                         MainTextBox.ScrollToEnd();
                 });
@@ -137,6 +165,58 @@ namespace llcom.Pages
                 return false;
             Dispatcher.Invoke(action);
             return true;
+        }
+
+        private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
+        {
+            var inlines = new List<System.Windows.Documents.Inline>();
+            var frozenDefault = defaultBrush is SolidColorBrush scb ? CreateFrozenBrush(scb.Color) : CreateFrozenBrush(System.Windows.Media.Colors.Lime);
+            if (enableAnsi)
+            {
+                var segments = AnsiParser.Parse(text);
+                foreach (var seg in segments)
+                {
+                    if (string.IsNullOrEmpty(seg.Text)) continue;
+                    var brush = seg.Color.HasValue ? CreateFrozenBrush(seg.Color.Value) : frozenDefault;
+                    inlines.Add(new Run(seg.Text) { Foreground = brush });
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(text))
+                    inlines.Add(new Run(text) { Foreground = frozenDefault });
+            }
+            if (inlines.Count == 0) return;
+            Paragraph p = null;
+            if (rtb.Document.Blocks.Count > 0)
+            {
+                var lastBlock = rtb.Document.Blocks.LastBlock;
+                p = lastBlock as Paragraph;
+            }
+            if (p == null)
+            {
+                p = new Paragraph { Margin = new Thickness(0) };
+                rtb.Document.Blocks.Add(p);
+            }
+            foreach (var inline in inlines)
+                p.Inlines.Add(inline);
+        }
+
+        private static SolidColorBrush CreateFrozenBrush(System.Windows.Media.Color color)
+        {
+            var b = new SolidColorBrush(color);
+            b.Freeze();
+            return b;
+        }
+
+        /// <summary>
+        /// 去除首尾换行，并将连续多个换行合并为单个换行，减少空行
+        /// </summary>
+        private static string NormalizeDisplayText(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            text = text.TrimEnd('\r', '\n').TrimStart('\r', '\n');
+            return Regex.Replace(text, @"[\r\n]+", "\n");
         }
 
 
@@ -177,6 +257,7 @@ namespace llcom.Pages
             /// </summary>
             public string HexText { get; set; }
             public SolidColorBrush HexTextColor { get; set; }
+            public bool EnableAnsiColor { get; set; }
 
 
             public DataShow(byte[] data, DateTime time, bool sent, string interfaceKey = null)
@@ -228,6 +309,7 @@ namespace llcom.Pages
                 var ifKey = interfaceKey ?? "Serial";
                 DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey) : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
                 HexTextColor = DataTextColor;
+                EnableAnsiColor = Tools.Global.setting.enableAnsiColor;
 
                 var len = temp.Length;
                 var fmt = Tools.Global.setting.GetShowHexFormatForInterface(interfaceKey ?? "Serial");
@@ -235,11 +317,12 @@ namespace llcom.Pages
                 //主要数据
                 if (temp != null && temp.Length > 0)
                 {
-                    DataText = fmt switch
+                    var raw = (fmt switch
                     {
                         2 => Tools.Global.Byte2Hex(temp, " ", len),
                         _ => Tools.Global.Byte2Readable(temp, len, enableSym),
-                    };
+                    }) ?? "";
+                    DataText = EnableAnsiColor ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n');
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
                         HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
@@ -265,11 +348,13 @@ namespace llcom.Pages
                 //主要数据
                 if (temp != null && temp.Length > 0)
                 {
-                    RawText = "\n" + fmt switch
+                    var raw = (fmt switch
                     {
                         2 => Tools.Global.Byte2Hex(temp, " ", len),
                         _ => Tools.Global.Byte2Readable(temp, len, enableSym),
-                    };
+                    }) ?? "";
+                    var enableAnsi = Tools.Global.setting.enableAnsiColor;
+                    RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n'));
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
                         HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
@@ -278,6 +363,7 @@ namespace llcom.Pages
                 RawTitle = title;
                 RawTextColor = color;
                 HexTextColor = color;
+                EnableAnsiColor = Tools.Global.setting.enableAnsiColor;
             }
         }
 
@@ -295,7 +381,8 @@ namespace llcom.Pages
                 StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
                 if (!needPack)
                 {
-                    sw.Write(MainTextBox.Text);
+                    var range = new TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+                    sw.Write(range.Text);
                 }
                 else
                 {

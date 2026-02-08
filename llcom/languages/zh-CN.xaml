@@ -273,6 +273,8 @@
     <system:String x:Key="OnlineScriptDownloadSaveNotice">请设置要保存为的文件名：</system:String>
     <system:String x:Key="SaveSucceed">文件保存成功！</system:String>
     <system:String x:Key="DisableLog">停止打印</system:String>
+    <system:String x:Key="EnableAnsiColor">ANSI终端</system:String>
+    <system:String x:Key="EnableAnsiColorTip">选中时解析 ANSI 转义序列颜色，不选中时按纯文本显示</system:String>
     <system:String x:Key="ShowSymbol">控制字符</system:String>
     <system:String x:Key="ShowSymbolTooltip">仅支持在UTF8编码时生效</system:String>
     <system:String x:Key="MQTTTLSCert">指定tls证书</system:String>

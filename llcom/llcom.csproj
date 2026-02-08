@@ -313,9 +313,13 @@
     <Compile Include="View\Controls\TxRxColorBlocks.xaml.cs">
       <DependentUpon>TxRxColorBlocks.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\AnsiTextBlock.xaml.cs">
+      <DependentUpon>AnsiTextBlock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Global.cs" />
     <Compile Include="Tools\LuaConvertHelper.cs" />
     <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\AnsiParser.cs" />
     <Page Include="languages\en-US.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -405,6 +409,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\ScriptSelectorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\AnsiTextBlock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
