@@ -393,7 +393,7 @@ namespace llcom.Pages
         {
             if (!Tools.Global.uart.IsOpen())
                 return "";
-            return $"{Tools.Global.uart.GetName()}：Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
+            return $"{Tools.Global.uart.GetName()}：{Tools.Global.setting.baudRate}";
         }
 
         private void NotifyStatusChanged()

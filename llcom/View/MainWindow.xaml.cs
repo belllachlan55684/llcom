@@ -403,6 +403,7 @@ namespace llcom
         {
             if (statusTextBlock == null || DataInterfaceComboBox == null)
                 return;
+            var txRx = $"Tx {Tools.Global.setting.SentCount} Rx {Tools.Global.setting.ReceivedCount}";
             var parts = new List<string>();
             foreach (var content in new[] {
                 SerialPortFrame?.Content,
@@ -414,7 +415,7 @@ namespace llcom
                 if (!string.IsNullOrEmpty(text))
                     parts.Add(text);
             }
-            statusTextBlock.Text = string.Join(" | ", parts);
+            statusTextBlock.Text = parts.Count > 0 ? $"{txRx} | {string.Join(" | ", parts)}" : txRx;
         }
 
         private void DataInterfaceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
