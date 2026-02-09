@@ -22,6 +22,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace llcom.Pages
@@ -115,6 +116,7 @@ namespace llcom.Pages
         }
 
         private bool loaded = false;
+        private bool _scrollToEndPending = false;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (loaded)
@@ -165,8 +167,16 @@ namespace llcom.Pages
                     if (data != null)
                     {
                         MainList.Items.Add(data);
-                        if (!LockLog)
-                            MainListScrollViewer.ScrollToEnd();
+                        if (!LockLog && !_scrollToEndPending)
+                        {
+                            _scrollToEndPending = true;
+                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                            {
+                                if (!LockLog)
+                                    MainListScrollViewer.ScrollToEnd();
+                                _scrollToEndPending = false;
+                            }));
+                        }
                     }
                 });
             }

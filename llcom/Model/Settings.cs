@@ -80,7 +80,7 @@ namespace llcom.Model
         public string sendDisplayColor
         {
             get => _sendDisplayColor;
-            set { _sendDisplayColor = value ?? "#CD5C5C"; Save(); }
+            set { _sendDisplayColor = value ?? "#CD5C5C"; _sendDisplayBrushCache?.Clear(); Save(); }
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace llcom.Model
         public string recvDisplayColor
         {
             get => _recvDisplayColor;
-            set { _recvDisplayColor = value ?? "#32CD32"; Save(); }
+            set { _recvDisplayColor = value ?? "#32CD32"; _recvDisplayBrushCache?.Clear(); Save(); }
         }
 
         /// <summary>
@@ -163,10 +163,14 @@ namespace llcom.Model
             return _recvDisplayColor;
         }
 
+        private Dictionary<string, SolidColorBrush> _sendDisplayBrushCache = null;
+        private Dictionary<string, SolidColorBrush> _recvDisplayBrushCache = null;
+
         public void SetSendDisplayColorForInterface(string key, string value)
         {
             if (string.IsNullOrEmpty(key)) return;
             sendDisplayColorByInterface[key] = value ?? _sendDisplayColor;
+            _sendDisplayBrushCache?.Remove(key);
             Save();
         }
 
@@ -174,29 +178,42 @@ namespace llcom.Model
         {
             if (string.IsNullOrEmpty(key)) return;
             recvDisplayColorByInterface[key] = value ?? _recvDisplayColor;
+            _recvDisplayBrushCache?.Remove(key);
             Save();
         }
 
         public SolidColorBrush GetSendDisplayBrushForInterface(string key)
         {
+            if (_sendDisplayBrushCache != null && _sendDisplayBrushCache.TryGetValue(key, out var cached))
+                return cached;
             var hex = GetSendDisplayColorForInterface(key);
+            SolidColorBrush b;
             try
             {
                 var color = (Color)ColorConverter.ConvertFromString(hex);
-                return new SolidColorBrush(color);
+                b = new SolidColorBrush(color);
             }
-            catch { return new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C)); }
+            catch { b = new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C)); }
+            b.Freeze();
+            (_sendDisplayBrushCache ??= new Dictionary<string, SolidColorBrush>())[key] = b;
+            return b;
         }
 
         public SolidColorBrush GetRecvDisplayBrushForInterface(string key)
         {
+            if (_recvDisplayBrushCache != null && _recvDisplayBrushCache.TryGetValue(key, out var cached))
+                return cached;
             var hex = GetRecvDisplayColorForInterface(key);
+            SolidColorBrush b;
             try
             {
                 var color = (Color)ColorConverter.ConvertFromString(hex);
-                return new SolidColorBrush(color);
+                b = new SolidColorBrush(color);
             }
-            catch { return new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
+            catch { b = new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
+            b.Freeze();
+            (_recvDisplayBrushCache ??= new Dictionary<string, SolidColorBrush>())[key] = b;
+            return b;
         }
 
         /// <summary>
