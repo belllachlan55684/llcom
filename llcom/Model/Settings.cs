@@ -20,7 +20,7 @@ namespace llcom.Model
         private int _baudRate = 115200;
         private bool _autoReconnect = true;
         private bool _autoSaveLog = false;
-        private int _showHexFormat = 0;
+        private int _showHexFormat = 1;
         private bool _showSend = true;
         private int _parity = 0;
         private int _packSize = 50;
@@ -386,7 +386,6 @@ namespace llcom.Model
 
         /// <summary>
         /// 串口数据显示格式
-        /// 0 都显示
         /// 1 只显示字符串
         /// 2 只显示Hex
         /// </summary>
@@ -394,11 +393,12 @@ namespace llcom.Model
         {
             get
             {
-                return _showHexFormat;
+                var v = _showHexFormat;
+                return (v == 1 || v == 2) ? v : 1; // 0 或非法值按 1 处理
             }
             set
             {
-                _showHexFormat = value;
+                _showHexFormat = (value == 1 || value == 2) ? value : 1; // 迁移：0 改为 1
                 Save();
             }
         }

@@ -130,7 +130,6 @@
     <system:String x:Key="SettingOpenLogFolder">Log Folder</system:String>
     <system:String x:Key="SettingDisplayAreaFont">Set display area font</system:String>
     <system:String x:Key="SettingShowFormat">Data show format:</system:String>
-    <system:String x:Key="SettingShowBoth">Both Text and Hex</system:String>
     <system:String x:Key="SettingShoText">Only Text</system:String>
     <system:String x:Key="SettingShowHexOnly">Only Hex</system:String>
     <system:String x:Key="SettingShowSend">Show data you sent</system:String>
@@ -213,11 +212,11 @@
     <system:String x:Key="ShowSend">Show send</system:String>
     <system:String x:Key="ShowSendTip">Show data sent out</system:String>
     <system:String x:Key="HexDisplay">Hex display</system:String>
-    <system:String x:Key="HexDisplayTip">modes: Only Hex/Only Text/Both Hex and Text</system:String>
+    <system:String x:Key="HexDisplayTip">modes: Only Hex or Only Text</system:String>
     <system:String x:Key="LockLogText">Locked</system:String>
     <system:String x:Key="SaveLogButtonTip">Save log</system:String>
     <system:String x:Key="ShowHexFormat">Hex</system:String>
-    <system:String x:Key="ShowHexFormatTip">modes: Only Hex/Only Text/Both Hex and Text</system:String>
+    <system:String x:Key="ShowHexFormatTip">modes: Only Hex or Only Text</system:String>
     <system:String x:Key="HexSendMode">Send Hex</system:String>
     <system:String x:Key="SerialPortTabTitle">Serial Port</system:String>
     <system:String x:Key="DataInterfaceTab">Data Interface</system:String>

@@ -65,8 +65,21 @@ namespace llcom.Pages
     }
 
     /// <summary>
+    /// ShowTimestampFormat 转 Visibility：0=Collapsed，1/2=Visible
+    /// </summary>
+    [ValueConversion(typeof(int), typeof(Visibility))]
+    public class ShowTimestampVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is int f && f == 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 根据 ShowTimestampFormat 控制时间戳+箭头前缀：value[0]=TimeText, value[1]=ArrowText, value[2]=ShowTimestampFormat, value[3]=TimeTextMs
-    /// format: 0=不显示时间戳，1=日期时间，2=UTC时间戳。隐藏时仍显示箭头
+    /// format: 0=不显示时间戳和箭头，1=日期时间+箭头，2=UTC时间戳+箭头
     /// </summary>
     public class ShowTimestampPrefixConverter : IMultiValueConverter
     {
@@ -81,7 +94,7 @@ namespace llcom.Pages
             {
                 1 => timeText + arrowText,
                 2 => timeTextMs + arrowText,
-                _ => arrowText,
+                _ => "",
             };
         }
 
@@ -241,7 +254,7 @@ namespace llcom.Pages
 
 
     /// <summary>
-    /// bool为true时显示连接，否则显示断开
+    /// showHexFormat: 1=只显示文本, 2=只显示Hex。bool true=Hex, false=文本。
     /// </summary>
     [ValueConversion(typeof(int), typeof(bool?))]
     public class showHexFormat : IValueConverter
@@ -252,7 +265,7 @@ namespace llcom.Pages
             {
                 1 => false,
                 2 => true,
-                _ => null,
+                _ => false, // 0 或 other 按文本处理
             };
         }
 
@@ -260,9 +273,8 @@ namespace llcom.Pages
         {
             return value switch
             {
-                false => 1,
                 true => 2,
-                _ => 0,
+                _ => 1,
             };
         }
     }

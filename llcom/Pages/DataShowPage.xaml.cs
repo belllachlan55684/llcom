@@ -80,11 +80,11 @@ namespace llcom.Pages
         }
 
         /// <summary>
-        ///  Hex 显示格式（0=同时显示，1=只显示文本，2=只显示 Hex）
+        ///  Hex 显示格式（1=只显示文本，2=只显示 Hex）
         /// </summary>
         public int ShowHexFormat
         {
-            get => Tools.Global.setting?.showHexFormat ?? 0;
+            get => Tools.Global.setting?.showHexFormat ?? 1;
             set { if (Tools.Global.setting != null) Tools.Global.setting.showHexFormat = value; }
         }
 
@@ -308,7 +308,7 @@ namespace llcom.Pages
                     TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = " → ",
                     RawTitle = pin.Title, RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n')),
                     RawTextColorHex = pin.ColorHex, HexTextColorHex = pin.ColorHex, EnableAnsiColor = enableAnsi,
-                    HexPrefix = fmt == 0 ? "Hex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+                    HexPrefix = null, HexData = null
                 };
             }
 
@@ -321,7 +321,7 @@ namespace llcom.Pages
                 TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = arrowText,
                 DataText = enableAnsi ? NormalizeDisplayText(dataRaw) : dataRaw.TrimEnd('\r', '\n'),
                 DataTextColorHex = dataTextColorHex, HexTextColorHex = dataTextColorHex, EnableAnsiColor = enableAnsi,
-                HexPrefix = fmt == 0 ? "Hex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+                HexPrefix = null, HexData = null
             };
         }
 
@@ -525,12 +525,6 @@ namespace llcom.Pages
                         _ => Tools.Global.Byte2Readable(temp, len, enableSym),
                     }) ?? "";
                     DataText = EnableAnsiColor ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n');
-                    //同时显示模式时，才显示小字hex
-                    if (fmt == 0)
-                    {
-                        HexPrefix = "Hex: ";
-                        HexData = Tools.Global.Byte2Hex(temp, " ", len);
-                    }
                 }
             }
 
@@ -561,12 +555,6 @@ namespace llcom.Pages
                     }) ?? "";
                     var enableAnsi = Tools.Global.setting.enableAnsiColor;
                     RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n'));
-                    //同时显示模式时，才显示小字hex
-                    if (fmt == 0)
-                    {
-                        HexPrefix = "Hex: ";
-                        HexData = Tools.Global.Byte2Hex(temp, " ", len);
-                    }
                 }
 
                 RawTitle = title;

@@ -130,7 +130,6 @@
     <system:String x:Key="SettingOpenLogFolder">日志目录</system:String>
     <system:String x:Key="SettingDisplayAreaFont">设置显示区字体</system:String>
     <system:String x:Key="SettingShowFormat">串口数据显示方式：</system:String>
-    <system:String x:Key="SettingShowBoth">同时显示Hex和文本数据</system:String>
     <system:String x:Key="SettingShoText">只显示文本数据</system:String>
     <system:String x:Key="SettingShowHexOnly">只显示Hex数据</system:String>
     <system:String x:Key="SettingShowSend">显示串口发送出去的数据</system:String>
@@ -213,11 +212,11 @@
     <system:String x:Key="ShowSend">显示发送</system:String>
     <system:String x:Key="ShowSendTip">显示发送出去的数据</system:String>
     <system:String x:Key="HexDisplay">HEX显示</system:String>
-    <system:String x:Key="HexDisplayTip">切换为：只显示Hex/只显示文本数据/同时显示Hex与文本数据</system:String>
+    <system:String x:Key="HexDisplayTip">切换为：只显示Hex/只显示文本数据（二选一）</system:String>
     <system:String x:Key="LockLogText">已锁定</system:String>
     <system:String x:Key="SaveLogButtonTip">保存日志</system:String>
     <system:String x:Key="ShowHexFormat">Hex</system:String>
-    <system:String x:Key="ShowHexFormatTip">切换为：只显示Hex/只显示文本数据/同时显示Hex与文本数据</system:String>
+    <system:String x:Key="ShowHexFormatTip">切换为：只显示Hex/只显示文本数据（二选一）</system:String>
     <system:String x:Key="HexSendMode">发Hex</system:String>
     <system:String x:Key="SerialPortTabTitle">串口</system:String>
     <system:String x:Key="DataInterfaceTab">数据接口</system:String>

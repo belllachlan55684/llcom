@@ -25,6 +25,7 @@
         <local:showTimestampFormat x:Key="showTimestampFormatConverter" />
         <local:ShowTimestampConverter x:Key="ShowTimestampConverter" />
         <local:ShowTimestampPrefixConverter x:Key="ShowTimestampPrefixConverter" />
+        <local:ShowTimestampVisibilityConverter x:Key="ShowTimestampVisibilityConverter" />
         <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
         <local:PrefixWhenDataExistsConverter x:Key="PrefixWhenDataExistsConverter" />
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
@@ -138,7 +139,8 @@
                     <StackPanel Orientation="Vertical" Margin="0">
                         <TextBlock TextWrapping="NoWrap" Foreground="White"
                             FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}">
+                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
+                            Visibility="{Binding Path=ShowTimestampFormat, ElementName=DataShowPageRoot, Converter={StaticResource ShowTimestampVisibilityConverter}}">
                             <TextBlock.Text>
                                 <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
                                     <Binding Path="TimeText" />
@@ -227,7 +229,6 @@
                     Margin="5,0,0,0"
                     Content="{DynamicResource HexDisplay}"
                     IsChecked="{Binding ShowHexFormat, ElementName=DataShowPageRoot, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
-                    IsThreeState="True"
                     ToolTip="{DynamicResource HexDisplayTip}" />
                 <CheckBox
                     Name="ShowTimestampCheckBox"
