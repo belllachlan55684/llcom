@@ -117,6 +117,7 @@ namespace llcom.Pages
 
         private const int MaxVisibleItems = 200;
         private const int LoadArchiveBatchSize = 200;
+        private static readonly object _luaRunLock = new object();
         private bool loaded = false;
         private bool _scrollToEndPending = false;
         private bool _isLoadingArchive = false;
@@ -160,7 +161,7 @@ namespace llcom.Pages
             if (Tools.Logger.DequeueBatch(batch, 20) == 0)
                 return;
 
-            int added = 0;
+            var prepareInputs = new List<DataShowPrepareInput>();
             foreach (var item in batch)
             {
                 var para = item as Tools.DataShowPara;
@@ -171,31 +172,154 @@ namespace llcom.Pages
                 var isRaw = item is Tools.DataShowRaw;
                 var raw = item as Tools.DataShowRaw;
                 var showPara = item as Tools.DataShowPara;
-                var dataCopy = item.data;
+                var dataCopy = item.data?.ToArray();
                 var timeCopy = item.time;
+                if (dataCopy == null) continue;
 
-                DataShow data = isRaw
-                    ? new DataShow(raw.title, dataCopy, timeCopy, raw.color)
-                    : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey, showPara.isRawSend);
-                if (data != null)
+                if (isRaw)
                 {
-                    MainList.Items.Add(data);
-                    added++;
+                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    var ifKeyForRaw = (mw?.DataInterfaceComboBox?.SelectedIndex ?? 0) switch
+                    {
+                        0 => "Serial", 1 => "UdpClient", 2 => "TcpClient", 3 => "TcpSslClient", 4 => "UdpLocal", 5 => "TcpLocal",
+                        6 => "Tcp", 7 => "WinUSB", 8 => "SerialMonitor", 9 => "MQTT", _ => "Serial"
+                    };
+                    prepareInputs.Add(new DataShowPrepareInput
+                    {
+                        Data = dataCopy, Time = timeCopy, IsRaw = true,
+                        Title = raw.title, ColorHex = DataShowRecord.BrushToHex(raw.color), InterfaceKey = ifKeyForRaw
+                    });
+                }
+                else
+                {
+                    prepareInputs.Add(new DataShowPrepareInput
+                    {
+                        Data = dataCopy, Time = timeCopy, IsRaw = false,
+                        Send = showPara.send, InterfaceKey = showPara.interfaceKey ?? "Serial", IsRawSend = showPara.isRawSend
+                    });
                 }
             }
 
-            if (added > 0 && !LockLog && !_scrollToEndPending)
+            if (prepareInputs.Count == 0) return;
+
+            Task.Run(() =>
             {
-                _scrollToEndPending = true;
-                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                var records = new List<DataShowRecord>();
+                foreach (var pin in prepareInputs)
                 {
-                    if (!LockLog)
-                        MainListScrollViewer.ScrollToEnd();
-                    _scrollToEndPending = false;
-                }));
+                    var r = PrepareDataShowRecord(pin);
+                    if (r != null) records.Add(r);
+                }
+                if (records.Count == 0) return;
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var r in records)
+                    {
+                        var ds = new DataShow(r);
+                        if (ds != null)
+                            MainList.Items.Add(ds);
+                    }
+                    if (!LockLog && !_scrollToEndPending)
+                    {
+                        _scrollToEndPending = true;
+                        Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                        {
+                            if (!LockLog)
+                                MainListScrollViewer.ScrollToEnd();
+                            _scrollToEndPending = false;
+                        }));
+                    }
+                    EvictToArchiveIfNeeded();
+                });
+            });
+        }
+
+        private sealed class DataShowPrepareInput
+        {
+            public byte[] Data;
+            public DateTime Time;
+            public bool IsRaw;
+            public bool Send;
+            public string InterfaceKey;
+            public bool IsRawSend;
+            public string Title;
+            public string ColorHex;
+        }
+
+        private static DataShowRecord PrepareDataShowRecord(DataShowPrepareInput pin)
+        {
+            if (pin?.Data == null || pin.Data.Length == 0) return null;
+            byte[] temp = pin.Data;
+            if (!pin.IsRaw && !pin.Send)
+            {
+                var uartPara = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[0] : new byte[0];
+                var uartSendRaw = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[1] : new byte[0];
+                var scripts = Tools.Global.GetEffectiveRecvScriptListForInterface(pin.InterfaceKey ?? "Serial");
+                lock (_luaRunLock)
+                {
+                    try
+                    {
+                        foreach (var scriptName in scripts ?? new List<string>())
+                        {
+                            if (string.IsNullOrEmpty(scriptName)) continue;
+                            if (!File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua"))
+                                continue;
+                            var backup = Tools.Global.recvPara;
+                            Tools.Global.recvPara = new byte[][] { uartPara, uartSendRaw };
+                            try
+                            {
+                                temp = LuaEnv.LuaLoader.Run(
+                                    $"{scriptName}.lua",
+                                    new System.Collections.ArrayList { "uartData", temp, "uartPara", uartPara, "uartSendRaw", uartSendRaw },
+                                    "user_script_recv_convert/");
+                            }
+                            finally { Tools.Global.recvPara = backup; }
+                            if (temp == null) return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                            Tools.MessageBox.Show($"receive convert lua script error\r\n" + ex.ToString()));
+                        return null;
+                    }
+                }
             }
 
-            EvictToArchiveIfNeeded();
+            var timeText = pin.Time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
+            var timeTextMs = $"[{new DateTimeOffset(pin.Time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
+            var enableAnsi = Tools.Global.setting.enableAnsiColor;
+            var len = temp.Length;
+            var fmt = Tools.Global.setting.GetShowHexFormatForInterface(pin.InterfaceKey ?? "Serial");
+            var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(pin.InterfaceKey ?? "Serial");
+
+            if (pin.IsRaw)
+            {
+                var raw = (fmt switch
+                {
+                    2 => Tools.Global.Byte2Hex(temp, " ", len),
+                    _ => Tools.Global.Byte2Readable(temp, len, enableSym),
+                }) ?? "";
+                return new DataShowRecord
+                {
+                    TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = " → ",
+                    RawTitle = pin.Title, RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n')),
+                    RawTextColorHex = pin.ColorHex, HexTextColorHex = pin.ColorHex, EnableAnsiColor = enableAnsi,
+                    HexPrefix = fmt == 0 ? "\r\nHex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+                };
+            }
+
+            var arrowText = pin.Send ? (pin.IsRawSend ? " ↓ " : " ← ") : " → ";
+            var dataTextColorHex = pin.Send ? Tools.Global.setting.GetSendDisplayColorForInterface(pin.InterfaceKey) : Tools.Global.setting.GetRecvDisplayColorForInterface(pin.InterfaceKey);
+            if (string.IsNullOrEmpty(dataTextColorHex)) dataTextColorHex = pin.Send ? "#CD5C5C" : "#32CD32";
+            var dataRaw = (fmt switch { 2 => Tools.Global.Byte2Hex(temp, " ", len), _ => Tools.Global.Byte2Readable(temp, len, enableSym) }) ?? "";
+            return new DataShowRecord
+            {
+                TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = arrowText,
+                DataText = enableAnsi ? NormalizeDisplayText(dataRaw) : dataRaw.TrimEnd('\r', '\n'),
+                DataTextColorHex = dataTextColorHex, HexTextColorHex = dataTextColorHex, EnableAnsiColor = enableAnsi,
+                HexPrefix = fmt == 0 ? "\r\nHex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+            };
         }
 
         private void EvictToArchiveIfNeeded()
