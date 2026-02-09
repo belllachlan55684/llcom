@@ -907,6 +907,9 @@
                     </TabControl>
                 </Grid>
             </TabItem>
+            <TabItem Header="{DynamicResource PlotHeader}">
+                <Frame Name="PlotFrame" NavigationUIVisibility="Hidden" />
+            </TabItem>
             <TabItem Header="{DynamicResource ToolsTab}">
                 <TabControl>
                     <TabItem Header="{DynamicResource EncodingToolsTab}">
@@ -914,9 +917,6 @@
                     </TabItem>
                     <TabItem Header="{DynamicResource EncodingFixHeader}">
                         <Frame Name="EncodingFixFrame" NavigationUIVisibility="Hidden" />
-                    </TabItem>
-                    <TabItem Header="{DynamicResource PlotHeader}">
-                        <Frame Name="PlotFrame" NavigationUIVisibility="Hidden" />
                     </TabItem>
                 </TabControl>
             </TabItem>

@@ -85,13 +85,21 @@ namespace llcom.View.Controls
             try
             {
                 var dir = new DirectoryInfo(DirPath);
+                var files = dir.GetFiles("*.lua");
+                var existingNames = new HashSet<string>(
+                    files.Select(f => f.Name.Substring(0, f.Name.Length - 4)),
+                    StringComparer.OrdinalIgnoreCase);
                 var selectedSet = new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
-                foreach (var file in dir.GetFiles("*.lua"))
+
+                foreach (var name in selected)
+                {
+                    if (existingNames.Contains(name))
+                        selectedListBox.Items.Add(name);
+                }
+                foreach (var file in files)
                 {
                     var name = file.Name.Substring(0, file.Name.Length - 4);
-                    if (selectedSet.Contains(name))
-                        selectedListBox.Items.Add(name);
-                    else
+                    if (!selectedSet.Contains(name))
                         availableListBox.Items.Add(name);
                 }
             }

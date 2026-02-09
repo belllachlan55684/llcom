@@ -449,6 +449,8 @@ namespace llcom.Tools
                     CreateFile("DefaultFiles/user_script_run/channel-demo.lua", ProfilePath + "user_script_run/channel-demo.lua");
                 if (!File.Exists(ProfilePath + "user_script_run/随机发送.lua"))
                     CreateFile("DefaultFiles/user_script_run/随机发送.lua", ProfilePath + "user_script_run/随机发送.lua");
+                if (!File.Exists(ProfilePath + "user_script_run/绘制正弦曲线.lua"))
+                    CreateFile("DefaultFiles/user_script_run/绘制正弦曲线.lua", ProfilePath + "user_script_run/绘制正弦曲线.lua");
 
                 if (!Directory.Exists(ProfilePath + "user_script_run/requires"))
                     Directory.CreateDirectory(ProfilePath + "user_script_run/requires");
