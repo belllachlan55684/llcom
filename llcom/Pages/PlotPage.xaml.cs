@@ -1,4 +1,4 @@
-﻿using ScottPlot;
+using ScottPlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,10 +28,14 @@ namespace llcom.Pages
         }
 
         //最多十个图像
-        private double[][] Data = new double[10][];
-        private double[] DataX = null;
-        //最大点数量
         private static int MaxPoints = 1000;
+        // Ring Buffer：后台线程 O(1) 写入
+        private double[][] ringBuffer = new double[10][];
+        private int[] head = new int[10];
+        private readonly object ringBufferLock = new object();
+        // 供 ScottPlot 使用的显示数组，Render 前从 ringBuffer 同步
+        private double[][] displayData = new double[10][];
+        private double[] DataX = null;
 
         private ScottPlot.Plottable.Crosshair ch = null;
 
@@ -50,11 +54,11 @@ namespace llcom.Pages
             DataX = new double[MaxPoints];
             for (int i = 0; i < MaxPoints; i++)
                 DataX[i] = i - MaxPoints + 1;
-            for (int i = 0; i < Data.Length; i++)
+            for (int i = 0; i < 10; i++)
             {
-                if(Data[i] == null)
-                    Data[i] = new double[MaxPoints];
-                Plot.Plot.AddSignalXY(DataX, Data[i]);
+                ringBuffer[i] = new double[MaxPoints];
+                displayData[i] = new double[MaxPoints];
+                Plot.Plot.AddSignalXY(DataX, displayData[i]);
             }
             Plot.Plot.SetAxisLimitsX(-MaxPoints, 0);
             ch = Plot.Plot.AddCrosshair(0,0);
@@ -74,6 +78,7 @@ namespace llcom.Pages
                         {
                             try
                             {
+                                SyncRingBufferToDisplay();
                                 Plot.Render();
                             }
                             catch { }
@@ -85,14 +90,24 @@ namespace llcom.Pages
                 }
             }).Start();
 
-            LuaEnv.LuaApis.LinePlotAdd += (s, e) => AddPoint(e.N, e.Line);
+            LuaEnv.LuaApis.LinePlotAdd += (s, e) => {
+                var n = e.N;
+                var line = e.Line;
+                Task.Run(() => AddPoint(n, line));
+            };
         }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < Data.Length; i++)
-                for(int j = 0; j < Data[i].Length; j++)
-                    Data[i][j] = 0;
+            lock (ringBufferLock)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    for (int j = 0; j < MaxPoints; j++)
+                        ringBuffer[i][j] = 0;
+                    head[i] = 0;
+                }
+            }
             Refresh();
         }
 
@@ -108,9 +123,10 @@ namespace llcom.Pages
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             Plot.Plot.SetAxisLimitsX(-MaxPoints, 0);
-            //防止最大值最小值错误
-            var min = Data.Min(x => x.Min());
-            var max = Data.Max(x => x.Max());
+            //防止最大值最小值错误（使用 displayData，Sync 在 Render 前执行，此处可能略旧但无妨）
+            SyncRingBufferToDisplay();
+            var min = displayData.Min(x => x.Min());
+            var max = displayData.Max(x => x.Max());
             if(min < max)
                 Plot.Plot.SetAxisLimitsY(min, max);
             Refresh();
@@ -126,16 +142,36 @@ namespace llcom.Pages
 
         private void Refresh() => NeedRefresh = true;
 
+        /// <summary>
+        /// 将 ringBuffer 按时间顺序复制到 displayData，供 ScottPlot 渲染。Render 前调用。
+        /// </summary>
+        private void SyncRingBufferToDisplay()
+        {
+            lock (ringBufferLock)
+            {
+                for (int line = 0; line < 10; line++)
+                {
+                    for (int i = 0; i < MaxPoints; i++)
+                        displayData[line][i] = ringBuffer[line][(head[line] + 1 + i) % MaxPoints];
+                }
+            }
+        }
+
+        /// <summary>
+        /// 后台线程调用，O(1) 写入 ringBuffer。
+        /// </summary>
         private void AddPoint(double d, int line)
         {
             if (line >= 10)
                 return;
-            if(Data[line] == null)
-                Data[line] = new double[MaxPoints];
-            for(int i = 0;i < MaxPoints - 1;i++)
-                Data[line][i] = Data[line][i + 1];
-            Data[line][MaxPoints - 1] = d;
-            Refresh();
+            lock (ringBufferLock)
+            {
+                if (ringBuffer[line] == null)
+                    ringBuffer[line] = new double[MaxPoints];
+                head[line] = (head[line] + 1) % MaxPoints;
+                ringBuffer[line][head[line]] = d;
+            }
+            Dispatcher.BeginInvoke(new Action(Refresh));
         }
     }
 }
