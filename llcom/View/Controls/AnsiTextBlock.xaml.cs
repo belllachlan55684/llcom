@@ -25,6 +25,10 @@ namespace llcom.View.Controls
             DependencyProperty.Register(nameof(ContentFontSize), typeof(double), typeof(AnsiTextBlock),
                 new PropertyMetadata(12.0, OnContentFontSizeChanged));
 
+        public static readonly DependencyProperty ContentFontFamilyProperty =
+            DependencyProperty.Register(nameof(ContentFontFamily), typeof(FontFamily), typeof(AnsiTextBlock),
+                new PropertyMetadata(new FontFamily("Consolas,Microsoft YaHei,微软雅黑"), OnContentFontFamilyChanged));
+
         public string Text
         {
             get => (string)GetValue(TextProperty);
@@ -47,6 +51,12 @@ namespace llcom.View.Controls
         {
             get => (double)GetValue(ContentFontSizeProperty);
             set => SetValue(ContentFontSizeProperty, value);
+        }
+
+        public FontFamily ContentFontFamily
+        {
+            get => (FontFamily)GetValue(ContentFontFamilyProperty);
+            set => SetValue(ContentFontFamilyProperty, value);
         }
 
         public AnsiTextBlock()
@@ -74,6 +84,13 @@ namespace llcom.View.Controls
             var ctrl = (AnsiTextBlock)d;
             if (ctrl.InnerTextBlock != null)
                 ctrl.InnerTextBlock.FontSize = (double)e.NewValue;
+        }
+
+        private static void OnContentFontFamilyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var ctrl = (AnsiTextBlock)d;
+            if (ctrl.InnerTextBlock != null && e.NewValue is FontFamily ff)
+                ctrl.InnerTextBlock.FontFamily = ff;
         }
 
         private void UpdateContent()
@@ -128,7 +145,10 @@ namespace llcom.View.Controls
         {
             base.OnInitialized(e);
             if (InnerTextBlock != null)
+            {
                 InnerTextBlock.FontSize = ContentFontSize;
+                InnerTextBlock.FontFamily = ContentFontFamily;
+            }
             UpdateContent();
         }
     }

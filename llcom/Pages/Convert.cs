@@ -65,23 +65,57 @@ namespace llcom.Pages
     }
 
     /// <summary>
-    /// 根据 ShowTimestamp 控制是否显示时间戳+箭头前缀：value[0]=TimeText, value[1]=ArrowText, value[2]=ShowTimestamp
-    /// 合并为单一 Run 避免 XAML 标签间空白被保留导致多余空格
+    /// 根据 ShowTimestampFormat 控制时间戳+箭头前缀：value[0]=TimeText, value[1]=ArrowText, value[2]=ShowTimestampFormat, value[3]=TimeTextMs
+    /// format: 0=不显示时间戳，1=日期时间，2=UTC时间戳。隐藏时仍显示箭头
     /// </summary>
     public class ShowTimestampPrefixConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length < 3) return "";
+            if (values == null || values.Length < 4) return "";
             var timeText = values[0] as string ?? "";
             var arrowText = values[1] as string ?? "";
-            var showTimestamp = values[2] is bool b && b;
-            return showTimestamp ? (timeText + arrowText) : "";
+            var format = values[2] is int f ? f : 1;
+            var timeTextMs = values[3] as string ?? "";
+            return format switch
+            {
+                1 => timeText + arrowText,
+                2 => timeTextMs + arrowText,
+                _ => arrowText,
+            };
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 时间戳格式 int ↔ bool?：0↔false 不显示，1↔true 日期时间，2↔null UTC时间戳
+    /// 点击顺序：勾选(日期)→方块(不显示)→不选(毫秒)→勾选
+    /// </summary>
+    [ValueConversion(typeof(int), typeof(bool?))]
+    public class showTimestampFormat : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value switch
+            {
+                1 => true,
+                2 => null,
+                _ => false,
+            };
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value switch
+            {
+                true => 1,
+                null => 2,
+                _ => 0,
+            };
         }
     }
 
@@ -142,6 +176,37 @@ namespace llcom.Pages
             throw new NotImplementedException();
     }
 
+
+    /// <summary>
+    /// value[0]=prefix, value[1]=data；当 data 非空时返回 prefix，否则返回空字符串
+    /// </summary>
+    public class PrefixWhenDataExistsConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length < 2) return "";
+            var prefix = values[0] as string ?? "";
+            return !string.IsNullOrEmpty(values[1] as string) ? prefix : "";
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 字符串为空时 Collapsed，否则 Visible
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(Visibility))]
+    public class StringToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
 
     /// <summary>
     /// bool为true时显示连接，否则显示断开

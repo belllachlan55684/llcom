@@ -46,6 +46,9 @@ namespace llcom.Model
         private string _sendDisplayColor = "#CD5C5C";
         private string _recvDisplayColor = "#32CD32";
 
+        private string _displayAreaFontFamily = "Consolas,Microsoft YaHei,微软雅黑";
+        private double _displayAreaFontSize = 15;
+
         //窗口大小与位置
         private double _windowTop = 0;
         public double windowTop { get { return _windowTop; } set { _windowTop = value; Save(); } }
@@ -87,6 +90,24 @@ namespace llcom.Model
         {
             get => _recvDisplayColor;
             set { _recvDisplayColor = value ?? "#32CD32"; Save(); }
+        }
+
+        /// <summary>
+        /// 显示区字体族（如 Consolas,Microsoft YaHei,微软雅黑）
+        /// </summary>
+        public string displayAreaFontFamily
+        {
+            get => _displayAreaFontFamily;
+            set { _displayAreaFontFamily = value ?? "Consolas,Microsoft YaHei,微软雅黑"; Save(); }
+        }
+
+        /// <summary>
+        /// 显示区字号
+        /// </summary>
+        public double displayAreaFontSize
+        {
+            get => _displayAreaFontSize;
+            set { _displayAreaFontSize = value > 0 ? value : 15; Save(); }
         }
 
         /// <summary>
@@ -698,11 +719,11 @@ namespace llcom.Model
         private bool _enableAnsiColor = true;
         public bool enableAnsiColor { get => _enableAnsiColor; set { _enableAnsiColor = value; Save(); } }
 
-        private bool _showTimestamp = true;
+        private int _showTimestampFormat = 1;
         /// <summary>
-        /// 显示时间戳（持久化）
+        /// 时间戳显示格式：0=不显示，1=日期时间，2=UTC时间戳
         /// </summary>
-        public bool showTimestamp { get => _showTimestamp; set { _showTimestamp = value; Save(); } }
+        public int showTimestampFormat { get => _showTimestampFormat; set { _showTimestampFormat = value; Save(); } }
 
         public string runScript
         {

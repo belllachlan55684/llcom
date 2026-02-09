@@ -128,6 +128,7 @@
     <system:String x:Key="LightMode">浅色模式</system:String>
     <system:String x:Key="SettingAutoReconnect">自动恢复被断开的串口连接</system:String>
     <system:String x:Key="SettingOpenLogFolder">日志目录</system:String>
+    <system:String x:Key="SettingDisplayAreaFont">设置显示区字体</system:String>
     <system:String x:Key="SettingShowFormat">串口数据显示方式：</system:String>
     <system:String x:Key="SettingShowBoth">同时显示Hex和文本数据</system:String>
     <system:String x:Key="SettingShoText">只显示文本数据</system:String>
@@ -211,6 +212,7 @@
     <system:String x:Key="KickClientButton">断开客户端</system:String>
     <system:String x:Key="LockLogButton">禁止滚屏</system:String>
     <system:String x:Key="ShowTimestampButton">时间戳</system:String>
+    <system:String x:Key="ShowTimestampTip">不显示/日期时间/UTC时间戳</system:String>
     <system:String x:Key="RawData">原始数据</system:String>
     <system:String x:Key="RawDataTip">显示原始发送数据</system:String>
     <system:String x:Key="ShowSend">显示发送</system:String>

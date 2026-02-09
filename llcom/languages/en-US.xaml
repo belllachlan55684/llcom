@@ -128,6 +128,7 @@
     <system:String x:Key="LightMode">Light mode</system:String>
     <system:String x:Key="SettingAutoReconnect">Auto reconnect after disconnect</system:String>
     <system:String x:Key="SettingOpenLogFolder">Log Folder</system:String>
+    <system:String x:Key="SettingDisplayAreaFont">Set display area font</system:String>
     <system:String x:Key="SettingShowFormat">Data show format:</system:String>
     <system:String x:Key="SettingShowBoth">Both Text and Hex</system:String>
     <system:String x:Key="SettingShoText">Only Text</system:String>
@@ -211,6 +212,7 @@
     <system:String x:Key="KickClientButton">Kick Client</system:String>
     <system:String x:Key="LockLogButton">Disable scroll</system:String>
     <system:String x:Key="ShowTimestampButton">Timestamp</system:String>
+    <system:String x:Key="ShowTimestampTip">Hide/DateTime/UTC timestamp</system:String>
     <system:String x:Key="RawData">Raw data</system:String>
     <system:String x:Key="RawDataTip">Show raw sent data</system:String>
     <system:String x:Key="ShowSend">Show send</system:String>

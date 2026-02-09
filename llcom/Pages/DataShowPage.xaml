@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fa="http://schemas.fontawesome.io/icons/"
     xmlns:local="clr-namespace:llcom.Pages"
+    xmlns:localTools="clr-namespace:llcom.Tools"
     xmlns:controls="clr-namespace:llcom.View.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="DataShowPage"
@@ -21,8 +22,11 @@
         <local:boolVisibe x:Key="boolVisibeConverter" />
         <local:boolNotVisibe x:Key="boolNotVisibeConverter" />
         <local:showHexFormat x:Key="showHexFormatConverter" />
+        <local:showTimestampFormat x:Key="showTimestampFormatConverter" />
         <local:ShowTimestampConverter x:Key="ShowTimestampConverter" />
         <local:ShowTimestampPrefixConverter x:Key="ShowTimestampPrefixConverter" />
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <local:PrefixWhenDataExistsConverter x:Key="PrefixWhenDataExistsConverter" />
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -31,35 +35,40 @@
                             Name="ItemGrid"
                             Background="Transparent"
                             BorderThickness="0"
-                            FontFamily="Consolas,Microsoft YaHei,微软雅黑"
-                            FontSize="12"
+                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
+                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
                             IsReadOnly="True">
                             <FlowDocument>
                                 <Paragraph Margin="0">
-                                    <Run>
+                                    <Run BaselineAlignment="Top">
                                         <Run.Text>
                                             <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
                                                 <Binding Path="TimeText" />
                                                 <Binding Path="ArrowText" />
-                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestampFormat" />
+                                                <Binding Path="TimeTextMs" />
                                             </MultiBinding>
                                         </Run.Text>
-                                    </Run>
-                                    <InlineUIContainer>
-                                        <Grid>
-                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
-                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                    </Run><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding RawTitle, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock FontWeight="Bold" Text="{Binding RawTitle}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </InlineUIContainer><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding RawText, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer><Run BaselineAlignment="Top"><Run.Text><MultiBinding Converter="{StaticResource PrefixWhenDataExistsConverter}"><Binding Path="HexPrefix" /><Binding Path="HexData" /></MultiBinding></Run.Text></Run><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding HexData, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock Foreground="{Binding HexTextColor}" Text="{Binding HexData}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" />
                                         </Grid>
                                     </InlineUIContainer>
-                                    <Run FontWeight="Bold" Text="{Binding RawTitle}" />
-                                    <InlineUIContainer>
-                                        <Grid>
-                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
-                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
-                                        </Grid>
-                                    </InlineUIContainer>
-                                    <Run Foreground="{Binding HexTextColor}" Text="{Binding HexText}" />
                                 </Paragraph>
                             </FlowDocument>
                         </RichTextBox>
@@ -87,8 +96,8 @@
             VerticalContentAlignment="Top"
             Background="Transparent"
             BorderThickness="0"
-            FontFamily="Consolas,Microsoft YaHei,微软雅黑"
-            FontSize="15"
+            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
+            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
             Foreground="Lime"
             IsReadOnly="True"
             ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -122,35 +131,40 @@
                             BorderThickness="0"
                             Padding="0"
                             Margin="0"
-                            FontFamily="Consolas,Microsoft YaHei,微软雅黑"
-                            FontSize="12"
+                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
+                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
                             IsReadOnly="True">
                             <FlowDocument PagePadding="0">
-                                <Paragraph Margin="0" Padding="0" LineHeight="14">
-                                    <Run>
+                                <Paragraph Margin="0" Padding="0" LineHeight="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}">
+                                    <Run BaselineAlignment="Top">
                                         <Run.Text>
                                             <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
                                                 <Binding Path="TimeText" />
                                                 <Binding Path="ArrowText" />
-                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestamp" />
+                                                <Binding ElementName="DataShowPageRoot" Path="ShowTimestampFormat" />
+                                                <Binding Path="TimeTextMs" />
                                             </MultiBinding>
                                         </Run.Text>
-                                    </Run>
-                                    <InlineUIContainer>
-                                        <Grid>
-                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
-                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                    </Run><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" DefaultForeground="{Binding DataTextColor}" EnableAnsiColor="True" Text="{Binding DataText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding RawTitle, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock FontWeight="Bold" Text="{Binding RawTitle}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </InlineUIContainer><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding RawText, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                            <controls:AnsiTextBlock ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
+                                        </Grid>
+                                    </InlineUIContainer><Run BaselineAlignment="Top"><Run.Text><MultiBinding Converter="{StaticResource PrefixWhenDataExistsConverter}"><Binding Path="HexPrefix" /><Binding Path="HexData" /></MultiBinding></Run.Text></Run><InlineUIContainer BaselineAlignment="Top">
+                                        <Grid VerticalAlignment="Top" Visibility="{Binding HexData, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock Foreground="{Binding HexTextColor}" Text="{Binding HexData}" FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}" FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" TextWrapping="Wrap" />
                                         </Grid>
                                     </InlineUIContainer>
-                                    <Run FontWeight="Bold" Text="{Binding RawTitle}" />
-                                    <InlineUIContainer>
-                                        <Grid>
-                                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" FontSize="15" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
-                                            <controls:AnsiTextBlock ContentFontSize="15" DefaultForeground="{Binding RawTextColor}" EnableAnsiColor="True" Text="{Binding RawText}" Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
-                                        </Grid>
-                                    </InlineUIContainer>
-                                    <Run Foreground="{Binding HexTextColor}" Text="{Binding HexText}" />
                                 </Paragraph>
                             </FlowDocument>
                         </RichTextBox>
@@ -213,10 +227,26 @@
                     Name="ShowTimestampCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource ShowTimestampButton}"
-                    IsChecked="{Binding ShowTimestamp, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                    ToolTip="{DynamicResource ShowTimestampButton}" />
+                    IsChecked="{Binding ShowTimestampFormat, ElementName=DataShowPageRoot, Converter={StaticResource showTimestampFormatConverter}, Mode=TwoWay}"
+                    IsThreeState="True"
+                    ToolTip="{DynamicResource ShowTimestampTip}" />
             </WrapPanel>
         </Grid>
+        <Button
+            Name="FontSettingsButton"
+            Width="32"
+            Height="32"
+            Margin="0,0,18,111"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Padding="0"
+            Click="FontSettingsButton_Click"
+            ToolTip="{DynamicResource SettingDisplayAreaFont}"
+            Visibility="{Binding Path=IsMouseOver, ElementName=mainGrid, Converter={StaticResource boolVisibeConverter}}">
+            <fa:FontAwesome Icon="Font" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+        </Button>
         <Button
             Name="OpenLogFolderButton"
             Width="32"

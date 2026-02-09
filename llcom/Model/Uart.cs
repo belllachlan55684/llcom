@@ -20,7 +20,13 @@ namespace llcom.Model
 
         public SerialPort serial = new SerialPort();
         public event EventHandler UartDataRecived;
-        public event EventHandler UartDataSent;
+        public event EventHandler<UartDataSentEventArgs> UartDataSent;
+
+        public class UartDataSentEventArgs : EventArgs
+        {
+            public byte[] Data { get; set; }
+            public bool IsRaw { get; set; }
+        }
         private Stream lastPortBaseStream = null;
         private bool _rts = false;
         private bool _dtr = true;
@@ -223,11 +229,11 @@ namespace llcom.Model
             bool showRaw = dataRaw != null && Tools.Global.setting.GetShowSendRawForInterface("Serial");
             bool showConverted = Tools.Global.setting.GetShowSendForInterface("Serial");
             if (showRaw && showConverted && dataRaw != null && data.SequenceEqual(dataRaw))
-                UartDataSent(data, EventArgs.Empty);
+                UartDataSent(this, new UartDataSentEventArgs { Data = data, IsRaw = false });
             else
             {
-                if (showRaw && dataRaw != null) UartDataSent(dataRaw, EventArgs.Empty);
-                if (showConverted) UartDataSent(data, EventArgs.Empty);
+                if (showRaw && dataRaw != null) UartDataSent(this, new UartDataSentEventArgs { Data = dataRaw, IsRaw = true });
+                if (showConverted) UartDataSent(this, new UartDataSentEventArgs { Data = data, IsRaw = false });
             }
         }
 

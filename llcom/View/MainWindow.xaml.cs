@@ -355,9 +355,10 @@ namespace llcom
             QuickListSwitchMenuItem.Header = Global.setting.GetQuickListNameNow() + " ▾";
         }
 
-        private void Uart_UartDataSent(object sender, EventArgs e)
+        private void Uart_UartDataSent(object sender, Model.Uart.UartDataSentEventArgs e)
         {
-            Tools.Logger.ShowData(sender as byte[], true, "Serial");
+            if (e?.Data == null) return;
+            Tools.Logger.ShowData(e.Data, true, "Serial", e.IsRaw);
         }
 
         private void Uart_UartDataRecived(object sender, EventArgs e)

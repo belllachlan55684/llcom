@@ -21,7 +21,7 @@ namespace llcom.Tools
             DataClearEvent?.Invoke(null,null);
         }
         //显示日志数据
-        public static void ShowData(byte[] data, bool send, string interfaceKey = null)
+        public static void ShowData(byte[] data, bool send, string interfaceKey = null, bool isRawSend = false)
         {
             //不刷新日志（全局）
             if (Tools.Global.setting.DisableLog)
@@ -30,7 +30,8 @@ namespace llcom.Tools
             {
                 data = data,
                 send = send,
-                interfaceKey = interfaceKey
+                interfaceKey = interfaceKey,
+                isRawSend = isRawSend
             });
         }
         //显示日志数据（DataShowRaw 无 interfaceKey，使用全局 DisableLog）
@@ -153,6 +154,10 @@ namespace llcom.Tools
         /// 数据来源接口键（Serial/TcpClient/TcpLocal 等），用于接收脚本分接口选择
         /// </summary>
         public string interfaceKey;
+        /// <summary>
+        /// 是否原始发送数据（脚本转换前）
+        /// </summary>
+        public bool isRawSend;
     }
 
     /// <summary>

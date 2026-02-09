@@ -287,6 +287,9 @@ namespace llcom.Tools
                             if (j["bitDelay"] != null)
                                 setting.packByTimeout = j["bitDelay"].Value<bool>();
                         }
+                        // 迁移：showTimestamp (bool) -> showTimestampFormat (int)
+                        if (j["showTimestamp"] != null && j["showTimestampFormat"] == null)
+                            setting.showTimestampFormat = j["showTimestamp"].Value<bool>() ? 1 : 0;
                     }
                     catch { }
                     // 迁移：default 或 原始数据 或 rawdata -> RawData；加上换行回车 -> CRLF
@@ -604,10 +607,11 @@ namespace llcom.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void Uart_UartDataSent(object sender, EventArgs e)
+        private static void Uart_UartDataSent(object sender, Model.Uart.UartDataSentEventArgs e)
         {
-            Logger.AddUartLogInfo($"<-{Byte2Readable((byte[])sender)}");
-            Logger.AddUartLogDebug($"[HEX]{Byte2Hex((byte[])sender, " ")}");
+            if (e?.Data == null) return;
+            Logger.AddUartLogInfo($"<-{Byte2Readable(e.Data)}");
+            Logger.AddUartLogDebug($"[HEX]{Byte2Hex(e.Data, " ")}");
         }
 
         /// <summary>

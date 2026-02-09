@@ -3,6 +3,7 @@ using llcom.Tools;
 using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -60,12 +61,12 @@ namespace llcom.Pages
         }
 
         /// <summary>
-        /// 显示时间戳？
+        /// 时间戳显示格式：0=不显示，1=日期时间，2=UTC时间戳
         /// </summary>
-        public bool ShowTimestamp
+        public int ShowTimestampFormat
         {
-            get => Tools.Global.setting?.showTimestamp ?? true;
-            set { if (Tools.Global.setting != null) Tools.Global.setting.showTimestamp = value; }
+            get => Tools.Global.setting?.showTimestampFormat ?? 1;
+            set { if (Tools.Global.setting != null) Tools.Global.setting.showTimestampFormat = value; }
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace llcom.Pages
                 {
                     var data = isRaw
                         ? new DataShow(raw.title, dataCopy, timeCopy, raw.color)
-                        : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey);
+                        : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey, showPara.isRawSend);
                     if (data != null)
                     {
                         MainList.Items.Add(data);
@@ -249,12 +250,39 @@ namespace llcom.Pages
             }
         }
 
+        private void FontSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var setting = Tools.Global.setting;
+            if (setting == null) return;
+            using (var dlg = new FontDialog())
+            {
+                try
+                {
+                    dlg.Font = new Font(setting.displayAreaFontFamily ?? "Consolas", (float)setting.displayAreaFontSize);
+                }
+                catch
+                {
+                    dlg.Font = new Font("Consolas", 15f);
+                }
+                dlg.FontMustExist = true;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    setting.displayAreaFontFamily = dlg.Font.FontFamily.Name;
+                    setting.displayAreaFontSize = dlg.Font.Size;
+                }
+            }
+        }
+
         /// <summary>
         /// 显示要用到的数据结构
         /// </summary>
         public class DataShow
         {
             public string TimeText { get; set; }
+            /// <summary>
+            /// UTC 时间戳（毫秒），格式 [1707408000000]
+            /// </summary>
+            public string TimeTextMs { get; set; }
             public string ArrowText { get; set; }
             public string DataText { get; set; }
             public SolidColorBrush DataTextColor { get; set; }
@@ -265,14 +293,18 @@ namespace llcom.Pages
             public string RawText { get; set; }
             public SolidColorBrush RawTextColor { get; set; }
             /// <summary>
-            /// 前面要加换行符
+            /// Hex 前缀 "\r\nHex: "
             /// </summary>
-            public string HexText { get; set; }
+            public string HexPrefix { get; set; }
+            /// <summary>
+            /// Hex 数据（纯 hex 字符串）
+            /// </summary>
+            public string HexData { get; set; }
             public SolidColorBrush HexTextColor { get; set; }
             public bool EnableAnsiColor { get; set; }
 
 
-            public DataShow(byte[] data, DateTime time, bool sent, string interfaceKey = null)
+            public DataShow(byte[] data, DateTime time, bool sent, string interfaceKey = null, bool isRawSend = false)
             {
                 if (data == null || data.Count() == 0)
                     return;
@@ -317,7 +349,8 @@ namespace llcom.Pages
                 }
 
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
-                ArrowText = sent ? " ← " : " → ";
+                TimeTextMs = $"[{new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
+                ArrowText = sent ? (isRawSend ? " ↓ " : " ← ") : " → ";
                 var ifKey = interfaceKey ?? "Serial";
                 DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey) : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
                 HexTextColor = DataTextColor;
@@ -337,7 +370,10 @@ namespace llcom.Pages
                     DataText = EnableAnsiColor ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n');
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
-                        HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
+                    {
+                        HexPrefix = "\r\nHex: ";
+                        HexData = Tools.Global.Byte2Hex(temp, " ", len);
+                    }
                 }
             }
 
@@ -346,6 +382,7 @@ namespace llcom.Pages
                 byte[] temp = data.ToArray();
 
                 TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
+                TimeTextMs = $"[{new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
 
                 var len = temp.Length;
                 // DataShowRaw 无 interfaceKey，使用当前选中接口或全局
@@ -369,7 +406,10 @@ namespace llcom.Pages
                     RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n'));
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
-                        HexText = "\nHex: " + Tools.Global.Byte2Hex(temp, " ", len);
+                    {
+                        HexPrefix = "\r\nHex: ";
+                        HexData = Tools.Global.Byte2Hex(temp, " ", len);
+                    }
                 }
 
                 RawTitle = title;
