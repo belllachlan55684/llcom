@@ -43,6 +43,14 @@ namespace llcom.Pages
         private int StyleNow = -1;
 
         private bool NeedRefresh = true;
+        private bool NeedDataRefresh = true;
+        private bool NeedCrosshairRefresh = false;
+        private DateTime lastCrosshairRenderTime = DateTime.MinValue;
+        private const int CrosshairRenderIntervalMs = 120;
+        private double pendingCrosshairX = 0;
+        private double pendingCrosshairY = 0;
+        private readonly object pendingCrosshairLock = new object();
+        private System.Windows.Threading.DispatcherTimer crosshairTimer = null;
 
         bool first = true;
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -66,23 +74,70 @@ namespace llcom.Pages
             ch.Color = System.Drawing.Color.LightGray;
             ch.LineWidth = 2;
 
+            // MouseMove 节流：Timer 每 80ms 更新十字光标并触发刷新
+            crosshairTimer = new System.Windows.Threading.DispatcherTimer(
+                System.Windows.Threading.DispatcherPriority.Background,
+                Dispatcher)
+            {
+                Interval = TimeSpan.FromMilliseconds(80)
+            };
+            crosshairTimer.Tick += (s, ev) =>
+            {
+                double x, y;
+                lock (pendingCrosshairLock)
+                {
+                    x = pendingCrosshairX;
+                    y = pendingCrosshairY;
+                }
+                ch.X = x;
+                ch.Y = y;
+                NeedCrosshairRefresh = true;
+                NeedRefresh = true;
+            };
+            crosshairTimer.Start();
+
             //定时刷吧，要不然卡
             new Thread(() =>
             {
                 while (true)
                 {
-                    if(NeedRefresh)
+                    if (NeedRefresh)
                     {
-                        NeedRefresh = false;
-                        this.Dispatcher.Invoke(new Action(delegate
+                        bool shouldRender = false;
+                        if (NeedDataRefresh)
                         {
-                            try
+                            shouldRender = true;
+                        }
+                        else if (NeedCrosshairRefresh)
+                        {
+                            var elapsed = (DateTime.Now - lastCrosshairRenderTime).TotalMilliseconds;
+                            if (elapsed >= CrosshairRenderIntervalMs)
                             {
-                                SyncRingBufferToDisplay();
-                                Plot.Render();
+                                shouldRender = true;
+                                lastCrosshairRenderTime = DateTime.Now;
                             }
-                            catch { }
-                        }));
+                        }
+
+                        if (shouldRender)
+                        {
+                            NeedRefresh = false;
+                            NeedDataRefresh = false;
+                            NeedCrosshairRefresh = false;
+                            this.Dispatcher.BeginInvoke(new Action(delegate
+                            {
+                                try
+                                {
+                                    SyncRingBufferToDisplay();
+                                    Plot.Render();
+                                }
+                                catch { }
+                            }));
+                        }
+                        else if (NeedCrosshairRefresh)
+                        {
+                            NeedCrosshairRefresh = false;
+                            NeedRefresh = false;
+                        }
                     }
                     Thread.Sleep(100);
                     if (Tools.Global.isMainWindowsClosed)
@@ -135,12 +190,14 @@ namespace llcom.Pages
         private void Plot_MouseMove(object sender, MouseEventArgs e)
         {
             var p = Plot.GetMouseCoordinates();
-            ch.X = p.x;
-            ch.Y = p.y;
-            Refresh();
+            lock (pendingCrosshairLock)
+            {
+                pendingCrosshairX = p.x;
+                pendingCrosshairY = p.y;
+            }
         }
 
-        private void Refresh() => NeedRefresh = true;
+        private void Refresh() => NeedRefresh = NeedDataRefresh = true;
 
         /// <summary>
         /// 将 ringBuffer 按时间顺序复制到 displayData，供 ScottPlot 渲染。Render 前调用。
