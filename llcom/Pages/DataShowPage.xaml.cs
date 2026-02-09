@@ -1,6 +1,6 @@
 using llcom;
 using llcom.Tools;
-using ScottPlot.Drawing.Colormaps;
+using ScottPlot.Colormaps;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

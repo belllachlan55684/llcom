@@ -5,7 +5,7 @@ using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Subscribing;
 using Newtonsoft.Json;
-using ScottPlot.Drawing.Colormaps;
+using ScottPlot.Colormaps;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;

@@ -37,9 +37,16 @@ namespace llcom.Pages
         private double[][] displayData = new double[10][];
         private double[] DataX = null;
 
-        private ScottPlot.Plottable.Crosshair ch = null;
+        private dynamic ch = null;  // ScottPlot 5: Add.Crosshair 返回的十字光标
 
-        private ScottPlot.Styles.IStyle[] Styles = ScottPlot.Style.GetStyles();
+        // ScottPlot 5 使用 Palette 替代 Style，主题切换
+        private static readonly ScottPlot.IPalette[] Palettes = new ScottPlot.IPalette[]
+        {
+            new ScottPlot.Palettes.Category10(),
+            new ScottPlot.Palettes.Nord(),
+            new ScottPlot.Palettes.Penumbra(),
+            new ScottPlot.Palettes.ColorblindFriendly(),
+        };
         private int StyleNow = -1;
 
         private bool NeedRefresh = true;
@@ -66,12 +73,11 @@ namespace llcom.Pages
             {
                 ringBuffer[i] = new double[MaxPoints];
                 displayData[i] = new double[MaxPoints];
-                Plot.Plot.AddSignalXY(DataX, displayData[i]);
+                Plot.Plot.Add.Scatter(DataX, displayData[i]);
             }
-            Plot.Plot.SetAxisLimitsX(-MaxPoints, 0);
-            ch = Plot.Plot.AddCrosshair(0,0);
-
-            ch.Color = System.Drawing.Color.LightGray;
+            Plot.Plot.Axes.SetLimitsX(-MaxPoints, 0);
+            ch = Plot.Plot.Add.Crosshair(0, 0);
+            ch.LineColor = ScottPlot.Colors.LightGray;
             ch.LineWidth = 2;
 
             // MouseMove 节流：Timer 每 80ms 更新十字光标并触发刷新
@@ -89,8 +95,7 @@ namespace llcom.Pages
                     x = pendingCrosshairX;
                     y = pendingCrosshairY;
                 }
-                ch.X = x;
-                ch.Y = y;
+                ch.Position = new ScottPlot.Coordinates(x, y);
                 NeedCrosshairRefresh = true;
                 NeedRefresh = true;
             };
@@ -128,7 +133,7 @@ namespace llcom.Pages
                                 try
                                 {
                                     SyncRingBufferToDisplay();
-                                    Plot.Render();
+                                    Plot.Refresh();
                                 }
                                 catch { }
                             }));
@@ -169,31 +174,37 @@ namespace llcom.Pages
         private void ThemeButton_Click(object sender, RoutedEventArgs e)
         {
             StyleNow++;
-            if(StyleNow >= Styles.Length)
+            if (StyleNow >= Palettes.Length)
                 StyleNow = 0;
-            Plot.Plot.Style(Styles[StyleNow]);
+            Plot.Plot.Add.Palette = Palettes[StyleNow];
             Refresh();
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            Plot.Plot.SetAxisLimitsX(-MaxPoints, 0);
-            //防止最大值最小值错误（使用 displayData，Sync 在 Render 前执行，此处可能略旧但无妨）
+            Plot.Plot.Axes.SetLimitsX(-MaxPoints, 0);
             SyncRingBufferToDisplay();
             var min = displayData.Min(x => x.Min());
             var max = displayData.Max(x => x.Max());
-            if(min < max)
-                Plot.Plot.SetAxisLimitsY(min, max);
+            if (min < max)
+                Plot.Plot.Axes.SetLimitsY(min, max);
             Refresh();
         }
 
         private void Plot_MouseMove(object sender, MouseEventArgs e)
         {
-            var p = Plot.GetMouseCoordinates();
+            var pos = e.GetPosition(Plot);
+            float px = (float)pos.X, py = (float)pos.Y;
+            if (Plot.DisplayScale != 1.0)
+            {
+                px *= (float)Plot.DisplayScale;
+                py *= (float)Plot.DisplayScale;
+            }
+            var coords = Plot.Plot.GetCoordinates(new ScottPlot.Pixel(px, py));
             lock (pendingCrosshairLock)
             {
-                pendingCrosshairX = p.x;
-                pendingCrosshairY = p.y;
+                pendingCrosshairX = coords.X;
+                pendingCrosshairY = coords.Y;
             }
         }
 
