@@ -115,8 +115,11 @@ namespace llcom.Pages
             set { if (Tools.Global.setting != null) Tools.Global.setting.terminal = value; }
         }
 
+        private const int MaxVisibleItems = 200;
+        private const int LoadArchiveBatchSize = 50;
         private bool loaded = false;
         private bool _scrollToEndPending = false;
+        private bool _isLoadingArchive = false;
         private DispatcherTimer _batchTimer;
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -128,7 +131,9 @@ namespace llcom.Pages
             {
                 MainList.Items.Clear();
                 MainTextBox.Document.Blocks.Clear();
+                DataShowArchive.Clear();
             };
+            MainListScrollViewer.ScrollChanged += MainListScrollViewer_ScrollChanged;
             _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _batchTimer.Tick += BatchTimer_Tick;
             _batchTimer.Start();
@@ -189,6 +194,65 @@ namespace llcom.Pages
                     _scrollToEndPending = false;
                 }));
             }
+
+            EvictToArchiveIfNeeded();
+        }
+
+        private void EvictToArchiveIfNeeded()
+        {
+            while (MainList.Items.Count > MaxVisibleItems)
+            {
+                var toEvict = new List<DataShowRecord>();
+                int evictCount = Math.Min(MainList.Items.Count - MaxVisibleItems, LoadArchiveBatchSize);
+                for (int i = 0; i < evictCount; i++)
+                {
+                    var item = MainList.Items[0] as DataShow;
+                    if (item == null) break;
+                    toEvict.Add(DataShowToRecord(item));
+                    MainList.Items.RemoveAt(0);
+                }
+                if (toEvict.Count > 0)
+                    DataShowArchive.Append(toEvict);
+            }
+        }
+
+        private static DataShowRecord DataShowToRecord(DataShow ds)
+        {
+            return new DataShowRecord
+            {
+                TimeText = ds.TimeText,
+                TimeTextMs = ds.TimeTextMs,
+                ArrowText = ds.ArrowText,
+                DataText = ds.DataText,
+                DataTextColorHex = DataShowRecord.BrushToHex(ds.DataTextColor),
+                RawTitle = ds.RawTitle,
+                RawText = ds.RawText,
+                RawTextColorHex = DataShowRecord.BrushToHex(ds.RawTextColor),
+                HexPrefix = ds.HexPrefix,
+                HexData = ds.HexData,
+                HexTextColorHex = DataShowRecord.BrushToHex(ds.HexTextColor),
+                EnableAnsiColor = ds.EnableAnsiColor
+            };
+        }
+
+        private void MainListScrollViewer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            if (_isLoadingArchive || !DataShowArchive.HasMoreData()) return;
+            if (MainListScrollViewer.VerticalOffset > 30) return;
+
+            _isLoadingArchive = true;
+            var records = DataShowArchive.ReadBatch(LoadArchiveBatchSize);
+            if (records.Count > 0)
+            {
+                for (int i = records.Count - 1; i >= 0; i--)
+                {
+                    var ds = new DataShow(records[i]);
+                    if (ds != null)
+                        MainList.Items.Insert(0, ds);
+                }
+                MainListScrollViewer.ScrollToVerticalOffset(0);
+            }
+            _isLoadingArchive = false;
         }
 
         private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
@@ -427,6 +491,23 @@ namespace llcom.Pages
                 RawTextColor = color;
                 HexTextColor = color;
                 EnableAnsiColor = Tools.Global.setting.enableAnsiColor;
+            }
+
+            public DataShow(DataShowRecord r)
+            {
+                if (r == null) return;
+                TimeText = r.TimeText;
+                TimeTextMs = r.TimeTextMs;
+                ArrowText = r.ArrowText;
+                DataText = r.DataText;
+                DataTextColor = DataShowRecord.HexToBrush(r.DataTextColorHex);
+                RawTitle = r.RawTitle;
+                RawText = r.RawText;
+                RawTextColor = DataShowRecord.HexToBrush(r.RawTextColorHex);
+                HexPrefix = r.HexPrefix;
+                HexData = r.HexData;
+                HexTextColor = DataShowRecord.HexToBrush(r.HexTextColorHex);
+                EnableAnsiColor = r.EnableAnsiColor;
             }
         }
 

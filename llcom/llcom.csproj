@@ -344,6 +344,7 @@
     <Compile Include="Tools\Global.cs" />
     <Compile Include="Tools\LuaConvertHelper.cs" />
     <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\DataShowArchive.cs" />
     <Compile Include="Tools\PlotDataReceiver.cs" />
     <Compile Include="Tools\AnsiParser.cs" />
     <Page Include="languages\en-US.xaml">
