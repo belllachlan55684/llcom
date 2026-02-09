@@ -1,5 +1,6 @@
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,36 +12,63 @@ namespace llcom.Tools
 {
     class Logger
     {
-        //显示日志数据的回调函数
+        //显示日志数据的回调函数（P1 队列模式：由 DataShowPage 定时器消费，此处保留供兼容）
         public static event EventHandler<DataShow> DataShowTask;
         //清空显示的回调函数
         public static event EventHandler DataClearEvent;
+
+        private static readonly ConcurrentQueue<DataShow> _pendingShowQueue = new ConcurrentQueue<DataShow>();
+        private const int BatchSize = 20;
+
+        /// <summary>
+        /// 从待显示队列取出一批（最多 BatchSize 条），返回实际取出的数量
+        /// </summary>
+        public static int DequeueBatch(List<DataShow> outList, int maxCount = BatchSize)
+        {
+            if (outList == null) return 0;
+            int count = 0;
+            while (count < maxCount && _pendingShowQueue.TryDequeue(out var item) && item != null)
+            {
+                outList.Add(item);
+                count++;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// 清空待显示队列
+        /// </summary>
+        public static void ClearPendingQueue()
+        {
+            while (_pendingShowQueue.TryDequeue(out _)) { }
+        }
+
         //清空日志显示
         public static void ClearData()
         {
-            DataClearEvent?.Invoke(null,null);
+            ClearPendingQueue();
+            DataClearEvent?.Invoke(null, null);
         }
-        //显示日志数据
+        //显示日志数据（入队，由 DataShowPage 定时器批量消费）
         public static void ShowData(byte[] data, bool send, string interfaceKey = null, bool isRawSend = false)
         {
-            //不刷新日志（全局）
             if (Tools.Global.setting.DisableLog)
                 return;
-            DataShowTask?.Invoke(null, new DataShowPara
+            _pendingShowQueue.Enqueue(new DataShowPara
             {
-                data = data,
+                data = data != null && data.Length > 0 ? data.ToArray() : data,
                 send = send,
                 interfaceKey = interfaceKey,
-                isRawSend = isRawSend
+                isRawSend = isRawSend,
+                time = DateTime.Now
             });
         }
         //显示日志数据（DataShowRaw 无 interfaceKey，使用全局 DisableLog）
         public static void ShowDataRaw(DataShowRaw s)
         {
-            //不刷新日志
             if (Tools.Global.setting.DisableLog)
                 return;
-            DataShowTask?.Invoke(null, s);
+            _pendingShowQueue.Enqueue(s);
         }
 
 

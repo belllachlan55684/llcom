@@ -117,18 +117,21 @@ namespace llcom.Pages
 
         private bool loaded = false;
         private bool _scrollToEndPending = false;
+        private DispatcherTimer _batchTimer;
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (loaded)
                 return;
             loaded = true;
-            //添加待显示数据到缓冲区
-            Tools.Logger.DataShowTask += Logger_DataShowTask;
-            Tools.Logger.DataClearEvent += (xx,x) =>
+            Tools.Logger.DataClearEvent += (xx, x) =>
             {
                 MainList.Items.Clear();
                 MainTextBox.Document.Blocks.Clear();
             };
+            _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _batchTimer.Tick += BatchTimer_Tick;
+            _batchTimer.Start();
             LockLogCheckBox.DataContext = this;
             DisableLogCheckBox.DataContext = this;
             ShowSymbolCheckBox.DataContext = this;
@@ -144,50 +147,48 @@ namespace llcom.Pages
             MainTextBox.Visibility = Visibility.Collapsed;
         }
 
-        private void Logger_DataShowTask(object sender, Tools.DataShow e)
-        {
-            //如果不开回显，就别打印
-            var para = e as DataShowPara;
-            var ifKey = para?.interfaceKey ?? "Serial";
-            if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && !Tools.Global.setting.GetShowSendRawForInterface(ifKey) && para != null && para.send)
-                return;
-
-            //分包模式：必须在 UI 线程创建 DataShow，否则 GetSendDisplayBrush/GetRecvDisplayBrush 创建的 SolidColorBrush 会导致跨线程 DependencySource 异常
-            {
-                var isRaw = e is DataShowRaw;
-                var raw = e as DataShowRaw;
-                var showPara = e as DataShowPara;
-                var dataCopy = e.data;
-                var timeCopy = e.time;
-                DoInvoke(() =>
-                {
-                    var data = isRaw
-                        ? new DataShow(raw.title, dataCopy, timeCopy, raw.color)
-                        : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey, showPara.isRawSend);
-                    if (data != null)
-                    {
-                        MainList.Items.Add(data);
-                        if (!LockLog && !_scrollToEndPending)
-                        {
-                            _scrollToEndPending = true;
-                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
-                            {
-                                if (!LockLog)
-                                    MainListScrollViewer.ScrollToEnd();
-                                _scrollToEndPending = false;
-                            }));
-                        }
-                    }
-                });
-            }
-        }
-
-        private bool DoInvoke(Action action)
+        private void BatchTimer_Tick(object sender, EventArgs e)
         {
             if (Tools.Global.isMainWindowsClosed)
-                return false;
-            Dispatcher.Invoke(action);
-            return true;
+                return;
+            var batch = new List<Tools.DataShow>();
+            if (Tools.Logger.DequeueBatch(batch, 20) == 0)
+                return;
+
+            int added = 0;
+            foreach (var item in batch)
+            {
+                var para = item as Tools.DataShowPara;
+                var ifKey = para?.interfaceKey ?? "Serial";
+                if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && !Tools.Global.setting.GetShowSendRawForInterface(ifKey) && para != null && para.send)
+                    continue;
+
+                var isRaw = item is Tools.DataShowRaw;
+                var raw = item as Tools.DataShowRaw;
+                var showPara = item as Tools.DataShowPara;
+                var dataCopy = item.data;
+                var timeCopy = item.time;
+
+                DataShow data = isRaw
+                    ? new DataShow(raw.title, dataCopy, timeCopy, raw.color)
+                    : new DataShow(dataCopy, timeCopy, showPara.send, showPara.interfaceKey, showPara.isRawSend);
+                if (data != null)
+                {
+                    MainList.Items.Add(data);
+                    added++;
+                }
+            }
+
+            if (added > 0 && !LockLog && !_scrollToEndPending)
+            {
+                _scrollToEndPending = true;
+                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                {
+                    if (!LockLog)
+                        MainListScrollViewer.ScrollToEnd();
+                    _scrollToEndPending = false;
+                }));
+            }
         }
 
         private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
