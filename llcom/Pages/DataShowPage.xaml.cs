@@ -337,6 +337,11 @@ namespace llcom.Pages
             return null;
         }
 
+        private void DataTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is System.Windows.Controls.TextBox tb) tb.SelectAll();
+        }
+
         private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
         {
             var inlines = new List<System.Windows.Documents.Inline>();

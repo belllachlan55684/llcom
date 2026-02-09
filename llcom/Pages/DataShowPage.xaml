@@ -28,6 +28,23 @@
         <local:ShowTimestampVisibilityConverter x:Key="ShowTimestampVisibilityConverter" />
         <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
         <local:PrefixWhenDataExistsConverter x:Key="PrefixWhenDataExistsConverter" />
+        <Style x:Key="DataDisplayTextBoxStyle" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <EventSetter Event="MouseDoubleClick" Handler="DataTextBox_MouseDoubleClick" />
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Command="ApplicationCommands.Copy" />
+                        <MenuItem Command="ApplicationCommands.SelectAll" />
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="DataShowStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -150,10 +167,11 @@
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                        <TextBlock Text="{Binding DataText}" Foreground="{Binding DataTextColor}" TextWrapping="Wrap"
+                        <TextBox Text="{Binding DataText}" Foreground="{Binding DataTextColor}"
                             FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
                             FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                            Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                            Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}"
+                            Style="{StaticResource DataDisplayTextBoxStyle}" />
                         <controls:AnsiTextBlock Text="{Binding DataText}" DefaultForeground="{Binding DataTextColor}"
                             ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
                             ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
@@ -164,24 +182,29 @@
                             FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
                             Visibility="{Binding RawTitle, Converter={StaticResource StringToVisibilityConverter}}" />
                         <Grid Visibility="{Binding RawText, Converter={StaticResource StringToVisibilityConverter}}">
-                            <TextBlock Text="{Binding RawText}" Foreground="{Binding RawTextColor}" TextWrapping="Wrap"
+                            <TextBox Text="{Binding RawText}" Foreground="{Binding RawTextColor}"
                                 FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
                                 FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                                Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}" />
+                                Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolNotVisibeConverter}}"
+                                Style="{StaticResource DataDisplayTextBoxStyle}" />
                             <controls:AnsiTextBlock Text="{Binding RawText}" DefaultForeground="{Binding RawTextColor}"
                                 ContentFontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
                                 ContentFontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
                                 EnableAnsiColor="True"
                                 Visibility="{Binding EnableAnsiColor, Converter={StaticResource boolVisibeConverter}}" />
                         </Grid>
-                        <StackPanel Visibility="{Binding HexData, Converter={StaticResource StringToVisibilityConverter}}">
-                            <TextBlock Text="{Binding HexPrefix}" TextWrapping="Wrap" Foreground="White"
-                                FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                                FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" />
-                            <TextBlock Text="{Binding HexData}" TextWrapping="Wrap" Foreground="{Binding HexTextColor}"
-                                FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                                FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}" />
-                        </StackPanel>
+                        <TextBox Visibility="{Binding HexData, Converter={StaticResource StringToVisibilityConverter}}"
+                            Foreground="{Binding HexTextColor}"
+                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
+                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
+                            Style="{StaticResource DataDisplayTextBoxStyle}">
+                            <TextBox.Text>
+                                <MultiBinding Converter="{StaticResource PrefixWhenDataExistsConverter}">
+                                    <Binding Path="HexPrefix" />
+                                    <Binding Path="HexData" />
+                                </MultiBinding>
+                            </TextBox.Text>
+                        </TextBox>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
