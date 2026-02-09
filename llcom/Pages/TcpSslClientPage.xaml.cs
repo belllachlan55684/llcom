@@ -319,15 +319,8 @@ namespace llcom.Pages
             {
                 socketNow.Send(toSend);
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("TcpSslClient");
-                bool showConverted = Tools.Global.setting.GetShowSendForInterface("TcpSslClient");
-                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                if (Tools.Global.setting.GetShowSendForInterface("TcpSslClient"))
                     Tools.Logger.ShowData(toSend, true, "TcpSslClient");
-                else
-                {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "TcpSslClient");
-                    if (showConverted) Tools.Logger.ShowData(toSend, true, "TcpSslClient");
-                }
                 return true;
             }
             catch (Exception ex)

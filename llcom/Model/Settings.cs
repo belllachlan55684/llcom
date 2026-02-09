@@ -22,7 +22,6 @@ namespace llcom.Model
         private bool _autoSaveLog = false;
         private int _showHexFormat = 0;
         private bool _showSend = true;
-        private bool _showSendRaw = true;
         private int _parity = 0;
         private int _packSize = 50;
         private bool _packByTimeout = true;
@@ -448,19 +447,6 @@ namespace llcom.Model
             }
         }
 
-        public bool showSendRaw
-        {
-            get
-            {
-                return _showSendRaw;
-            }
-            set
-            {
-                _showSendRaw = value;
-                Save();
-            }
-        }
-
         public int parity
         {
             get
@@ -706,11 +692,6 @@ namespace llcom.Model
         public Dictionary<string, bool> showSendByInterface { get => _showSendByInterface ??= new Dictionary<string, bool>(); set => _showSendByInterface = value ?? new Dictionary<string, bool>(); }
         public bool GetShowSendForInterface(string key) { return showSend; }
         public void SetShowSendForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendByInterface[key] = value; Save(); }
-
-        private Dictionary<string, bool> _showSendRawByInterface = null;
-        public Dictionary<string, bool> showSendRawByInterface { get => _showSendRawByInterface ??= new Dictionary<string, bool>(); set => _showSendRawByInterface = value ?? new Dictionary<string, bool>(); }
-        public bool GetShowSendRawForInterface(string key) { return showSendRaw; }
-        public void SetShowSendRawForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendRawByInterface[key] = value; Save(); }
 
         private Dictionary<string, string> _dataToSendByInterface = null;
         public Dictionary<string, string> dataToSendByInterface { get => _dataToSendByInterface ??= new Dictionary<string, string>(); set => _dataToSendByInterface = value ?? new Dictionary<string, string>(); }

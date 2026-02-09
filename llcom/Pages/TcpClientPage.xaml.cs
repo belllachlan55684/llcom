@@ -289,15 +289,8 @@ namespace llcom.Pages
             {
                 socketNow.Send(toSend);
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("TcpClient");
-                bool showConverted = Tools.Global.setting.GetShowSendForInterface("TcpClient");
-                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                if (Tools.Global.setting.GetShowSendForInterface("TcpClient"))
                     Tools.Logger.ShowData(toSend, true, "TcpClient");
-                else
-                {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "TcpClient");
-                    if (showConverted) Tools.Logger.ShowData(toSend, true, "TcpClient");
-                }
                 return true;
             }
             catch (Exception ex)

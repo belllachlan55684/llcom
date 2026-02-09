@@ -362,15 +362,8 @@ namespace llcom.Pages
                         try { c.Send(toSend); } catch { }
                 }
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("TcpLocal");
-                bool showConverted = Tools.Global.setting.GetShowSendForInterface("TcpLocal");
-                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                if (Tools.Global.setting.GetShowSendForInterface("TcpLocal"))
                     Tools.Logger.ShowData(toSend, true, "TcpLocal");
-                else
-                {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "TcpLocal");
-                    if (showConverted) Tools.Logger.ShowData(toSend, true, "TcpLocal");
-                }
                 return true;
             }
             catch (Exception ex)

@@ -255,15 +255,8 @@ namespace llcom.Pages
             {
                 Server.Send(toSend, toSend.Length, target);
                 Tools.Global.setting.SentCount += toSend.Length;
-                bool showRaw = buff != null && Tools.Global.setting.GetShowSendRawForInterface("UdpLocal");
-                bool showConverted = Tools.Global.setting.GetShowSendForInterface("UdpLocal");
-                if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+                if (Tools.Global.setting.GetShowSendForInterface("UdpLocal"))
                     Tools.Logger.ShowData(toSend, true, "UdpLocal");
-                else
-                {
-                    if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "UdpLocal");
-                    if (showConverted) Tools.Logger.ShowData(toSend, true, "UdpLocal");
-                }
                 return true;
             }
             catch (Exception ex)

@@ -342,15 +342,8 @@ namespace llcom.Pages
             lock (toSendBuffer)
                 toSendBuffer.Add(toSend);
             Tools.Global.setting.SentCount += toSend.Length;
-            bool showRaw = buff != null && buff.Length > 0 && Tools.Global.setting.GetShowSendRawForInterface("WinUSB");
-            bool showConverted = Tools.Global.setting.GetShowSendForInterface("WinUSB");
-            if (showRaw && showConverted && buff != null && toSend.SequenceEqual(buff))
+            if (Tools.Global.setting.GetShowSendForInterface("WinUSB"))
                 Tools.Logger.ShowData(toSend, true, "WinUSB");
-            else
-            {
-                if (showRaw && buff != null) Tools.Logger.ShowData(buff, true, "WinUSB");
-                if (showConverted) Tools.Logger.ShowData(toSend, true, "WinUSB");
-            }
             return true;
         }
 

@@ -134,7 +134,6 @@
     <system:String x:Key="SettingShoText">只显示文本数据</system:String>
     <system:String x:Key="SettingShowHexOnly">只显示Hex数据</system:String>
     <system:String x:Key="SettingShowSend">显示串口发送出去的数据</system:String>
-    <system:String x:Key="SettingShowSendRaw">显示原始发送数据</system:String>
     <system:String x:Key="SettingKeepTop">窗口保持置顶显示</system:String>
     <system:String x:Key="WindowMinimize">最小化</system:String>
     <system:String x:Key="WindowMaximize">最大化</system:String>
@@ -149,8 +148,6 @@
     <system:String x:Key="SettingAutoConnectTip">自动恢复被断开的连接</system:String>
     <system:String x:Key="SettingShowSendData">显示发送数据</system:String>
     <system:String x:Key="SettingShowSendDataTip">显示发送出去的数据</system:String>
-    <system:String x:Key="SettingShowRawData">显示原始数据</system:String>
-    <system:String x:Key="SettingShowRawDataTip">显示原始发送数据</system:String>
     <system:String x:Key="SettingTerminalMode">键盘输入</system:String>
     <system:String x:Key="SettingTerminalModeTip">选中数据区可直接使用键盘输入</system:String>
     <system:String x:Key="SettingTerminal">终端模式（选中数据区域可直接敲键盘输出串口数据）</system:String>
@@ -213,8 +210,6 @@
     <system:String x:Key="LockLogButton">禁止滚屏</system:String>
     <system:String x:Key="ShowTimestampButton">时间戳</system:String>
     <system:String x:Key="ShowTimestampTip">不显示/日期时间/UTC时间戳</system:String>
-    <system:String x:Key="RawData">原始数据</system:String>
-    <system:String x:Key="RawDataTip">显示原始发送数据</system:String>
     <system:String x:Key="ShowSend">显示发送</system:String>
     <system:String x:Key="ShowSendTip">显示发送出去的数据</system:String>
     <system:String x:Key="HexDisplay">HEX显示</system:String>

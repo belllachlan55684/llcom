@@ -71,15 +71,6 @@ namespace llcom.Pages
         }
 
         /// <summary>
-        /// 显示原始数据（脚本处理前的发送数据）
-        /// </summary>
-        public bool ShowSendRaw
-        {
-            get => Tools.Global.setting?.showSendRaw ?? true;
-            set { if (Tools.Global.setting != null) Tools.Global.setting.showSendRaw = value; }
-        }
-
-        /// <summary>
         /// 显示发送（脚本处理后的发送数据）
         /// </summary>
         public bool ShowSend
@@ -144,7 +135,6 @@ namespace llcom.Pages
             LockLogCheckBox.DataContext = this;
             DisableLogCheckBox.DataContext = this;
             ShowSymbolCheckBox.DataContext = this;
-            ShowRawDataCheckBox.DataContext = this;
             ShowSendCheckBox.DataContext = this;
             ShowHexFormatCheckBox.DataContext = this;
             ShowTimestampCheckBox.DataContext = this;
@@ -172,7 +162,7 @@ namespace llcom.Pages
             {
                 var para = item as Tools.DataShowPara;
                 var ifKey = para?.interfaceKey ?? "Serial";
-                if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && !Tools.Global.setting.GetShowSendRawForInterface(ifKey) && para != null && para.send)
+                if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && para != null && para.send)
                     continue;
 
                 var isRaw = item is Tools.DataShowRaw;

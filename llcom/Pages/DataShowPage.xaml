@@ -217,12 +217,6 @@
                     IsChecked="{Binding EnableSymbol, ElementName=DataShowPageRoot, Mode=TwoWay}"
                     ToolTip="{DynamicResource ShowSymbolTooltip}" />
                 <CheckBox
-                    Name="ShowRawDataCheckBox"
-                    Margin="5,0,0,0"
-                    Content="{DynamicResource RawData}"
-                    IsChecked="{Binding ShowSendRaw, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                    ToolTip="{DynamicResource RawDataTip}" />
-                <CheckBox
                     Name="ShowSendCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource ShowSend}"
