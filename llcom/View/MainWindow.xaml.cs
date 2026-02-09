@@ -79,6 +79,7 @@ namespace llcom
         }
         ObservableCollection<ToSendData> toSendListItems = new ObservableCollection<ToSendData>();
         private bool canSaveSendList = true;
+        private View.PlotWindow _plotWindow;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //延迟启动，加快软件第一屏出现速度
@@ -238,8 +239,8 @@ namespace llcom
                     //串口监听
                     SerialMonitorFrame.Navigate(new Uri("Pages/SerialMonitorPage.xaml", UriKind.Relative));
 
-                    //绘制曲线
-                    PlotFrame.Navigate(new Uri("Pages/PlotPage.xaml", UriKind.Relative));
+                    //初始化曲线数据接收层（常驻，无论曲线窗口是否打开）
+                    var _ = Tools.PlotDataReceiver.Instance;
 
                     //WinUSB
                     WinUSBFrame.Navigate(new Uri("Pages/WinUSBPage.xaml", UriKind.Relative));
@@ -736,6 +737,33 @@ namespace llcom
         private void LanguageButton_Click(object sender, RoutedEventArgs e)
         {
             LanguagePopup.IsOpen = !LanguagePopup.IsOpen;
+        }
+
+        private void PlotWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_plotWindow != null && _plotWindow.IsLoaded)
+            {
+                try
+                {
+                    _plotWindow.Activate();
+                }
+                catch
+                {
+                    _plotWindow = null;
+                    OpenPlotWindow();
+                }
+            }
+            else
+            {
+                OpenPlotWindow();
+            }
+        }
+
+        private void OpenPlotWindow()
+        {
+            _plotWindow = new View.PlotWindow();
+            _plotWindow.Closed += (s, ev) => _plotWindow = null;
+            _plotWindow.Show();
         }
 
         private void ModeButton_Click(object sender, RoutedEventArgs e)

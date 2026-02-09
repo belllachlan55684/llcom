@@ -309,6 +309,9 @@
     <Compile Include="View\InputDialogWindow.xaml.cs">
       <DependentUpon>InputDialogWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\PlotWindow.xaml.cs">
+      <DependentUpon>PlotWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LuaEnv\LuaApis.cs" />
     <Compile Include="LuaEnv\LuaLoader.cs" />
     <Compile Include="LuaEnv\LuaRunEnv.cs" />
@@ -341,6 +344,7 @@
     <Compile Include="Tools\Global.cs" />
     <Compile Include="Tools\LuaConvertHelper.cs" />
     <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\PlotDataReceiver.cs" />
     <Compile Include="Tools\AnsiParser.cs" />
     <Page Include="languages\en-US.xaml">
       <SubType>Designer</SubType>
@@ -407,6 +411,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\InputDialogWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\PlotWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

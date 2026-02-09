@@ -264,6 +264,7 @@
     <system:String x:Key="PlotFit">Fit</system:String>
     <system:String x:Key="PlotClear">Clear</system:String>
     <system:String x:Key="PlotTheme">Theme</system:String>
+    <system:String x:Key="PlotWindowTooltip">Chart Window</system:String>
     <system:String x:Key="DarkMode">Dark mode</system:String>
     <system:String x:Key="RefreshIpList">Refresh IP</system:String>
     <system:String x:Key="StartListen">Start listen</system:String>
