@@ -371,14 +371,21 @@ namespace llcom.Pages
                 if (records.Count == 0) { Dispatcher.Invoke(() => _isLoadingArchive = false); return; }
                 Dispatcher.Invoke(() =>
                 {
+                    double extentBefore = MainListScrollViewer.ExtentHeight;
                     for (int i = records.Count - 1; i >= 0; i--)
                     {
                         var ds = new DataShow(records[i]);
                         if (ds != null)
                             MainList.Items.Insert(0, ds);
                     }
-                    MainListScrollViewer.ScrollToVerticalOffset(0);
-                    _isLoadingArchive = false;
+                    Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
+                    {
+                        double extentAfter = MainListScrollViewer.ExtentHeight;
+                        double delta = extentAfter - extentBefore;
+                        if (delta > 0)
+                            MainListScrollViewer.ScrollToVerticalOffset(Math.Min(delta, MainListScrollViewer.ExtentHeight - MainListScrollViewer.ViewportHeight));
+                        _isLoadingArchive = false;
+                    }));
                 });
             });
         }
