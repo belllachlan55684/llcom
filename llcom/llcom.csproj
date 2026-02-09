@@ -138,6 +138,9 @@
     <Reference Include="SkiaSharp">
       <HintPath>..\packages\SkiaSharp.3.119.0\lib\net462\SkiaSharp.dll</HintPath>
     </Reference>
+    <Reference Include="SkiaSharp.Views.Desktop.Common">
+      <HintPath>..\packages\SkiaSharp.Views.Desktop.Common.3.119.0\lib\net462\SkiaSharp.Views.Desktop.Common.dll</HintPath>
+    </Reference>
     <Reference Include="SkiaSharp.Views.WPF">
       <HintPath>..\packages\SkiaSharp.Views.WPF.3.119.0\lib\net462\SkiaSharp.Views.WPF.dll</HintPath>
     </Reference>
