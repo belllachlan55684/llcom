@@ -21,7 +21,7 @@ namespace llcom.Pages
             InitializeComponent();
         }
 
-        private static int MaxPoints = 1000;
+        private static int MaxPoints = 500;
         private ScottPlot.Plottables.DataStreamer[] streamers = new ScottPlot.Plottables.DataStreamer[10];
 
         private dynamic ch = null;
@@ -35,8 +35,8 @@ namespace llcom.Pages
         };
         private int StyleNow = -1;
 
-        private bool NeedRefresh = true;
-        private bool NeedDataRefresh = true;
+        private volatile bool NeedRefresh = true;
+        private volatile bool NeedDataRefresh = true;
         private bool NeedCrosshairRefresh = false;
         private DateTime lastCrosshairRenderTime = DateTime.MinValue;
         private const int CrosshairRenderIntervalMs = 120;
@@ -201,7 +201,9 @@ namespace llcom.Pages
             if (s != null)
             {
                 s.Add(d);
-                Dispatcher.BeginInvoke(new Action(Refresh));
+                // 直接设置标志，由刷新循环统一处理，避免每个点都调度 Dispatcher.BeginInvoke
+                NeedRefresh = true;
+                NeedDataRefresh = true;
             }
         }
     }
