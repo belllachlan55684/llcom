@@ -115,7 +115,7 @@ namespace llcom.Pages
             set { if (Tools.Global.setting != null) Tools.Global.setting.terminal = value; }
         }
 
-        private const int MaxVisibleItems = 200;
+        private const int MaxVisibleItems = 1000;
         private const int LoadArchiveBatchSize = 200;
         private static readonly object _luaRunLock = new object();
         private bool loaded = false;
