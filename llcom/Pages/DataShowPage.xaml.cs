@@ -116,7 +116,7 @@ namespace llcom.Pages
         }
 
         private const int MaxVisibleItems = 200;
-        private const int LoadArchiveBatchSize = 50;
+        private const int LoadArchiveBatchSize = 200;
         private bool loaded = false;
         private bool _scrollToEndPending = false;
         private bool _isLoadingArchive = false;
@@ -241,18 +241,22 @@ namespace llcom.Pages
             if (MainListScrollViewer.VerticalOffset > 30) return;
 
             _isLoadingArchive = true;
-            var records = DataShowArchive.ReadBatch(LoadArchiveBatchSize);
-            if (records.Count > 0)
+            Task.Run(() =>
             {
-                for (int i = records.Count - 1; i >= 0; i--)
+                var records = DataShowArchive.ReadBatch(LoadArchiveBatchSize);
+                if (records.Count == 0) { Dispatcher.Invoke(() => _isLoadingArchive = false); return; }
+                Dispatcher.Invoke(() =>
                 {
-                    var ds = new DataShow(records[i]);
-                    if (ds != null)
-                        MainList.Items.Insert(0, ds);
-                }
-                MainListScrollViewer.ScrollToVerticalOffset(0);
-            }
-            _isLoadingArchive = false;
+                    for (int i = records.Count - 1; i >= 0; i--)
+                    {
+                        var ds = new DataShow(records[i]);
+                        if (ds != null)
+                            MainList.Items.Insert(0, ds);
+                    }
+                    MainListScrollViewer.ScrollToVerticalOffset(0);
+                    _isLoadingArchive = false;
+                });
+            });
         }
 
         private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
