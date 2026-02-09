@@ -2,23 +2,17 @@ using ScottPlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace llcom.Pages
 {
     /// <summary>
     /// PlotPage.xaml 的交互逻辑
+    /// 使用 ScottPlot 5 DataStreamer 实现实时流，减少 SyncRingBufferToDisplay 等开销
     /// </summary>
     public partial class PlotPage : Page
     {
@@ -27,19 +21,11 @@ namespace llcom.Pages
             InitializeComponent();
         }
 
-        //最多十个图像
         private static int MaxPoints = 1000;
-        // Ring Buffer：后台线程 O(1) 写入
-        private double[][] ringBuffer = new double[10][];
-        private int[] head = new int[10];
-        private readonly object ringBufferLock = new object();
-        // 供 ScottPlot 使用的显示数组，Render 前从 ringBuffer 同步
-        private double[][] displayData = new double[10][];
-        private double[] DataX = null;
+        private ScottPlot.Plottables.DataStreamer[] streamers = new ScottPlot.Plottables.DataStreamer[10];
 
-        private dynamic ch = null;  // ScottPlot 5: Add.Crosshair 返回的十字光标
+        private dynamic ch = null;
 
-        // ScottPlot 5 使用 Palette 替代 Style，主题切换
         private static readonly ScottPlot.IPalette[] Palettes = new ScottPlot.IPalette[]
         {
             new ScottPlot.Palettes.Category10(),
@@ -65,22 +51,19 @@ namespace llcom.Pages
             if (!first)
                 return;
             first = false;
-            //暂时先定1000个点吧
-            DataX = new double[MaxPoints];
-            for (int i = 0; i < MaxPoints; i++)
-                DataX[i] = i - MaxPoints + 1;
+
             for (int i = 0; i < 10; i++)
             {
-                ringBuffer[i] = new double[MaxPoints];
-                displayData[i] = new double[MaxPoints];
-                Plot.Plot.Add.Scatter(DataX, displayData[i]);
+                var s = Plot.Plot.Add.DataStreamer(MaxPoints);
+                s.ViewScrollLeft();
+                streamers[i] = s;
             }
             Plot.Plot.Axes.SetLimitsX(-MaxPoints, 0);
+
             ch = Plot.Plot.Add.Crosshair(0, 0);
             ch.LineColor = ScottPlot.Colors.LightGray;
             ch.LineWidth = 2;
 
-            // MouseMove 节流：Timer 每 80ms 更新十字光标并触发刷新
             crosshairTimer = new System.Windows.Threading.DispatcherTimer(
                 System.Windows.Threading.DispatcherPriority.Background,
                 Dispatcher)
@@ -101,7 +84,6 @@ namespace llcom.Pages
             };
             crosshairTimer.Start();
 
-            //定时刷吧，要不然卡
             new Thread(() =>
             {
                 while (true)
@@ -132,7 +114,6 @@ namespace llcom.Pages
                             {
                                 try
                                 {
-                                    SyncRingBufferToDisplay();
                                     Plot.Refresh();
                                 }
                                 catch { }
@@ -159,14 +140,9 @@ namespace llcom.Pages
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
-            lock (ringBufferLock)
+            for (int i = 0; i < 10; i++)
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    for (int j = 0; j < MaxPoints; j++)
-                        ringBuffer[i][j] = 0;
-                    head[i] = 0;
-                }
+                streamers[i]?.Clear(0);
             }
             Refresh();
         }
@@ -183,9 +159,16 @@ namespace llcom.Pages
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             Plot.Plot.Axes.SetLimitsX(-MaxPoints, 0);
-            SyncRingBufferToDisplay();
-            var min = displayData.Min(x => x.Min());
-            var max = displayData.Max(x => x.Max());
+            double min = double.MaxValue, max = double.MinValue;
+            for (int i = 0; i < 10; i++)
+            {
+                var s = streamers[i];
+                if (s != null)
+                {
+                    min = Math.Min(min, s.Data.DataMin);
+                    max = Math.Max(max, s.Data.DataMax);
+                }
+            }
             if (min < max)
                 Plot.Plot.Axes.SetLimitsY(min, max);
             Refresh();
@@ -210,36 +193,16 @@ namespace llcom.Pages
 
         private void Refresh() => NeedRefresh = NeedDataRefresh = true;
 
-        /// <summary>
-        /// 将 ringBuffer 按时间顺序复制到 displayData，供 ScottPlot 渲染。Render 前调用。
-        /// </summary>
-        private void SyncRingBufferToDisplay()
-        {
-            lock (ringBufferLock)
-            {
-                for (int line = 0; line < 10; line++)
-                {
-                    for (int i = 0; i < MaxPoints; i++)
-                        displayData[line][i] = ringBuffer[line][(head[line] + 1 + i) % MaxPoints];
-                }
-            }
-        }
-
-        /// <summary>
-        /// 后台线程调用，O(1) 写入 ringBuffer。
-        /// </summary>
         private void AddPoint(double d, int line)
         {
-            if (line >= 10)
+            if (line >= 10 || line < 0)
                 return;
-            lock (ringBufferLock)
+            var s = streamers[line];
+            if (s != null)
             {
-                if (ringBuffer[line] == null)
-                    ringBuffer[line] = new double[MaxPoints];
-                head[line] = (head[line] + 1) % MaxPoints;
-                ringBuffer[line][head[line]] = d;
+                s.Add(d);
+                Dispatcher.BeginInvoke(new Action(Refresh));
             }
-            Dispatcher.BeginInvoke(new Action(Refresh));
         }
     }
 }
