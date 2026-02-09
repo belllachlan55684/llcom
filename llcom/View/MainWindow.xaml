@@ -753,9 +753,9 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ComboBox Name="ScriptTypeComboBox" SelectedIndex="0" Margin="2">
+                        <ComboBoxItem Content="{DynamicResource LuaCard}" />
                         <ComboBoxItem Content="{DynamicResource SendScriptTab}" />
                         <ComboBoxItem Content="{DynamicResource RecvScriptTab}" />
-                        <ComboBoxItem Content="{DynamicResource LuaCard}" />
                         <ComboBoxItem Content="{DynamicResource OnlineScriptTitle}" />
                     </ComboBox>
                     <TabControl Grid.Row="1" SelectedIndex="{Binding ElementName=ScriptTypeComboBox, Path=SelectedIndex, Mode=OneWay}">
@@ -764,16 +764,6 @@
                                 <ContentPresenter ContentSource="SelectedContent" />
                             </ControlTemplate>
                         </TabControl.Template>
-                        <TabItem>
-                            <ScrollViewer>
-                                <local_controls:SendScriptControl />
-                            </ScrollViewer>
-                        </TabItem>
-                        <TabItem>
-                            <ScrollViewer>
-                                <local_controls:RecvScriptControl />
-                            </ScrollViewer>
-                        </TabItem>
                         <TabItem>
                             <Grid>
                                 <!--  脚本编辑界面  -->
@@ -936,6 +926,16 @@
                                 </Grid>
                                 <!--  脚本运行日志界面END  -->
                             </Grid>
+                        </TabItem>
+                        <TabItem>
+                            <ScrollViewer>
+                                <local_controls:SendScriptControl />
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem>
+                            <ScrollViewer>
+                                <local_controls:RecvScriptControl />
+                            </ScrollViewer>
                         </TabItem>
                         <TabItem>
                             <Frame Name="OnlineScriptsFrame" NavigationUIVisibility="Hidden" />

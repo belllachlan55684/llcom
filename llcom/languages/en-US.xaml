@@ -274,6 +274,7 @@
     <system:String x:Key="WriteEndpoint">Write endpoint</system:String>
     <system:String x:Key="ReadData">Read data</system:String>
     <system:String x:Key="Loading">Loading...</system:String>
+    <system:String x:Key="LogArchiveLoading">Loading logs...</system:String>
     <system:String x:Key="OnlineScriptLoading">Fetching online scripts...</system:String>
     <system:String x:Key="OnlineScriptTitle">Community scripts</system:String>
     <system:String x:Key="OnlineScriptAuthor">Author:</system:String>

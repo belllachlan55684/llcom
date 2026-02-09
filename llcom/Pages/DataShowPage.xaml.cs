@@ -115,13 +115,13 @@ namespace llcom.Pages
             set { if (Tools.Global.setting != null) Tools.Global.setting.terminal = value; }
         }
 
-        private const int MaxVisibleItems = 1000;
-        private const int LoadArchiveBatchSize = 200;
         private static readonly object _luaRunLock = new object();
         private bool loaded = false;
         private bool _scrollToEndPending = false;
-        private bool _isLoadingArchive = false;
         private DispatcherTimer _batchTimer;
+        private bool _batchInProgress = false; // 防止多批并发导致顺序错乱
+        private int _clearGeneration = 0;       // 清空时递增，飞行中的批次若发现已清空则跳过添加
+        private ScrollViewer _mainListScrollViewer; // ListBox 内部 ScrollViewer，用于 ScrollToEnd
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -130,11 +130,14 @@ namespace llcom.Pages
             loaded = true;
             Tools.Logger.DataClearEvent += (xx, x) =>
             {
+                _clearGeneration++;
                 MainList.Items.Clear();
                 MainTextBox.Document.Blocks.Clear();
-                DataShowArchive.Clear();
             };
-            MainListScrollViewer.ScrollChanged += MainListScrollViewer_ScrollChanged;
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
+            {
+                _mainListScrollViewer = FindScrollViewer(MainList);
+            }));
             _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _batchTimer.Tick += BatchTimer_Tick;
             _batchTimer.Start();
@@ -149,7 +152,7 @@ namespace llcom.Pages
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
 
-            MainListScrollViewer.Visibility = Visibility.Visible;
+            MainList.Visibility = Visibility.Visible;
             MainTextBox.Visibility = Visibility.Collapsed;
         }
 
@@ -157,10 +160,13 @@ namespace llcom.Pages
         {
             if (Tools.Global.isMainWindowsClosed)
                 return;
+            if (_batchInProgress) return; // 上一批未完成，避免并发导致顺序错乱
             var batch = new List<Tools.DataShow>();
             if (Tools.Logger.DequeueBatch(batch, 20) == 0)
                 return;
 
+            _batchInProgress = true;
+            int gen = _clearGeneration;
             var prepareInputs = new List<DataShowPrepareInput>();
             foreach (var item in batch)
             {
@@ -200,7 +206,7 @@ namespace llcom.Pages
                 }
             }
 
-            if (prepareInputs.Count == 0) return;
+            if (prepareInputs.Count == 0) { _batchInProgress = false; return; }
 
             Task.Run(() =>
             {
@@ -210,26 +216,33 @@ namespace llcom.Pages
                     var r = PrepareDataShowRecord(pin);
                     if (r != null) records.Add(r);
                 }
-                if (records.Count == 0) return;
+                if (records.Count == 0) { Dispatcher.Invoke(() => _batchInProgress = false); return; }
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (var r in records)
+                    try
                     {
-                        var ds = new DataShow(r);
-                        if (ds != null)
-                            MainList.Items.Add(ds);
-                    }
-                    if (!LockLog && !_scrollToEndPending)
-                    {
-                        _scrollToEndPending = true;
-                        Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                        if (gen != _clearGeneration) return; // 清空后飞行中的批次不再添加
+                        foreach (var r in records)
                         {
-                            if (!LockLog)
-                                MainListScrollViewer.ScrollToEnd();
-                            _scrollToEndPending = false;
-                        }));
+                            var ds = new DataShow(r);
+                            if (ds != null)
+                                MainList.Items.Add(ds);
+                        }
+                        if (!LockLog && !_scrollToEndPending)
+                        {
+                            _scrollToEndPending = true;
+                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                            {
+                        if (!LockLog && _mainListScrollViewer != null)
+                                _mainListScrollViewer.ScrollToEnd();
+                                _scrollToEndPending = false;
+                            }));
+                        }
                     }
-                    EvictToArchiveIfNeeded();
+                    finally
+                    {
+                        _batchInProgress = false;
+                    }
                 });
             });
         }
@@ -305,7 +318,7 @@ namespace llcom.Pages
                     TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = " → ",
                     RawTitle = pin.Title, RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n')),
                     RawTextColorHex = pin.ColorHex, HexTextColorHex = pin.ColorHex, EnableAnsiColor = enableAnsi,
-                    HexPrefix = fmt == 0 ? "\r\nHex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+                    HexPrefix = fmt == 0 ? "Hex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
                 };
             }
 
@@ -318,76 +331,20 @@ namespace llcom.Pages
                 TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = arrowText,
                 DataText = enableAnsi ? NormalizeDisplayText(dataRaw) : dataRaw.TrimEnd('\r', '\n'),
                 DataTextColorHex = dataTextColorHex, HexTextColorHex = dataTextColorHex, EnableAnsiColor = enableAnsi,
-                HexPrefix = fmt == 0 ? "\r\nHex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
+                HexPrefix = fmt == 0 ? "Hex: " : null, HexData = fmt == 0 ? Tools.Global.Byte2Hex(temp, " ", len) : null
             };
         }
 
-        private void EvictToArchiveIfNeeded()
+        private static ScrollViewer FindScrollViewer(DependencyObject parent)
         {
-            while (MainList.Items.Count > MaxVisibleItems)
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
-                var toEvict = new List<DataShowRecord>();
-                int evictCount = Math.Min(MainList.Items.Count - MaxVisibleItems, LoadArchiveBatchSize);
-                for (int i = 0; i < evictCount; i++)
-                {
-                    var item = MainList.Items[0] as DataShow;
-                    if (item == null) break;
-                    toEvict.Add(DataShowToRecord(item));
-                    MainList.Items.RemoveAt(0);
-                }
-                if (toEvict.Count > 0)
-                    DataShowArchive.Append(toEvict);
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is ScrollViewer sv) return sv;
+                var found = FindScrollViewer(child);
+                if (found != null) return found;
             }
-        }
-
-        private static DataShowRecord DataShowToRecord(DataShow ds)
-        {
-            return new DataShowRecord
-            {
-                TimeText = ds.TimeText,
-                TimeTextMs = ds.TimeTextMs,
-                ArrowText = ds.ArrowText,
-                DataText = ds.DataText,
-                DataTextColorHex = DataShowRecord.BrushToHex(ds.DataTextColor),
-                RawTitle = ds.RawTitle,
-                RawText = ds.RawText,
-                RawTextColorHex = DataShowRecord.BrushToHex(ds.RawTextColor),
-                HexPrefix = ds.HexPrefix,
-                HexData = ds.HexData,
-                HexTextColorHex = DataShowRecord.BrushToHex(ds.HexTextColor),
-                EnableAnsiColor = ds.EnableAnsiColor
-            };
-        }
-
-        private void MainListScrollViewer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
-        {
-            if (_isLoadingArchive || !DataShowArchive.HasMoreData()) return;
-            if (MainListScrollViewer.VerticalOffset > 30) return;
-
-            _isLoadingArchive = true;
-            Task.Run(() =>
-            {
-                var records = DataShowArchive.ReadBatch(LoadArchiveBatchSize);
-                if (records.Count == 0) { Dispatcher.Invoke(() => _isLoadingArchive = false); return; }
-                Dispatcher.Invoke(() =>
-                {
-                    double extentBefore = MainListScrollViewer.ExtentHeight;
-                    for (int i = records.Count - 1; i >= 0; i--)
-                    {
-                        var ds = new DataShow(records[i]);
-                        if (ds != null)
-                            MainList.Items.Insert(0, ds);
-                    }
-                    Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
-                    {
-                        double extentAfter = MainListScrollViewer.ExtentHeight;
-                        double delta = extentAfter - extentBefore;
-                        if (delta > 0)
-                            MainListScrollViewer.ScrollToVerticalOffset(Math.Min(delta, MainListScrollViewer.ExtentHeight - MainListScrollViewer.ViewportHeight));
-                        _isLoadingArchive = false;
-                    }));
-                });
-            });
+            return null;
         }
 
         private static void AppendAnsiToRichTextBox(System.Windows.Controls.RichTextBox rtb, string text, bool enableAnsi, System.Windows.Media.Brush defaultBrush)
@@ -581,7 +538,7 @@ namespace llcom.Pages
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
                     {
-                        HexPrefix = "\r\nHex: ";
+                        HexPrefix = "Hex: ";
                         HexData = Tools.Global.Byte2Hex(temp, " ", len);
                     }
                 }
@@ -617,7 +574,7 @@ namespace llcom.Pages
                     //同时显示模式时，才显示小字hex
                     if (fmt == 0)
                     {
-                        HexPrefix = "\r\nHex: ";
+                        HexPrefix = "Hex: ";
                         HexData = Tools.Global.Byte2Hex(temp, " ", len);
                     }
                 }

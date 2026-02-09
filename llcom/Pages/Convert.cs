@@ -178,7 +178,7 @@ namespace llcom.Pages
 
 
     /// <summary>
-    /// value[0]=prefix, value[1]=data；当 data 非空时返回 prefix，否则返回空字符串
+    /// value[0]=prefix, value[1]=data；当 data 非空时返回 prefix+data，否则返回空字符串
     /// </summary>
     public class PrefixWhenDataExistsConverter : IMultiValueConverter
     {
@@ -186,7 +186,8 @@ namespace llcom.Pages
         {
             if (values == null || values.Length < 2) return "";
             var prefix = values[0] as string ?? "";
-            return !string.IsNullOrEmpty(values[1] as string) ? prefix : "";
+            var data = values[1] as string ?? "";
+            return !string.IsNullOrEmpty(data) ? prefix + data : "";
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) =>

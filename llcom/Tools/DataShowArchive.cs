@@ -1,13 +1,9 @@
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Windows.Media;
 
 namespace llcom.Tools
 {
     /// <summary>
-    /// DataShow 可序列化 DTO，用于磁盘归档
+    /// DataShow 可序列化 DTO，用于 PrepareDataShowRecord 与 DataShow 构造
     /// </summary>
     public class DataShowRecord
     {
@@ -42,94 +38,6 @@ namespace llcom.Tools
                 return b;
             }
             catch { return new SolidColorBrush(Color.FromRgb(0x32, 0xCD, 0x32)); }
-        }
-    }
-
-    /// <summary>
-    /// 数据量上限双缓存：内存 + 磁盘归档，支持向上滚动懒加载
-    /// </summary>
-    public static class DataShowArchive
-    {
-        private static string ArchivePath => Global.ProfilePath + $"temp/data_show_archive_{Global.InstanceId}.tmp";
-        private static int _archiveReadLineIndex = 0;
-        private static readonly object _archiveLock = new object();
-
-        public static void Append(IEnumerable<DataShowRecord> records)
-        {
-            if (records == null) return;
-            var dir = Path.GetDirectoryName(ArchivePath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            lock (_archiveLock)
-            {
-                using (var sw = new StreamWriter(ArchivePath, true, System.Text.Encoding.UTF8))
-                {
-                    foreach (var r in records)
-                    {
-                        sw.WriteLine(JsonConvert.SerializeObject(r));
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 从归档读取一批（最多 maxCount 条），返回反序列化后的记录；已读过的行不会重复返回
-        /// </summary>
-        public static List<DataShowRecord> ReadBatch(int maxCount = 50)
-        {
-            var result = new List<DataShowRecord>();
-            if (!File.Exists(ArchivePath)) return result;
-
-            lock (_archiveLock)
-            {
-                try
-                {
-                    var lines = File.ReadAllLines(ArchivePath);
-                    int start = _archiveReadLineIndex;
-                    int end = Math.Min(start + maxCount, lines.Length);
-                    for (int i = start; i < end; i++)
-                    {
-                        if (string.IsNullOrWhiteSpace(lines[i])) continue;
-                        try
-                        {
-                            var r = JsonConvert.DeserializeObject<DataShowRecord>(lines[i]);
-                            if (r != null) result.Add(r);
-                        }
-                        catch { }
-                    }
-                    _archiveReadLineIndex = end;
-                }
-                catch { }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 归档中是否还有未读数据
-        /// </summary>
-        public static bool HasMoreData()
-        {
-            if (!File.Exists(ArchivePath)) return false;
-            lock (_archiveLock)
-            {
-                var lines = File.ReadAllLines(ArchivePath);
-                return _archiveReadLineIndex < lines.Length;
-            }
-        }
-
-        public static void Clear()
-        {
-            lock (_archiveLock)
-            {
-                _archiveReadLineIndex = 0;
-                try
-                {
-                    if (File.Exists(ArchivePath))
-                        File.Delete(ArchivePath);
-                }
-                catch { }
-            }
         }
     }
 }
