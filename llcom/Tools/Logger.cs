@@ -5,11 +5,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace llcom.Tools
 {
+    enum LogFileEntryType { UartInfo, UartDebug, Lua }
+
+    struct LogFileEntry
+    {
+        public LogFileEntryType Type;
+        public string Message;
+    }
+
     class Logger
     {
         //显示日志数据的回调函数（P1 队列模式：由 DataShowPage 定时器消费，此处保留供兼容）
@@ -74,56 +83,139 @@ namespace llcom.Tools
 
         private static Serilog.Core.Logger uartLogFile = null;
         private static Serilog.Core.Logger luaLogFile = null;
+        private static readonly ConcurrentQueue<LogFileEntry> _fileLogQueue = new ConcurrentQueue<LogFileEntry>();
+        private static volatile bool _fileLogWorkerRun = true;
+        private static Thread _fileLogWorkerThread = null;
+        private static readonly object _fileLogWorkerLock = new object();
+        private static readonly ManualResetEvent _fileLogWorkerIdle = new ManualResetEvent(false);
+
+        private static void EnsureFileLogWorkerStarted()
+        {
+            lock (_fileLogWorkerLock)
+            {
+                if (_fileLogWorkerThread != null && _fileLogWorkerThread.IsAlive) return;
+                _fileLogWorkerRun = true;
+                _fileLogWorkerThread = new Thread(FileLogWorkerEntry) { IsBackground = true };
+                _fileLogWorkerThread.Start();
+            }
+        }
+
+        private static void FileLogWorkerEntry()
+        {
+            while (_fileLogWorkerRun || !_fileLogQueue.IsEmpty)
+            {
+                if (_fileLogQueue.TryDequeue(out var entry))
+                {
+                    try
+                    {
+                        if (entry.Type == LogFileEntryType.UartInfo || entry.Type == LogFileEntryType.UartDebug)
+                        {
+                            if (uartLogFile == null) InitUartLogInternal();
+                            if (uartLogFile != null)
+                            {
+                                if (entry.Type == LogFileEntryType.UartInfo)
+                                    uartLogFile.Information(entry.Message);
+                                else
+                                    uartLogFile.Debug(entry.Message);
+                            }
+                        }
+                        else
+                        {
+                            if (luaLogFile == null) InitLuaLogInternal();
+                            if (luaLogFile != null)
+                                luaLogFile.Information(entry.Message);
+                        }
+                    }
+                    catch { }
+                }
+                else
+                {
+                    _fileLogWorkerIdle.Set();
+                    if (!_fileLogWorkerRun) break;
+                    Thread.Sleep(5);
+                }
+            }
+        }
+
+        private static void InitUartLogInternal()
+        {
+            try
+            {
+                var logPath = Tools.Global.ProfilePath + $"logs/log_{Tools.Global.InstanceId}.txt";
+                uartLogFile = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .WriteTo.File(logPath,
+                        rollingInterval: RollingInterval.Day,
+                        retainedFileCountLimit: 30,
+                        encoding: Encoding.UTF8,
+                        rollOnFileSizeLimit: true)
+                    .CreateLogger();
+                uartLogFile.Information("[START]Logs by LLCOM. https://github.com/chenxuuu/llcom");
+            }
+            catch { }
+        }
+
+        private static void InitLuaLogInternal()
+        {
+            try
+            {
+                var logPath = Tools.Global.ProfilePath + $"user_script_run/logs/log_{Tools.Global.InstanceId}.txt";
+                luaLogFile = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .WriteTo.File(logPath,
+                        rollingInterval: RollingInterval.Day,
+                        retainedFileCountLimit: 30,
+                        encoding: Encoding.UTF8,
+                        rollOnFileSizeLimit: true)
+                    .CreateLogger();
+            }
+            catch { }
+        }
 
         /// <summary>
-        /// 初始化串口日志文件（按实例隔离，避免多开冲突）
+        /// 初始化串口日志文件（按实例隔离，避免多开冲突）；首次写日志时由工作线程自动初始化
         /// </summary>
         public static void InitUartLog()
         {
-            var logPath = Tools.Global.ProfilePath + $"logs/log_{Tools.Global.InstanceId}.txt";
-            uartLogFile = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File(logPath,
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 30,
-                    encoding: Encoding.UTF8,
-                    rollOnFileSizeLimit: true)
-                .CreateLogger();
-            AddUartLogInfo("[START]Logs by LLCOM. https://github.com/chenxuuu/llcom");
+            EnsureFileLogWorkerStarted();
         }
 
         public static void CloseUartLog()
         {
-            if (uartLogFile == null)
-                return;
-            uartLogFile.Dispose();
+            var log = uartLogFile;
             uartLogFile = null;
+            log?.Dispose();
         }
 
         /// <summary>
-        /// 写入一条串口日志（仅当 autoSaveLog 为 true 时写入文件）
+        /// 写入一条串口日志（仅当 autoSaveLog 为 true 时入队，由后台线程写入文件）
         /// </summary>
-        /// <param name="l"></param>
         public static void AddUartLogInfo(string l)
         {
             if (Tools.Global.setting?.autoSaveLog != true)
                 return;
-            if (uartLogFile == null)
-                InitUartLog();
-            uartLogFile.Information(l);
+            EnsureFileLogWorkerStarted();
+            EnqueueFileLog(LogFileEntryType.UartInfo, l);
         }
+
         /// <summary>
-        /// 写入一条串口调试日志（仅当 autoSaveLog 为 true 时写入文件）
+        /// 写入一条串口调试日志（仅当 autoSaveLog 为 true 时入队，由后台线程写入文件）
         /// </summary>
-        /// <param name="l"></param>
         public static void AddUartLogDebug(string l)
         {
             if (Tools.Global.setting?.autoSaveLog != true)
                 return;
-            if (uartLogFile == null)
-                InitUartLog();
-            uartLogFile.Debug(l);
+            EnsureFileLogWorkerStarted();
+            EnqueueFileLog(LogFileEntryType.UartDebug, l);
+        }
+
+        private static void EnqueueFileLog(LogFileEntryType type, string message)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+            _fileLogWorkerIdle.Reset();
+            _fileLogQueue.Enqueue(new LogFileEntry { Type = type, Message = message });
         }
 
         /// <summary>
@@ -131,37 +223,45 @@ namespace llcom.Tools
         /// </summary>
         public static void InitLuaLog()
         {
-            var logPath = Tools.Global.ProfilePath + $"user_script_run/logs/log_{Tools.Global.InstanceId}.txt";
-            luaLogFile = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File(logPath,
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 30,
-                    encoding: Encoding.UTF8,
-                    rollOnFileSizeLimit: true)
-                .CreateLogger();
+            EnsureFileLogWorkerStarted();
         }
 
         public static void CloseLuaLog()
         {
-            if (luaLogFile == null)
-                return;
-            luaLogFile.Dispose();
+            var log = luaLogFile;
             luaLogFile = null;
+            log?.Dispose();
         }
 
         /// <summary>
-        /// 写入一条lua日志（仅当 autoSaveLog 为 true 时写入文件）
+        /// 写入一条lua日志（仅当 autoSaveLog 为 true 时入队，由后台线程写入文件）
         /// </summary>
-        /// <param name="l"></param>
         public static void AddLuaLog(string l)
         {
             if (Tools.Global.setting?.autoSaveLog != true)
                 return;
-            if (luaLogFile == null)
-                InitLuaLog();
-            luaLogFile.Information(l);
+            EnsureFileLogWorkerStarted();
+            EnqueueFileLog(LogFileEntryType.Lua, l);
+        }
+
+        /// <summary>
+        /// 关闭文件日志管线，等待队列消费完毕（最多 3 秒）
+        /// </summary>
+        public static void ShutdownFileLog(bool waitForDrain = true)
+        {
+            _fileLogWorkerRun = false;
+            if (waitForDrain)
+            {
+                for (int i = 0; i < 60 && !_fileLogQueue.IsEmpty; i++)
+                    _fileLogWorkerIdle.WaitOne(50);
+                _fileLogWorkerThread?.Join(1000);
+            }
+            var u = uartLogFile;
+            var l = luaLogFile;
+            uartLogFile = null;
+            luaLogFile = null;
+            u?.Dispose();
+            l?.Dispose();
         }
     }
 

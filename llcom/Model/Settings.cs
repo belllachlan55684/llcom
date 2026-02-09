@@ -379,8 +379,7 @@ namespace llcom.Model
                 _autoSaveLog = value;
                 if (!value)
                 {
-                    Tools.Logger.CloseUartLog();
-                    Tools.Logger.CloseLuaLog();
+                    Tools.Logger.ShutdownFileLog(waitForDrain: true);
                 }
                 Save();
             }

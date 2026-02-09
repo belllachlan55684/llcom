@@ -45,8 +45,7 @@ namespace llcom.Tools
                 if (value)
                 {
                     uart.WaitUartReceive.Set();
-                    Logger.CloseUartLog();
-                    Logger.CloseLuaLog();
+                    Logger.ShutdownFileLog(waitForDrain: true);
                     ProgramClosedEvent?.Invoke(null,EventArgs.Empty);
                 }
             }
