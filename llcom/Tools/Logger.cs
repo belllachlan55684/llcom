@@ -21,8 +21,6 @@ namespace llcom.Tools
 
     class Logger
     {
-        //显示日志数据的回调函数（P1 队列模式：由 DataShowPage 定时器消费，此处保留供兼容）
-        public static event EventHandler<DataShow> DataShowTask;
         //清空显示的回调函数
         public static event EventHandler DataClearEvent;
 
@@ -61,7 +59,7 @@ namespace llcom.Tools
         //显示日志数据（入队，由 DataShowPage 定时器批量消费）
         public static void ShowData(byte[] data, bool send, string interfaceKey = null, bool isRawSend = false)
         {
-            if (Tools.Global.setting.DisableLog)
+            if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
                 return;
             _pendingShowQueue.Enqueue(new DataShowPara
             {
@@ -75,7 +73,7 @@ namespace llcom.Tools
         //显示日志数据（DataShowRaw 无 interfaceKey，使用全局 DisableLog）
         public static void ShowDataRaw(DataShowRaw s)
         {
-            if (Tools.Global.setting.DisableLog)
+            if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
                 return;
             _pendingShowQueue.Enqueue(s);
         }
@@ -296,5 +294,4 @@ namespace llcom.Tools
         public string title;
         public SolidColorBrush color;
     }
-    class DataShowSendRaw : DataShow { }
 }

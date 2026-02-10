@@ -172,6 +172,20 @@ namespace llcom.Pages
     }
 
     /// <summary>
+    /// bool 取反：用于 IsEnabled，true→false, false→true
+    /// </summary>
+    [ValueConversion(typeof(bool), typeof(bool))]
+    public class InverseBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !(value is bool b && b);
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// bool反向显示隐藏
     /// </summary>
     [ValueConversion(typeof(bool), typeof(Visibility))]

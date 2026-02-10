@@ -94,7 +94,12 @@ namespace llcom.Pages
         public bool EnableAnsiColor
         {
             get => Tools.Global.setting?.enableAnsiColor ?? true;
-            set { if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value; }
+            set
+            {
+                var oldVal = Tools.Global.setting?.enableAnsiColor ?? true;
+                if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value;
+                UpdateAnsiModeVisibility(value, clearWhenSwitchingToAnsi: !oldVal && value);
+            }
         }
 
         /// <summary>
@@ -113,6 +118,7 @@ namespace llcom.Pages
         private bool _batchInProgress = false; // 防止多批并发导致顺序错乱
         private int _clearGeneration = 0;       // 清空时递增，飞行中的批次若发现已清空则跳过添加
         private ScrollViewer _mainListScrollViewer; // ListBox 内部 ScrollViewer，用于 ScrollToEnd
+        private ScrollViewer _mainTextBoxScrollViewer; // MainTextBox 内部 ScrollViewer，ANSI 模式下滚动
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -128,6 +134,7 @@ namespace llcom.Pages
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
             {
                 _mainListScrollViewer = FindScrollViewer(MainList);
+                _mainTextBoxScrollViewer = FindScrollViewer(MainTextBox);
             }));
             _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _batchTimer.Tick += BatchTimer_Tick;
@@ -142,8 +149,23 @@ namespace llcom.Pages
             MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
 
-            MainList.Visibility = Visibility.Visible;
-            MainTextBox.Visibility = Visibility.Collapsed;
+            UpdateAnsiModeVisibility(EnableAnsiColor, clearWhenSwitchingToAnsi: false);
+        }
+
+        private void UpdateAnsiModeVisibility(bool enableAnsi, bool clearWhenSwitchingToAnsi = false)
+        {
+            if (enableAnsi)
+            {
+                MainTextBox.Visibility = Visibility.Visible;
+                MainList.Visibility = Visibility.Collapsed;
+                if (clearWhenSwitchingToAnsi)
+                    MainTextBox.Document.Blocks.Clear();
+            }
+            else
+            {
+                MainList.Visibility = Visibility.Visible;
+                MainTextBox.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void BatchTimer_Tick(object sender, EventArgs e)
@@ -157,12 +179,13 @@ namespace llcom.Pages
 
             _batchInProgress = true;
             int gen = _clearGeneration;
+            var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
             var prepareInputs = new List<DataShowPrepareInput>();
             foreach (var item in batch)
             {
                 var para = item as Tools.DataShowPara;
                 var ifKey = para?.interfaceKey ?? "Serial";
-                if (!Tools.Global.setting.GetShowSendForInterface(ifKey) && para != null && para.send)
+                if (para != null && para.send && (enableAnsi || !Tools.Global.setting.GetShowSendForInterface(ifKey)))
                     continue;
 
                 var isRaw = item is Tools.DataShowRaw;
@@ -203,7 +226,7 @@ namespace llcom.Pages
                 var records = new List<DataShowRecord>();
                 foreach (var pin in prepareInputs)
                 {
-                    var r = PrepareDataShowRecord(pin);
+                    var r = PrepareDataShowRecord(pin, enableAnsi);
                     if (r != null) records.Add(r);
                 }
                 if (records.Count == 0) { Dispatcher.Invoke(() => _batchInProgress = false); return; }
@@ -212,21 +235,47 @@ namespace llcom.Pages
                     try
                     {
                         if (gen != _clearGeneration) return; // 清空后飞行中的批次不再添加
-                        foreach (var r in records)
+                        var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
+                        if (enableAnsi)
                         {
-                            var ds = new DataShow(r);
-                            if (ds != null)
-                                MainList.Items.Add(ds);
-                        }
-                        if (!LockLog && !_scrollToEndPending)
-                        {
-                            _scrollToEndPending = true;
-                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                            foreach (var r in records)
                             {
-                        if (!LockLog && _mainListScrollViewer != null)
-                                _mainListScrollViewer.ScrollToEnd();
-                                _scrollToEndPending = false;
-                            }));
+                                var text = string.IsNullOrEmpty(r.RawTitle) ? r.DataText : (r.RawTitle + r.RawText);
+                                if (string.IsNullOrEmpty(text)) continue;
+                                var prefix = ""; // ANSI 模式下始终不显示时间戳
+                                var fullText = prefix + text + "\n";
+                                var brush = DataShowRecord.HexToBrush(string.IsNullOrEmpty(r.RawTitle) ? r.DataTextColorHex : r.RawTextColorHex);
+                                AppendAnsiToRichTextBox(MainTextBox, fullText, true, brush);
+                            }
+                            if (!LockLog && !_scrollToEndPending && _mainTextBoxScrollViewer != null)
+                            {
+                                _scrollToEndPending = true;
+                                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                                {
+                                    if (!LockLog && _mainTextBoxScrollViewer != null)
+                                        _mainTextBoxScrollViewer.ScrollToEnd();
+                                    _scrollToEndPending = false;
+                                }));
+                            }
+                        }
+                        else
+                        {
+                            foreach (var r in records)
+                            {
+                                var ds = new DataShow(r);
+                                if (ds != null)
+                                    MainList.Items.Add(ds);
+                            }
+                            if (!LockLog && !_scrollToEndPending)
+                            {
+                                _scrollToEndPending = true;
+                                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                                {
+                                    if (!LockLog && _mainListScrollViewer != null)
+                                        _mainListScrollViewer.ScrollToEnd();
+                                    _scrollToEndPending = false;
+                                }));
+                            }
                         }
                     }
                     finally
@@ -249,7 +298,7 @@ namespace llcom.Pages
             public string ColorHex;
         }
 
-        private static DataShowRecord PrepareDataShowRecord(DataShowPrepareInput pin)
+        private static DataShowRecord PrepareDataShowRecord(DataShowPrepareInput pin, bool forAnsiMode = false)
         {
             if (pin?.Data == null || pin.Data.Length == 0) return null;
             byte[] temp = pin.Data;
@@ -293,8 +342,9 @@ namespace llcom.Pages
             var timeTextMs = $"[{new DateTimeOffset(pin.Time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
             var enableAnsi = Tools.Global.setting.enableAnsiColor;
             var len = temp.Length;
-            var fmt = Tools.Global.setting.GetShowHexFormatForInterface(pin.InterfaceKey ?? "Serial");
-            var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(pin.InterfaceKey ?? "Serial");
+            // ANSI 模式下：不显示 HEX（强制文本）、不显示控制字符
+            var fmt = forAnsiMode ? 1 : Tools.Global.setting.GetShowHexFormatForInterface(pin.InterfaceKey ?? "Serial");
+            var enableSym = forAnsiMode ? false : Tools.Global.setting.GetEnableSymbolForInterface(pin.InterfaceKey ?? "Serial");
 
             if (pin.IsRaw)
             {
@@ -464,109 +514,6 @@ namespace llcom.Pages
             public string HexData { get; set; }
             public SolidColorBrush HexTextColor { get; set; }
             public bool EnableAnsiColor { get; set; }
-
-
-            public DataShow(byte[] data, DateTime time, bool sent, string interfaceKey = null, bool isRawSend = false)
-            {
-                if (data == null || data.Count() == 0)
-                    return;
-                byte[] temp = data.ToArray();
-                //转换下接收数据（按顺序执行多个 recv 脚本）
-                if (!sent)
-                {
-                    var uartPara = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[0] : new byte[0];
-                    var uartSendRaw = (Tools.Global.recvPara != null && Tools.Global.recvPara.Length >= 2) ? Tools.Global.recvPara[1] : new byte[0];
-                    var scripts = Tools.Global.GetEffectiveRecvScriptListForInterface(interfaceKey ?? "Serial");
-                    try
-                    {
-                        foreach (var scriptName in scripts ?? new System.Collections.Generic.List<string>())
-                        {
-                            if (string.IsNullOrEmpty(scriptName)) continue;
-                            if (!System.IO.File.Exists(Tools.Global.ProfilePath + $"user_script_recv_convert/{scriptName}.lua"))
-                                continue;
-                            var backup = Tools.Global.recvPara;
-                            Tools.Global.recvPara = new byte[][] { uartPara, uartSendRaw };
-                            try
-                            {
-                                temp = LuaEnv.LuaLoader.Run(
-                                    $"{scriptName}.lua",
-                                    new System.Collections.ArrayList { "uartData", temp, "uartPara", uartPara, "uartSendRaw", uartSendRaw },
-                                    "user_script_recv_convert/");
-                            }
-                            finally
-                            {
-                                Tools.Global.recvPara = backup;
-                            }
-                            if (temp == null)
-                                return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Tools.MessageBox.Show($"receive convert lua script error\r\n" + ex.ToString());
-                        return;
-                    }
-                    if (temp == null)
-                        return;
-                }
-
-                TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
-                TimeTextMs = $"[{new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
-                ArrowText = sent ? (isRawSend ? " ↓ " : " ← ") : " → ";
-                var ifKey = interfaceKey ?? "Serial";
-                DataTextColor = sent ? Tools.Global.setting.GetSendDisplayBrushForInterface(ifKey) : Tools.Global.setting.GetRecvDisplayBrushForInterface(ifKey);
-                HexTextColor = DataTextColor;
-                EnableAnsiColor = Tools.Global.setting.enableAnsiColor;
-
-                var len = temp.Length;
-                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(interfaceKey ?? "Serial");
-                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(interfaceKey ?? "Serial");
-                //主要数据
-                if (temp != null && temp.Length > 0)
-                {
-                    var raw = (fmt switch
-                    {
-                        2 => Tools.Global.Byte2Hex(temp, " ", len),
-                        _ => Tools.Global.Byte2Readable(temp, len, enableSym),
-                    }) ?? "";
-                    DataText = EnableAnsiColor ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n');
-                }
-            }
-
-            public DataShow(string title, byte[] data, DateTime time, SolidColorBrush color)
-            {
-                byte[] temp = data.ToArray();
-
-                TimeText = time.ToString("[yyyy/MM/dd HH:mm:ss.fff]");
-                TimeTextMs = $"[{new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
-
-                var len = temp.Length;
-                // DataShowRaw 无 interfaceKey，使用当前选中接口或全局
-                var mw = System.Windows.Application.Current.MainWindow as MainWindow;
-                var ifKey = (mw?.DataInterfaceComboBox?.SelectedIndex ?? 0) switch
-                {
-                    0 => "Serial", 1 => "UdpClient", 2 => "TcpClient", 3 => "TcpSslClient", 4 => "UdpLocal", 5 => "TcpLocal",
-                    6 => "Tcp", 7 => "WinUSB", 8 => "SerialMonitor", 9 => "MQTT", _ => "Serial"
-                };
-                var fmt = Tools.Global.setting.GetShowHexFormatForInterface(ifKey);
-                var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(ifKey);
-                //主要数据
-                if (temp != null && temp.Length > 0)
-                {
-                    var raw = (fmt switch
-                    {
-                        2 => Tools.Global.Byte2Hex(temp, " ", len),
-                        _ => Tools.Global.Byte2Readable(temp, len, enableSym),
-                    }) ?? "";
-                    var enableAnsi = Tools.Global.setting.enableAnsiColor;
-                    RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n'));
-                }
-
-                RawTitle = title;
-                RawTextColor = color;
-                HexTextColor = color;
-                EnableAnsiColor = Tools.Global.setting.enableAnsiColor;
-            }
 
             public DataShow(DataShowRecord r)
             {
