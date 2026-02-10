@@ -1,5 +1,5 @@
 --[[
-随机发送脚本
+RandomSend
 向指定接口发送随机字符串或随机 hex 数据
 ]]
 
@@ -41,7 +41,7 @@ local function randomHex(len)
     return table.concat(t):fromHex()
 end
 
-local function sendData()
+local function sendData(n)
     local len = math.random(minLen, maxLen)
     local data
     if mode == "hex" then
@@ -49,22 +49,19 @@ local function sendData()
     else
         data = randomString(len)
     end
+    data = "[" .. n .. "]" .. data
     local ok = apiSend(channel, data)
-    log.info("随机发送", ok and "成功" or "失败", "len=" .. len, mode == "hex" and data:toHex() or data)
     return ok
 end
 
 sys.taskInit(function()
-    log.info("随机发送", "通道=" .. channel, "模式=" .. mode, "长度=" .. minLen .. "-" .. maxLen,
-        "次数=" .. (loopCount < 0 and "无限" or loopCount), "间隔=" .. sendInterval .. "ms")
     local count = 0
     while loopCount < 0 or count < loopCount do
-        sendData()
         count = count + 1
+        sendData(count)
         if loopCount >= 0 and count >= loopCount then
             break
         end
         sys.wait(sendInterval)
     end
-    log.info("随机发送", "结束", "共发送 " .. count .. " 次")
 end)

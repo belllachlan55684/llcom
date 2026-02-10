@@ -24,22 +24,14 @@ namespace llcom.Tools
         //清空显示的回调函数
         public static event EventHandler DataClearEvent;
 
-        private static readonly ConcurrentQueue<DataShow> _pendingShowQueue = new ConcurrentQueue<DataShow>();
-        private const int BatchSize = 20;
+        private static readonly BlockingCollection<DataShow> _pendingShowQueue = new BlockingCollection<DataShow>(new ConcurrentQueue<DataShow>());
 
         /// <summary>
-        /// 从待显示队列取出一批（最多 BatchSize 条），返回实际取出的数量
+        /// 从待显示队列取出一条，有数据立即返回，无数据则阻塞最多 timeoutMs 毫秒。供 DataShowPage 后台消费线程逐条消费。
         /// </summary>
-        public static int DequeueBatch(List<DataShow> outList, int maxCount = BatchSize)
+        public static bool TryTakeOne(out DataShow item, int timeoutMs)
         {
-            if (outList == null) return 0;
-            int count = 0;
-            while (count < maxCount && _pendingShowQueue.TryDequeue(out var item) && item != null)
-            {
-                outList.Add(item);
-                count++;
-            }
-            return count;
+            return _pendingShowQueue.TryTake(out item, timeoutMs);
         }
 
         /// <summary>
@@ -47,7 +39,7 @@ namespace llcom.Tools
         /// </summary>
         public static void ClearPendingQueue()
         {
-            while (_pendingShowQueue.TryDequeue(out _)) { }
+            while (_pendingShowQueue.TryTake(out _)) { }
         }
 
         //清空日志显示
@@ -56,12 +48,12 @@ namespace llcom.Tools
             ClearPendingQueue();
             DataClearEvent?.Invoke(null, null);
         }
-        //显示日志数据（入队，由 DataShowPage 定时器批量消费）
+        //显示日志数据（入队，由 DataShowPage 后台消费线程通过 BlockingCollection.TryTakeOne(50ms) 逐条消费）
         public static void ShowData(byte[] data, bool send, string interfaceKey = null, bool isRawSend = false)
         {
             if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
                 return;
-            _pendingShowQueue.Enqueue(new DataShowPara
+            _pendingShowQueue.Add(new DataShowPara
             {
                 data = data != null && data.Length > 0 ? data.ToArray() : data,
                 send = send,
@@ -75,7 +67,7 @@ namespace llcom.Tools
         {
             if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
                 return;
-            _pendingShowQueue.Enqueue(s);
+            _pendingShowQueue.Add(s);
         }
 
 

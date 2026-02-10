@@ -446,8 +446,8 @@ namespace llcom.Tools
                 //通用消息通道的demo
                 if (!File.Exists(ProfilePath + "user_script_run/channel-demo.lua"))
                     CreateFile("DefaultFiles/user_script_run/channel-demo.lua", ProfilePath + "user_script_run/channel-demo.lua");
-                if (!File.Exists(ProfilePath + "user_script_run/随机发送.lua"))
-                    CreateFile("DefaultFiles/user_script_run/随机发送.lua", ProfilePath + "user_script_run/随机发送.lua");
+                if (!File.Exists(ProfilePath + "user_script_run/RandomSend.lua"))
+                    CreateFile("DefaultFiles/user_script_run/RandomSend.lua", ProfilePath + "user_script_run/RandomSend.lua");
                 if (!File.Exists(ProfilePath + "user_script_run/绘制正弦曲线.lua"))
                     CreateFile("DefaultFiles/user_script_run/绘制正弦曲线.lua", ProfilePath + "user_script_run/绘制正弦曲线.lua");
 

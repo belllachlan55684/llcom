@@ -114,8 +114,6 @@ namespace llcom.Pages
         private static readonly object _luaRunLock = new object();
         private bool loaded = false;
         private bool _scrollToEndPending = false;
-        private DispatcherTimer _batchTimer;
-        private bool _batchInProgress = false; // 防止多批并发导致顺序错乱
         private int _clearGeneration = 0;       // 清空时递增，飞行中的批次若发现已清空则跳过添加
         private ScrollViewer _mainListScrollViewer; // ListBox 内部 ScrollViewer，用于 ScrollToEnd
         private ScrollViewer _mainTextBoxScrollViewer; // MainTextBox 内部 ScrollViewer，ANSI 模式下滚动
@@ -136,9 +134,7 @@ namespace llcom.Pages
                 _mainListScrollViewer = FindScrollViewer(MainList);
                 _mainTextBoxScrollViewer = FindScrollViewer(MainTextBox);
             }));
-            _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-            _batchTimer.Tick += BatchTimer_Tick;
-            _batchTimer.Start();
+            _ = Task.Run(ShowDataConsumerLoop);
             LockLogCheckBox.DataContext = this;
             DisableLogCheckBox.DataContext = this;
             ShowSymbolCheckBox.DataContext = this;
@@ -168,122 +164,111 @@ namespace llcom.Pages
             }
         }
 
-        private void BatchTimer_Tick(object sender, EventArgs e)
+        private string GetRawInterfaceKeyFromUi()
         {
-            if (Tools.Global.isMainWindowsClosed)
-                return;
-            if (_batchInProgress) return; // 上一批未完成，避免并发导致顺序错乱
-            var batch = new List<Tools.DataShow>();
-            if (Tools.Logger.DequeueBatch(batch, 20) == 0)
-                return;
-
-            _batchInProgress = true;
-            int gen = _clearGeneration;
-            var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
-            var prepareInputs = new List<DataShowPrepareInput>();
-            foreach (var item in batch)
+            var mw = System.Windows.Application.Current?.MainWindow as MainWindow;
+            var idx = mw?.DataInterfaceComboBox?.SelectedIndex ?? 0;
+            return idx switch
             {
+                0 => "Serial", 1 => "UdpClient", 2 => "TcpClient", 3 => "TcpSslClient", 4 => "UdpLocal", 5 => "TcpLocal",
+                6 => "Tcp", 7 => "WinUSB", 8 => "SerialMonitor", 9 => "MQTT", _ => "Serial"
+            };
+        }
+
+        private void ShowDataConsumerLoop()
+        {
+            while (!Tools.Global.isMainWindowsClosed)
+            {
+                if (!Tools.Logger.TryTakeOne(out var item, 50))
+                    continue;
+                if (Tools.Global.isMainWindowsClosed)
+                    break;
+
+                var snapshot = Dispatcher.Invoke(() => new
+                {
+                    enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true,
+                    rawInterfaceKey = GetRawInterfaceKeyFromUi(),
+                    gen = _clearGeneration
+                });
+
                 var para = item as Tools.DataShowPara;
                 var ifKey = para?.interfaceKey ?? "Serial";
-                if (para != null && para.send && (enableAnsi || !Tools.Global.setting.GetShowSendForInterface(ifKey)))
+                if (para != null && para.send && (snapshot.enableAnsi || !Tools.Global.setting.GetShowSendForInterface(ifKey)))
                     continue;
 
+                var dataCopy = item.data?.ToArray();
+                if (dataCopy == null)
+                    continue;
+
+                DataShowPrepareInput pin;
                 var isRaw = item is Tools.DataShowRaw;
                 var raw = item as Tools.DataShowRaw;
                 var showPara = item as Tools.DataShowPara;
-                var dataCopy = item.data?.ToArray();
-                var timeCopy = item.time;
-                if (dataCopy == null) continue;
-
                 if (isRaw)
                 {
-                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
-                    var ifKeyForRaw = (mw?.DataInterfaceComboBox?.SelectedIndex ?? 0) switch
+                    pin = new DataShowPrepareInput
                     {
-                        0 => "Serial", 1 => "UdpClient", 2 => "TcpClient", 3 => "TcpSslClient", 4 => "UdpLocal", 5 => "TcpLocal",
-                        6 => "Tcp", 7 => "WinUSB", 8 => "SerialMonitor", 9 => "MQTT", _ => "Serial"
+                        Data = dataCopy, Time = item.time, IsRaw = true,
+                        Title = raw.title, ColorHex = DataShowRecord.BrushToHex(raw.color), InterfaceKey = snapshot.rawInterfaceKey
                     };
-                    prepareInputs.Add(new DataShowPrepareInput
-                    {
-                        Data = dataCopy, Time = timeCopy, IsRaw = true,
-                        Title = raw.title, ColorHex = DataShowRecord.BrushToHex(raw.color), InterfaceKey = ifKeyForRaw
-                    });
                 }
                 else
                 {
-                    prepareInputs.Add(new DataShowPrepareInput
+                    pin = new DataShowPrepareInput
                     {
-                        Data = dataCopy, Time = timeCopy, IsRaw = false,
+                        Data = dataCopy, Time = item.time, IsRaw = false,
                         Send = showPara.send, InterfaceKey = showPara.interfaceKey ?? "Serial", IsRawSend = showPara.isRawSend
-                    });
+                    };
                 }
-            }
 
-            if (prepareInputs.Count == 0) { _batchInProgress = false; return; }
+                var record = PrepareDataShowRecord(pin, snapshot.enableAnsi);
+                if (record == null)
+                    continue;
 
-            Task.Run(() =>
-            {
-                var records = new List<DataShowRecord>();
-                foreach (var pin in prepareInputs)
-                {
-                    var r = PrepareDataShowRecord(pin, enableAnsi);
-                    if (r != null) records.Add(r);
-                }
-                if (records.Count == 0) { Dispatcher.Invoke(() => _batchInProgress = false); return; }
+                var gen = snapshot.gen;
                 Dispatcher.Invoke(() =>
                 {
-                    try
+                    if (gen != _clearGeneration)
+                        return;
+                    var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
+                    if (enableAnsi)
                     {
-                        if (gen != _clearGeneration) return; // 清空后飞行中的批次不再添加
-                        var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
-                        if (enableAnsi)
+                        var text = string.IsNullOrEmpty(record.RawTitle) ? record.DataText : (record.RawTitle + record.RawText);
+                        if (!string.IsNullOrEmpty(text))
                         {
-                            foreach (var r in records)
-                            {
-                                var text = string.IsNullOrEmpty(r.RawTitle) ? r.DataText : (r.RawTitle + r.RawText);
-                                if (string.IsNullOrEmpty(text)) continue;
-                                var prefix = ""; // ANSI 模式下始终不显示时间戳
-                                var fullText = prefix + text + "\n";
-                                var brush = DataShowRecord.HexToBrush(string.IsNullOrEmpty(r.RawTitle) ? r.DataTextColorHex : r.RawTextColorHex);
-                                AppendAnsiToRichTextBox(MainTextBox, fullText, true, brush);
-                            }
-                            if (!LockLog && !_scrollToEndPending && _mainTextBoxScrollViewer != null)
-                            {
-                                _scrollToEndPending = true;
-                                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
-                                {
-                                    if (!LockLog && _mainTextBoxScrollViewer != null)
-                                        _mainTextBoxScrollViewer.ScrollToEnd();
-                                    _scrollToEndPending = false;
-                                }));
-                            }
+                            var fullText = text + "\n";
+                            var brush = DataShowRecord.HexToBrush(string.IsNullOrEmpty(record.RawTitle) ? record.DataTextColorHex : record.RawTextColorHex);
+                            AppendAnsiToRichTextBox(MainTextBox, fullText, true, brush);
                         }
-                        else
+                        if (!LockLog && !_scrollToEndPending && _mainTextBoxScrollViewer != null)
                         {
-                            foreach (var r in records)
+                            _scrollToEndPending = true;
+                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
                             {
-                                var ds = new DataShow(r);
-                                if (ds != null)
-                                    MainList.Items.Add(ds);
-                            }
-                            if (!LockLog && !_scrollToEndPending)
-                            {
-                                _scrollToEndPending = true;
-                                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
-                                {
-                                    if (!LockLog && _mainListScrollViewer != null)
-                                        _mainListScrollViewer.ScrollToEnd();
-                                    _scrollToEndPending = false;
-                                }));
-                            }
+                                if (!LockLog && _mainTextBoxScrollViewer != null)
+                                    _mainTextBoxScrollViewer.ScrollToEnd();
+                                _scrollToEndPending = false;
+                            }));
                         }
                     }
-                    finally
+                    else
                     {
-                        _batchInProgress = false;
+                        var ds = new DataShow(record);
+                        if (ds != null)
+                            MainList.Items.Add(ds);
+                        if (!LockLog && !_scrollToEndPending)
+                        {
+                            _scrollToEndPending = true;
+                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+                            {
+                                if (!LockLog && _mainListScrollViewer != null)
+                                    _mainListScrollViewer.ScrollToEnd();
+                                _scrollToEndPending = false;
+                            }));
+                        }
                     }
                 });
-            });
+            }
         }
 
         private sealed class DataShowPrepareInput

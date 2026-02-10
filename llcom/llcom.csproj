@@ -501,7 +501,7 @@
     <Resource Include="DefaultFiles\user_script_recv_convert\绘制曲线-解析结构体.lua" />
     <Resource Include="DefaultFiles\user_script_recv_convert\JSON格式化.lua" />
     <Resource Include="DefaultFiles\user_script_run\channel-demo.lua" />
-    <Resource Include="DefaultFiles\user_script_run\随机发送.lua" />
+    <Resource Include="DefaultFiles\user_script_run\RandomSend.lua" />
     <Resource Include="DefaultFiles\user_script_run\绘制正弦曲线.lua" />
     <Resource Include="DefaultFiles\user_script_send_convert\checksum.lua" />
     <None Include="packages.config" />
