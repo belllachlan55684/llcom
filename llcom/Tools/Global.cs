@@ -296,10 +296,11 @@ namespace llcom.Tools
                         setting.sendScript = "RawData";
                     if (setting.sendScript == "加上换行回车")
                         setting.sendScript = "CRLF";
-                    if (setting.sendScript == "解析换行回车的转义字符")
-                        setting.sendScript = "ParseEscapeSeq";
-                    if (setting.sendScript == "16进制数据")
-                        setting.sendScript = "Hex";
+                    // 已移除的发送脚本迁移为 RawData
+                    if (setting.sendScript == "解析换行回车的转义字符" || setting.sendScript == "ParseEscapeSeq"
+                        || setting.sendScript == "16进制数据" || setting.sendScript == "Hex"
+                        || setting.sendScript == "checksum" || setting.sendScript == "GPS NMEA")
+                        setting.sendScript = "RawData";
                     if (setting.recvScript == "default" || setting.recvScript == "原始数据" || setting.recvScript == "rawdata")
                         setting.recvScript = "RawData";
                 }
@@ -460,11 +461,7 @@ namespace llcom.Tools
                 {
                     Directory.CreateDirectory(ProfilePath + "user_script_send_convert");
                     CreateFile("DefaultFiles/user_script_send_convert/RawData.lua", ProfilePath + "user_script_send_convert/RawData.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/checksum.lua", ProfilePath + "user_script_send_convert/checksum.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/Hex.lua", ProfilePath + "user_script_send_convert/Hex.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/GPS NMEA.lua", ProfilePath + "user_script_send_convert/GPS NMEA.lua");
                     CreateFile("DefaultFiles/user_script_send_convert/CRLF.lua", ProfilePath + "user_script_send_convert/CRLF.lua");
-                    CreateFile("DefaultFiles/user_script_send_convert/ParseEscapeSeq.lua", ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua");
                 }
                 if (!Directory.Exists(ProfilePath + "user_script_recv_convert"))
                 {
@@ -540,28 +537,6 @@ namespace llcom.Tools
                 }
                 if (!File.Exists(ProfilePath + "user_script_send_convert/CRLF.lua"))
                     CreateFile("DefaultFiles/user_script_send_convert/CRLF.lua", ProfilePath + "user_script_send_convert/CRLF.lua");
-                var sendParseEscapePath = ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua";
-                var sendParseEscapeOldPath = ProfilePath + "user_script_send_convert/解析换行回车的转义字符.lua";
-                if (File.Exists(sendParseEscapeOldPath))
-                {
-                    if (!File.Exists(sendParseEscapePath))
-                        File.Move(sendParseEscapeOldPath, sendParseEscapePath);
-                    else
-                        File.Delete(sendParseEscapeOldPath);
-                }
-                if (!File.Exists(ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua"))
-                    CreateFile("DefaultFiles/user_script_send_convert/ParseEscapeSeq.lua", ProfilePath + "user_script_send_convert/ParseEscapeSeq.lua");
-                var sendHexPath = ProfilePath + "user_script_send_convert/Hex.lua";
-                var sendHexOldPath = ProfilePath + "user_script_send_convert/16进制数据.lua";
-                if (File.Exists(sendHexOldPath))
-                {
-                    if (!File.Exists(sendHexPath))
-                        File.Move(sendHexOldPath, sendHexPath);
-                    else
-                        File.Delete(sendHexOldPath);
-                }
-                if (!File.Exists(ProfilePath + "user_script_send_convert/Hex.lua"))
-                    CreateFile("DefaultFiles/user_script_send_convert/Hex.lua", ProfilePath + "user_script_send_convert/Hex.lua");
                 if (!File.Exists(ProfilePath + "user_script_recv_convert/绘制曲线.lua"))
                     CreateFile("DefaultFiles/user_script_recv_convert/绘制曲线.lua", ProfilePath + "user_script_recv_convert/绘制曲线.lua");
                 if (!File.Exists(ProfilePath + "user_scrispt_recv_convert/绘制曲线-多条.lua"))

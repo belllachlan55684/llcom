@@ -498,10 +498,7 @@
     <Resource Include="DefaultFiles\user_script_run\AT控制TCP连接-慢发模式.lua" />
     <Resource Include="DefaultFiles\user_script_run\example.lua" />
     <Resource Include="DefaultFiles\user_script_run\循环发送快捷发送区数据.lua" />
-    <Resource Include="DefaultFiles\user_script_send_convert\Hex.lua" />
-    <Resource Include="DefaultFiles\user_script_send_convert\GPS NMEA.lua" />
     <Resource Include="DefaultFiles\user_script_send_convert\CRLF.lua" />
-    <Resource Include="DefaultFiles\user_script_send_convert\ParseEscapeSeq.lua" />
     <Resource Include="DefaultFiles\user_script_send_convert\RawData.lua" />
     <Resource Include="DefaultFiles\user_script_recv_convert\RawData.lua" />
     <Resource Include="DefaultFiles\user_script_recv_convert\绘制曲线.lua" />
@@ -511,7 +508,6 @@
     <Resource Include="DefaultFiles\user_script_run\channel-demo.lua" />
     <Resource Include="DefaultFiles\user_script_run\RandomSend.lua" />
     <Resource Include="DefaultFiles\user_script_run\绘制正弦曲线.lua" />
-    <Resource Include="DefaultFiles\user_script_send_convert\checksum.lua" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
