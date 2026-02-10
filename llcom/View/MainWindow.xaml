@@ -224,6 +224,42 @@
                         </Style>
                     </Button.Style>
                 </Button>
+                <Button
+                    Name="SystemLogWindowButton"
+                    Width="46"
+                    Height="32"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    ToolTip="{DynamicResource SystemLogWindowTooltip}"
+                    Click="SystemLogWindowButton_Click"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Content>
+                        <fa:FontAwesome Icon="List" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
+                    </Button.Content>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            x:Name="SystemLogButtonBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="SystemLogButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <ToggleButton
                     Name="PinTopmostButton"
                     Width="46"

@@ -35,6 +35,11 @@ namespace llcom.Tools
         }
 
         /// <summary>
+        /// 当前待显示队列中的条数（线程安全，供打日志等使用）
+        /// </summary>
+        public static int PendingShowQueueCount => _pendingShowQueue.Count;
+
+        /// <summary>
         /// 清空待显示队列
         /// </summary>
         public static void ClearPendingQueue()
@@ -51,7 +56,7 @@ namespace llcom.Tools
         //显示日志数据（入队，由 DataShowPage 后台消费线程通过 BlockingCollection.TryTakeOne(50ms) 逐条消费）
         public static void ShowData(byte[] data, bool send, string interfaceKey = null, bool isRawSend = false)
         {
-            if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
+            if (Tools.Global.setting.DisableLog)
                 return;
             _pendingShowQueue.Add(new DataShowPara
             {
@@ -65,7 +70,7 @@ namespace llcom.Tools
         //显示日志数据（DataShowRaw 无 interfaceKey，使用全局 DisableLog）
         public static void ShowDataRaw(DataShowRaw s)
         {
-            if (Tools.Global.setting.DisableLog && !Tools.Global.setting.enableAnsiColor)
+            if (Tools.Global.setting.DisableLog)
                 return;
             _pendingShowQueue.Add(s);
         }

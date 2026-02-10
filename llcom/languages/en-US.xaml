@@ -259,6 +259,9 @@
     <system:String x:Key="PlotClear">Clear</system:String>
     <system:String x:Key="PlotTheme">Theme</system:String>
     <system:String x:Key="PlotWindowTooltip">Chart Window</system:String>
+    <system:String x:Key="SystemLogWindowTooltip">System log</system:String>
+    <system:String x:Key="SystemLogTitle">System log</system:String>
+    <system:String x:Key="SystemLogClear">Clear</system:String>
     <system:String x:Key="DarkMode">Dark mode</system:String>
     <system:String x:Key="RefreshIpList">Refresh IP</system:String>
     <system:String x:Key="StartListen">Start listen</system:String>

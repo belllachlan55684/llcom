@@ -80,6 +80,7 @@ namespace llcom
         ObservableCollection<ToSendData> toSendListItems = new ObservableCollection<ToSendData>();
         private bool canSaveSendList = true;
         private View.PlotWindow _plotWindow;
+        private View.SystemLogWindow _systemLogWindow;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //延迟启动，加快软件第一屏出现速度
@@ -257,6 +258,8 @@ namespace llcom
                     MainGrid.IsEnabled = true;
 
                     RefreshDataInterfaceStatus();
+
+                    Tools.SystemLog.WriteLine("[启动] LLCOM 已就绪");
 
                     //检查更新
                     if (!Tools.Global.IsMSIX())
@@ -764,6 +767,33 @@ namespace llcom
             _plotWindow = new View.PlotWindow();
             _plotWindow.Closed += (s, ev) => _plotWindow = null;
             _plotWindow.Show();
+        }
+
+        private void SystemLogWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_systemLogWindow != null && _systemLogWindow.IsLoaded)
+            {
+                try
+                {
+                    _systemLogWindow.Activate();
+                }
+                catch
+                {
+                    _systemLogWindow = null;
+                    OpenSystemLogWindow();
+                }
+            }
+            else
+            {
+                OpenSystemLogWindow();
+            }
+        }
+
+        private void OpenSystemLogWindow()
+        {
+            _systemLogWindow = new View.SystemLogWindow();
+            _systemLogWindow.Closed += (s, ev) => _systemLogWindow = null;
+            _systemLogWindow.Show();
         }
 
         private void ModeButton_Click(object sender, RoutedEventArgs e)

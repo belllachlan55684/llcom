@@ -65,82 +65,6 @@
             ScrollViewer.VerticalScrollBarVisibility="Auto">
             <FlowDocument />
         </RichTextBox>
-        <ListBox
-            Name="MainList"
-            Grid.Row="0"
-            Background="Transparent"
-            BorderThickness="0"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            ScrollViewer.CanContentScroll="True"
-            VirtualizingStackPanel.CacheLength="2,2"
-            VirtualizingStackPanel.IsVirtualizing="True"
-            VirtualizingStackPanel.VirtualizationMode="Recycling">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="Margin" Value="0" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ListBoxItem">
-                                <ContentPresenter />
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Vertical" Margin="0">
-                        <TextBlock TextWrapping="NoWrap" Foreground="White"
-                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                            Visibility="{Binding Path=ShowTimestampFormat, ElementName=DataShowPageRoot, Converter={StaticResource ShowTimestampVisibilityConverter}}">
-                            <TextBlock.Text>
-                                <MultiBinding Converter="{StaticResource ShowTimestampPrefixConverter}">
-                                    <Binding Path="TimeText" />
-                                    <Binding Path="ArrowText" />
-                                    <Binding ElementName="DataShowPageRoot" Path="ShowTimestampFormat" />
-                                    <Binding Path="TimeTextMs" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
-                        <TextBox Text="{Binding DataText}" Foreground="{Binding DataTextColor}"
-                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                            Style="{StaticResource DataDisplayTextBoxStyle}" />
-                        <TextBlock FontWeight="Bold" Text="{Binding RawTitle}" TextWrapping="Wrap" Foreground="White"
-                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                            Visibility="{Binding RawTitle, Converter={StaticResource StringToVisibilityConverter}}" />
-                        <Grid Visibility="{Binding RawText, Converter={StaticResource StringToVisibilityConverter}}">
-                            <TextBox Text="{Binding RawText}" Foreground="{Binding RawTextColor}"
-                                FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                                FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                                Style="{StaticResource DataDisplayTextBoxStyle}" />
-                        </Grid>
-                        <TextBox Visibility="{Binding HexData, Converter={StaticResource StringToVisibilityConverter}}"
-                            Foreground="{Binding HexTextColor}"
-                            FontFamily="{Binding Path=displayAreaFontFamily, Source={x:Static localTools:Global.setting}}"
-                            FontSize="{Binding Path=displayAreaFontSize, Source={x:Static localTools:Global.setting}}"
-                            Style="{StaticResource DataDisplayTextBoxStyle}">
-                            <TextBox.Text>
-                                <MultiBinding Converter="{StaticResource PrefixWhenDataExistsConverter}">
-                                    <Binding Path="HexPrefix" />
-                                    <Binding Path="HexData" />
-                                </MultiBinding>
-                            </TextBox.Text>
-                        </TextBox>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
         <Grid Grid.Row="1" Margin="10,0,10,3">
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
                 <CheckBox
@@ -154,7 +78,6 @@
                     Margin="5,0,0,0"
                     Content="{DynamicResource DisableLog}"
                     IsChecked="{Binding DisableLog, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                    IsEnabled="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Converter={StaticResource inverseBoolConverter}}"
                     ToolTip="{DynamicResource DisableLog}" />
                 <CheckBox
                     Name="EnableAnsiColorCheckBox"
@@ -173,28 +96,24 @@
                     Margin="5,0,0,0"
                     Content="{DynamicResource ShowSymbol}"
                     IsChecked="{Binding EnableSymbol, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                    IsEnabled="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Converter={StaticResource inverseBoolConverter}}"
                     ToolTip="{DynamicResource ShowSymbolTooltip}" />
                 <CheckBox
                     Name="ShowSendCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource ShowSend}"
                     IsChecked="{Binding ShowSend, ElementName=DataShowPageRoot, Mode=TwoWay}"
-                    IsEnabled="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Converter={StaticResource inverseBoolConverter}}"
                     ToolTip="{DynamicResource ShowSendTip}" />
                 <CheckBox
                     Name="ShowHexFormatCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource HexDisplay}"
                     IsChecked="{Binding ShowHexFormat, ElementName=DataShowPageRoot, Converter={StaticResource showHexFormatConverter}, Mode=TwoWay}"
-                    IsEnabled="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Converter={StaticResource inverseBoolConverter}}"
                     ToolTip="{DynamicResource HexDisplayTip}" />
                 <CheckBox
                     Name="ShowTimestampCheckBox"
                     Margin="5,0,0,0"
                     Content="{DynamicResource ShowTimestampButton}"
                     IsChecked="{Binding ShowTimestampFormat, ElementName=DataShowPageRoot, Converter={StaticResource showTimestampFormatConverter}, Mode=TwoWay}"
-                    IsEnabled="{Binding EnableAnsiColor, ElementName=DataShowPageRoot, Converter={StaticResource inverseBoolConverter}}"
                     IsThreeState="True"
                     ToolTip="{DynamicResource ShowTimestampTip}" />
             </WrapPanel>

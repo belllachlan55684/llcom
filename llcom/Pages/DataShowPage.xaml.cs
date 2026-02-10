@@ -91,15 +91,13 @@ namespace llcom.Pages
         /// <summary>
         /// ANSI 终端（选中时解析 ANSI 转义序列，不选中时按纯文本显示）
         /// </summary>
+        /// <summary>
+        /// 是否解析内容中的 ANSI 转义颜色（不改变其他选项或显示控件）
+        /// </summary>
         public bool EnableAnsiColor
         {
             get => Tools.Global.setting?.enableAnsiColor ?? true;
-            set
-            {
-                var oldVal = Tools.Global.setting?.enableAnsiColor ?? true;
-                if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value;
-                UpdateAnsiModeVisibility(value, clearWhenSwitchingToAnsi: !oldVal && value);
-            }
+            set { if (Tools.Global.setting != null) Tools.Global.setting.enableAnsiColor = value; }
         }
 
         /// <summary>
@@ -115,8 +113,10 @@ namespace llcom.Pages
         private bool loaded = false;
         private bool _scrollToEndPending = false;
         private int _clearGeneration = 0;       // 清空时递增，飞行中的批次若发现已清空则跳过添加
-        private ScrollViewer _mainListScrollViewer; // ListBox 内部 ScrollViewer，用于 ScrollToEnd
-        private ScrollViewer _mainTextBoxScrollViewer; // MainTextBox 内部 ScrollViewer，ANSI 模式下滚动
+        private ScrollViewer _mainTextBoxScrollViewer; // MainTextBox 内部 ScrollViewer，用于 ScrollToEnd
+        private static long _maxShowDataProcessMs; // 单条完整处理最大耗时（ms，取条到 UI 更新结束）
+        private static long _maxDataProcessMs;     // 数据处理阶段最大耗时（ms）
+        private static long _maxUiUpdateMs;       // UI 更新阶段最大耗时（ms）
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -126,12 +126,10 @@ namespace llcom.Pages
             Tools.Logger.DataClearEvent += (xx, x) =>
             {
                 _clearGeneration++;
-                MainList.Items.Clear();
                 MainTextBox.Document.Blocks.Clear();
             };
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
             {
-                _mainListScrollViewer = FindScrollViewer(MainList);
                 _mainTextBoxScrollViewer = FindScrollViewer(MainTextBox);
             }));
             _ = Task.Run(ShowDataConsumerLoop);
@@ -142,26 +140,7 @@ namespace llcom.Pages
             ShowHexFormatCheckBox.DataContext = this;
             ShowTimestampCheckBox.DataContext = this;
 
-            MainList.DataContext = Tools.Global.setting;
             MainTextBox.DataContext = Tools.Global.setting;
-
-            UpdateAnsiModeVisibility(EnableAnsiColor, clearWhenSwitchingToAnsi: false);
-        }
-
-        private void UpdateAnsiModeVisibility(bool enableAnsi, bool clearWhenSwitchingToAnsi = false)
-        {
-            if (enableAnsi)
-            {
-                MainTextBox.Visibility = Visibility.Visible;
-                MainList.Visibility = Visibility.Collapsed;
-                if (clearWhenSwitchingToAnsi)
-                    MainTextBox.Document.Blocks.Clear();
-            }
-            else
-            {
-                MainList.Visibility = Visibility.Visible;
-                MainTextBox.Visibility = Visibility.Collapsed;
-            }
         }
 
         private string GetRawInterfaceKeyFromUi()
@@ -184,6 +163,7 @@ namespace llcom.Pages
                 if (Tools.Global.isMainWindowsClosed)
                     break;
 
+                var swTotal = Stopwatch.StartNew();
                 var snapshot = Dispatcher.Invoke(() => new
                 {
                     enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true,
@@ -193,13 +173,20 @@ namespace llcom.Pages
 
                 var para = item as Tools.DataShowPara;
                 var ifKey = para?.interfaceKey ?? "Serial";
-                if (para != null && para.send && (snapshot.enableAnsi || !Tools.Global.setting.GetShowSendForInterface(ifKey)))
+                if (para != null && para.send && !Tools.Global.setting.GetShowSendForInterface(ifKey))
+                {
+                    swTotal.Stop();
                     continue;
+                }
 
                 var dataCopy = item.data?.ToArray();
                 if (dataCopy == null)
+                {
+                    swTotal.Stop();
                     continue;
+                }
 
+                var swData = Stopwatch.StartNew();
                 DataShowPrepareInput pin;
                 var isRaw = item is Tools.DataShowRaw;
                 var raw = item as Tools.DataShowRaw;
@@ -223,51 +210,59 @@ namespace llcom.Pages
 
                 var record = PrepareDataShowRecord(pin, snapshot.enableAnsi);
                 if (record == null)
+                {
+                    swTotal.Stop();
                     continue;
+                }
+
+                swData.Stop();
+                var elapsedDataMs = swData.ElapsedMilliseconds;
 
                 var gen = snapshot.gen;
+                var swUi = Stopwatch.StartNew();
                 Dispatcher.Invoke(() =>
                 {
                     if (gen != _clearGeneration)
                         return;
-                    var enableAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
-                    if (enableAnsi)
+                    var parseAnsi = Tools.Global.setting?.enableAnsiColor ?? true;
+                    AppendRecordToRichTextBox(MainTextBox, record, parseAnsi);
+                    if (!LockLog && !_scrollToEndPending && _mainTextBoxScrollViewer != null)
                     {
-                        var text = string.IsNullOrEmpty(record.RawTitle) ? record.DataText : (record.RawTitle + record.RawText);
-                        if (!string.IsNullOrEmpty(text))
+                        _scrollToEndPending = true;
+                        Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
                         {
-                            var fullText = text + "\n";
-                            var brush = DataShowRecord.HexToBrush(string.IsNullOrEmpty(record.RawTitle) ? record.DataTextColorHex : record.RawTextColorHex);
-                            AppendAnsiToRichTextBox(MainTextBox, fullText, true, brush);
-                        }
-                        if (!LockLog && !_scrollToEndPending && _mainTextBoxScrollViewer != null)
-                        {
-                            _scrollToEndPending = true;
-                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
-                            {
-                                if (!LockLog && _mainTextBoxScrollViewer != null)
-                                    _mainTextBoxScrollViewer.ScrollToEnd();
-                                _scrollToEndPending = false;
-                            }));
-                        }
-                    }
-                    else
-                    {
-                        var ds = new DataShow(record);
-                        if (ds != null)
-                            MainList.Items.Add(ds);
-                        if (!LockLog && !_scrollToEndPending)
-                        {
-                            _scrollToEndPending = true;
-                            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
-                            {
-                                if (!LockLog && _mainListScrollViewer != null)
-                                    _mainListScrollViewer.ScrollToEnd();
-                                _scrollToEndPending = false;
-                            }));
-                        }
+                            if (!LockLog && _mainTextBoxScrollViewer != null)
+                                _mainTextBoxScrollViewer.ScrollToEnd();
+                            _scrollToEndPending = false;
+                        }));
                     }
                 });
+                swUi.Stop();
+                var elapsedUiMs = swUi.ElapsedMilliseconds;
+                swTotal.Stop();
+                var elapsedTotalMs = swTotal.ElapsedMilliseconds;
+
+                var updated = false;
+                if (elapsedTotalMs > _maxShowDataProcessMs)
+                {
+                    _maxShowDataProcessMs = elapsedTotalMs;
+                    updated = true;
+                }
+                if (elapsedDataMs > _maxDataProcessMs)
+                {
+                    _maxDataProcessMs = elapsedDataMs;
+                    updated = true;
+                }
+                if (elapsedUiMs > _maxUiUpdateMs)
+                {
+                    _maxUiUpdateMs = elapsedUiMs;
+                    updated = true;
+                }
+                if (updated)
+                {
+                    var depth = Tools.Logger.PendingShowQueueCount;
+                    Tools.SystemLog.WriteLine($"[数据显示] 单条完整最大: {_maxShowDataProcessMs} ms, 数据处理最大: {_maxDataProcessMs} ms, UI更新最大: {_maxUiUpdateMs} ms, 队列深度: {depth}");
+                }
             }
         }
 
@@ -327,9 +322,8 @@ namespace llcom.Pages
             var timeTextMs = $"[{new DateTimeOffset(pin.Time.ToUniversalTime()).ToUnixTimeMilliseconds()}]";
             var enableAnsi = Tools.Global.setting.enableAnsiColor;
             var len = temp.Length;
-            // ANSI 模式下：不显示 HEX（强制文本）、不显示控制字符
-            var fmt = forAnsiMode ? 1 : Tools.Global.setting.GetShowHexFormatForInterface(pin.InterfaceKey ?? "Serial");
-            var enableSym = forAnsiMode ? false : Tools.Global.setting.GetEnableSymbolForInterface(pin.InterfaceKey ?? "Serial");
+            var fmt = Tools.Global.setting.GetShowHexFormatForInterface(pin.InterfaceKey ?? "Serial");
+            var enableSym = Tools.Global.setting.GetEnableSymbolForInterface(pin.InterfaceKey ?? "Serial");
 
             if (pin.IsRaw)
             {
@@ -341,7 +335,7 @@ namespace llcom.Pages
                 return new DataShowRecord
                 {
                     TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = " → ",
-                    RawTitle = pin.Title, RawText = "\n" + (enableAnsi ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n')),
+                    RawTitle = pin.Title, RawText = "\n" + (forAnsiMode ? NormalizeDisplayText(raw) : raw.TrimEnd('\r', '\n')),
                     RawTextColorHex = pin.ColorHex, HexTextColorHex = pin.ColorHex, EnableAnsiColor = enableAnsi,
                     HexPrefix = null, HexData = null
                 };
@@ -354,7 +348,7 @@ namespace llcom.Pages
             return new DataShowRecord
             {
                 TimeText = timeText, TimeTextMs = timeTextMs, ArrowText = arrowText,
-                DataText = enableAnsi ? NormalizeDisplayText(dataRaw) : dataRaw.TrimEnd('\r', '\n'),
+                DataText = forAnsiMode ? NormalizeDisplayText(dataRaw) : dataRaw.TrimEnd('\r', '\n'),
                 DataTextColorHex = dataTextColorHex, HexTextColorHex = dataTextColorHex, EnableAnsiColor = enableAnsi,
                 HexPrefix = null, HexData = null
             };
@@ -396,6 +390,79 @@ namespace llcom.Pages
                 if (!string.IsNullOrEmpty(text))
                     inlines.Add(new Run(text) { Foreground = frozenDefault });
             }
+            if (inlines.Count == 0) return;
+            Paragraph p = null;
+            if (rtb.Document.Blocks.Count > 0)
+            {
+                var lastBlock = rtb.Document.Blocks.LastBlock;
+                p = lastBlock as Paragraph;
+            }
+            if (p == null)
+            {
+                p = new Paragraph { Margin = new Thickness(0) };
+                rtb.Document.Blocks.Add(p);
+            }
+            foreach (var inline in inlines)
+                p.Inlines.Add(inline);
+        }
+
+        /// <summary>
+        /// 将单条 DataShowRecord 按时间戳、主内容、Hex 的颜色逻辑追加到 RichTextBox；parseAnsi 为 true 时对主内容解析 ANSI 转义。
+        /// </summary>
+        private static void AppendRecordToRichTextBox(System.Windows.Controls.RichTextBox rtb, DataShowRecord record, bool parseAnsi)
+        {
+            if (record == null) return;
+            var inlines = new List<System.Windows.Documents.Inline>();
+            var showTs = Tools.Global.setting?.showTimestampFormat ?? 1;
+            if (showTs != 0)
+            {
+                var prefix = showTs == 2 ? (record.TimeTextMs ?? "") + (record.ArrowText ?? "") : (record.TimeText ?? "") + (record.ArrowText ?? "");
+                if (!string.IsNullOrEmpty(prefix))
+                {
+                    var tsBrush = CreateFrozenBrush(System.Windows.Media.Colors.White);
+                    inlines.Add(new Run(prefix) { Foreground = tsBrush });
+                }
+            }
+            string mainText;
+            string mainColorHex;
+            if (!string.IsNullOrEmpty(record.RawTitle) || !string.IsNullOrEmpty(record.RawText))
+            {
+                mainText = (record.RawTitle ?? "") + (record.RawText ?? "");
+                mainColorHex = record.RawTextColorHex;
+            }
+            else
+            {
+                mainText = record.DataText ?? "";
+                mainColorHex = record.DataTextColorHex;
+            }
+            if (!string.IsNullOrEmpty(mainText))
+            {
+                var defaultBrush = DataShowRecord.HexToBrush(mainColorHex);
+                var frozenDefault = defaultBrush is SolidColorBrush scb ? CreateFrozenBrush(scb.Color) : CreateFrozenBrush(System.Windows.Media.Colors.Lime);
+                if (parseAnsi)
+                {
+                    var segments = AnsiParser.Parse(mainText);
+                    foreach (var seg in segments)
+                    {
+                        if (string.IsNullOrEmpty(seg.Text)) continue;
+                        var brush = seg.Color.HasValue ? CreateFrozenBrush(seg.Color.Value) : frozenDefault;
+                        inlines.Add(new Run(seg.Text) { Foreground = brush });
+                    }
+                }
+                else
+                {
+                    inlines.Add(new Run(mainText) { Foreground = frozenDefault });
+                }
+            }
+            if (!string.IsNullOrEmpty(record.HexPrefix) || !string.IsNullOrEmpty(record.HexData))
+            {
+                inlines.Add(new Run("\n") { Foreground = CreateFrozenBrush(System.Windows.Media.Colors.Lime) });
+                var hexText = (record.HexPrefix ?? "") + (record.HexData ?? "");
+                var hexBrush = DataShowRecord.HexToBrush(record.HexTextColorHex);
+                var frozenHex = hexBrush is SolidColorBrush hb ? CreateFrozenBrush(hb.Color) : CreateFrozenBrush(System.Windows.Media.Colors.Lime);
+                inlines.Add(new Run(hexText) { Foreground = frozenHex });
+            }
+            inlines.Add(new Run("\n") { Foreground = CreateFrozenBrush(System.Windows.Media.Colors.Lime) });
             if (inlines.Count == 0) return;
             Paragraph p = null;
             if (rtb.Document.Blocks.Count > 0)
@@ -470,79 +537,25 @@ namespace llcom.Pages
             }
         }
 
-        /// <summary>
-        /// 显示要用到的数据结构
-        /// </summary>
-        public class DataShow
-        {
-            public string TimeText { get; set; }
-            /// <summary>
-            /// UTC 时间戳（毫秒），格式 [1707408000000]
-            /// </summary>
-            public string TimeTextMs { get; set; }
-            public string ArrowText { get; set; }
-            public string DataText { get; set; }
-            public SolidColorBrush DataTextColor { get; set; }
-            public string RawTitle { get; set; }
-            /// <summary>
-            /// 前面要加换行符
-            /// </summary>
-            public string RawText { get; set; }
-            public SolidColorBrush RawTextColor { get; set; }
-            /// <summary>
-            /// Hex 前缀 "\r\nHex: "
-            /// </summary>
-            public string HexPrefix { get; set; }
-            /// <summary>
-            /// Hex 数据（纯 hex 字符串）
-            /// </summary>
-            public string HexData { get; set; }
-            public SolidColorBrush HexTextColor { get; set; }
-            public bool EnableAnsiColor { get; set; }
-
-            public DataShow(DataShowRecord r)
-            {
-                if (r == null) return;
-                TimeText = r.TimeText;
-                TimeTextMs = r.TimeTextMs;
-                ArrowText = r.ArrowText;
-                DataText = r.DataText;
-                DataTextColor = DataShowRecord.HexToBrush(r.DataTextColorHex);
-                RawTitle = r.RawTitle;
-                RawText = r.RawText;
-                RawTextColor = DataShowRecord.HexToBrush(r.RawTextColorHex);
-                HexPrefix = r.HexPrefix;
-                HexData = r.HexData;
-                HexTextColor = DataShowRecord.HexToBrush(r.HexTextColorHex);
-                EnableAnsiColor = r.EnableAnsiColor;
-            }
-        }
-
         private void SaveLogButton_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Log files(*.log)|*.log";
             saveFileDialog.InitialDirectory = Tools.Global.GetTrueProfilePath() + "logs";
             saveFileDialog.FileName = DateTime.Now.ToString("yyMMddHHmmss") + ".log";
-            if(saveFileDialog.ShowDialog() == DialogResult.OK)
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string saveFilePath = saveFileDialog.FileName;
-                FileStream fs = new FileStream(saveFilePath, FileMode.Create);
-                StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                try
                 {
-                    int iCount = MainList.Items.Count - 1;
-                    for (int i = 0; i <= iCount; i++)
-                    {
-                        var item = MainList.Items[i] as DataShow;
-                        if (string.IsNullOrEmpty(item.RawTitle))
-                            sw.WriteLine(item.TimeText + (item.ArrowText == " ← " ? " [send] " : " [recv] ") + item.DataText);
-                        else
-                            sw.WriteLine(item.TimeText + " [" + item.RawTitle + "] " + item.RawText);
-                    }
+                    var range = new System.Windows.Documents.TextRange(MainTextBox.Document.ContentStart, MainTextBox.Document.ContentEnd);
+                    var text = range.Text ?? "";
+                    File.WriteAllText(saveFilePath, text, Encoding.UTF8);
                 }
-                sw.Flush();
-                sw.Close();
-                fs.Close();
+                catch (Exception ex)
+                {
+                    Tools.MessageBox.Show($"保存失败：{ex.Message}");
+                }
             }
         }
     }
