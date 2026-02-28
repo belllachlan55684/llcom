@@ -801,9 +801,9 @@ namespace llcom
             ModePopup.IsOpen = !ModePopup.IsOpen;
         }
 
-        private void AutoSaveLogButton_Click(object sender, RoutedEventArgs e)
+        private void LogOptionButton_Click(object sender, RoutedEventArgs e)
         {
-            AutoSaveLogPopup.IsOpen = !AutoSaveLogPopup.IsOpen;
+            LogOptionPopup.IsOpen = !LogOptionPopup.IsOpen;
         }
 
         private void LanguageMenuItem_Click(object sender, RoutedEventArgs e)

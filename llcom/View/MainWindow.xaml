@@ -189,13 +189,13 @@
                     </Button.Style>
                 </Button>
                 <Button
-                    Name="AutoSaveLogButton"
+                    Name="LogOptionButton"
                     Width="46"
                     Height="32"
                     BorderThickness="0"
                     Background="Transparent"
-                    ToolTip="{DynamicResource SettingAutoSaveLog}"
-                    Click="AutoSaveLogButton_Click"
+                    ToolTip="{DynamicResource LogOptionsTooltip}"
+                    Click="LogOptionButton_Click"
                     shell:WindowChrome.IsHitTestVisibleInChrome="True">
                     <Button.Content>
                         <fa:FontAwesome Icon="ListAlt" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
@@ -206,7 +206,7 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="Button">
                                         <Border
-                                            x:Name="AutoSaveButtonBorder"
+                                            x:Name="LogOptionButtonBorder"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                             <ContentPresenter
@@ -215,43 +215,7 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="AutoSaveButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button
-                    Name="SystemLogWindowButton"
-                    Width="46"
-                    Height="32"
-                    BorderThickness="0"
-                    Background="Transparent"
-                    ToolTip="{DynamicResource SystemLogWindowTooltip}"
-                    Click="SystemLogWindowButton_Click"
-                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Button.Content>
-                        <fa:FontAwesome Icon="List" FontSize="12" Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}" />
-                    </Button.Content>
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border
-                                            x:Name="SystemLogButtonBorder"
-                                            Background="{TemplateBinding Background}"
-                                            BorderThickness="{TemplateBinding BorderThickness}">
-                                            <ContentPresenter
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center" />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="SystemLogButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
+                                                <Setter TargetName="LogOptionButtonBorder" Property="Background" Value="{DynamicResource {x:Static adonisUi:Brushes.Layer1HighlightBrush}}" />
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -1036,8 +1000,8 @@
             </Border>
         </Popup>
         <Popup
-            Name="AutoSaveLogPopup"
-            PlacementTarget="{Binding ElementName=AutoSaveLogButton}"
+            Name="LogOptionPopup"
+            PlacementTarget="{Binding ElementName=LogOptionButton}"
             Placement="Bottom"
             StaysOpen="False">
             <Border
@@ -1046,10 +1010,15 @@
                 Background="{DynamicResource {x:Static adonisUi:Brushes.Layer1BackgroundBrush}}"
                 BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}"
                 BorderThickness="1">
-                <MenuItem
-                    Header="{DynamicResource SettingAutoSaveLog}"
-                    IsCheckable="True"
-                    IsChecked="{Binding autoSaveLog, Source={x:Static local_tool:Global.setting}, Mode=TwoWay}" />
+                <StackPanel>
+                    <MenuItem
+                        Header="{DynamicResource SettingAutoSaveLog}"
+                        IsCheckable="True"
+                        IsChecked="{Binding autoSaveLog, Source={x:Static local_tool:Global.setting}, Mode=TwoWay}" />
+                    <MenuItem
+                        Header="{DynamicResource SystemLogWindowTooltip}"
+                        Click="SystemLogWindowButton_Click" />
+                </StackPanel>
             </Border>
         </Popup>
     </Grid>

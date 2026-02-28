@@ -693,9 +693,27 @@ namespace llcom.Model
         public bool GetShowSendForInterface(string key) { return showSend; }
         public void SetShowSendForInterface(string key, bool value) { if (string.IsNullOrEmpty(key)) return; showSendByInterface[key] = value; Save(); }
 
+        private static readonly Dictionary<string, string> DefaultDataToSendByInterface = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            { "Serial", "uart data" },
+            { "TcpClient", "tcp client data" },
+            { "TcpSslClient", "tcp ssl client data" },
+            { "TcpLocal", "tcp server data" },
+            { "UdpClient", "udp client data" },
+            { "UdpLocal", "udp server data" },
+            { "WinUSB", "winusb data" },
+        };
+
+        private string GetDefaultDataToSendForInterface(string key)
+        {
+            if (!string.IsNullOrEmpty(key) && DefaultDataToSendByInterface.TryGetValue(key, out var v))
+                return v;
+            return _dataToSend;
+        }
+
         private Dictionary<string, string> _dataToSendByInterface = null;
         public Dictionary<string, string> dataToSendByInterface { get => _dataToSendByInterface ??= new Dictionary<string, string>(); set => _dataToSendByInterface = value ?? new Dictionary<string, string>(); }
-        public string GetDataToSendForInterface(string key) { if (key != null && dataToSendByInterface.TryGetValue(key, out var v) && v != null) return v; return dataToSend; }
+        public string GetDataToSendForInterface(string key) { if (key != null && dataToSendByInterface.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v)) return v; return GetDefaultDataToSendForInterface(key); }
         public void SetDataToSendForInterface(string key, string value) { if (string.IsNullOrEmpty(key)) return; dataToSendByInterface[key] = value ?? dataToSend; Save(); }
 
         private Dictionary<string, int> _showHexFormatByInterface = null;

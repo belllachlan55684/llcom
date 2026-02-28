@@ -124,6 +124,7 @@
     <system:String x:Key="SettingDisplayMode">显示模式选择</system:String>
     <system:String x:Key="SettingThemeSelection">主题选择</system:String>
     <system:String x:Key="SettingAutoSaveLog">自动保存日志</system:String>
+    <system:String x:Key="LogOptionsTooltip">日志选项</system:String>
     <system:String x:Key="FollowSystemMode">跟随系统</system:String>
     <system:String x:Key="LightMode">浅色模式</system:String>
     <system:String x:Key="SettingAutoReconnect">自动恢复被断开的串口连接</system:String>
